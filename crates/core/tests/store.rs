@@ -30,6 +30,7 @@ fn item(entry_id: &str, name: &str) -> DiscoveredItem {
         name: name.to_owned(),
         description: format!("{name} does things"),
         enabled: true,
+        modified: Some("2026-01-01T00:00:00Z".to_owned()),
     }
 }
 

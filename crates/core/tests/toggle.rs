@@ -101,6 +101,7 @@ fn item(source_path: &Path) -> ItemMetadata {
             name: "test".into(),
             description: String::new(),
             enabled: true,
+            modified: None,
         },
         tags: Vec::new(),
         favorite: false,

@@ -62,6 +62,8 @@ pub struct Frontmatter {
     #[serde(default = "default_true")]
     pub enabled: bool,
     #[serde(default)]
+    pub modified: Option<String>,
+    #[serde(default)]
     pub last_scanned: Option<String>,
 
     // ---- the user's own
@@ -125,6 +127,7 @@ impl Frontmatter {
             source_path: item.source_path.to_string_lossy().into_owned(),
             real_path: item.real_path.to_string_lossy().into_owned(),
             enabled: item.enabled,
+            modified: item.modified.clone(),
             last_scanned: Some(now.to_owned()),
             tags: Vec::new(),
             favorite: false,
@@ -151,6 +154,7 @@ impl Frontmatter {
         self.source_path = item.source_path.to_string_lossy().into_owned();
         self.real_path = item.real_path.to_string_lossy().into_owned();
         self.enabled = item.enabled;
+        self.modified.clone_from(&item.modified);
         self.last_scanned = Some(now.to_owned());
         // Being found again is the end of being orphaned.
         self.orphaned_at = None;
@@ -183,6 +187,7 @@ impl Frontmatter {
                 name: self.name.clone(),
                 description: self.description.clone(),
                 enabled: self.enabled,
+                modified: self.modified.clone(),
             },
             tags: self.tags.clone(),
             favorite: self.favorite,
@@ -260,6 +265,7 @@ mod tests {
             name: "writing".into(),
             description: "Helps you write".into(),
             enabled: true,
+            modified: Some("2026-01-01T00:00:00Z".into()),
         }
     }
 

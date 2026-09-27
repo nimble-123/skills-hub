@@ -166,6 +166,13 @@ export type DiscoveredItem = {
 	description: string,
 	/**  Derived purely from which folder the item physically sits in. */
 	enabled: boolean,
+	/**
+	 *  When the item's own file was last written, as RFC 3339.
+	 * 
+	 *  `None` when it could not be read — a dangling link, or a filesystem
+	 *  that does not record it.
+	 */
+	modified: string | null,
 };
 
 export type EnabledFilter = "all" | "enabled" | "disabled";

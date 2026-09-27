@@ -334,6 +334,7 @@ impl<'a> Walk<'a> {
             name,
             description: meta.description,
             enabled,
+            modified: modified_rfc3339(source_path),
         });
     }
 
@@ -378,4 +379,16 @@ pub fn real_path(path: &Path) -> PathBuf {
 
 fn is_file(path: &Path) -> bool {
     std::fs::metadata(path).is_ok_and(|meta| meta.is_file())
+}
+
+/// When a file was last written, in the same form the metadata notes use.
+fn modified_rfc3339(path: &Path) -> Option<String> {
+    let modified = std::fs::metadata(path).ok()?.modified().ok()?;
+    let seconds = modified
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()
+        .and_then(|since| i64::try_from(since.as_secs()).ok())?;
+    jiff::Timestamp::from_second(seconds)
+        .ok()
+        .map(|ts| ts.to_string())
 }

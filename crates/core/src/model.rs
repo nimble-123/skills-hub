@@ -156,6 +156,11 @@ pub struct DiscoveredItem {
     pub description: String,
     /// Derived purely from which folder the item physically sits in.
     pub enabled: bool,
+    /// When the item's own file was last written, as RFC 3339.
+    ///
+    /// `None` when it could not be read — a dangling link, or a filesystem
+    /// that does not record it.
+    pub modified: Option<String>,
 }
 
 /// A discovered item plus everything the user has said about it.

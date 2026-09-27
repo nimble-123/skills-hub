@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { TOOL_META } from "./toolMeta";
 
@@ -9,7 +10,10 @@ import { TOOL_META } from "./toolMeta";
  * and forgets the other.
  */
 function registryToolIds(): string[] {
-  const source = readFileSync(new URL("../crates/core/src/tools.rs", import.meta.url), "utf8");
+  const source = readFileSync(
+    fileURLToPath(new URL("../crates/core/src/tools.rs", import.meta.url)),
+    "utf8",
+  );
   return [...source.matchAll(/Tool::new\("([^"]+)"\)/g)].map((match) => match[1] as string);
 }
 
