@@ -1,8 +1,11 @@
 import { open } from "@tauri-apps/plugin-dialog";
+import { commands } from "../../bindings";
 import type { Facets } from "../../lib/library";
 import { GLOBAL } from "../../lib/library";
+import { reportError } from "../../stores/errors";
 import { useFilters } from "../../stores/filters";
 import { useLibrary } from "../../stores/library";
+import { useCollections, usePlugins, useWorkspaces } from "../../stores/selectors";
 import { useSettings } from "../../stores/settings";
 import { useUi } from "../../stores/ui";
 import { TOOL_META, TYPE_META } from "../../toolMeta";
@@ -27,7 +30,18 @@ export function Sidebar({ facets }: SidebarProps) {
 
   const addProjectWorkspace = useSettings((store) => store.addProjectWorkspace);
   const removeProjectWorkspace = useSettings((store) => store.removeProjectWorkspace);
+  const loadSettings = useSettings((store) => store.load);
+  const collections = useCollections();
+  const workspaces = useWorkspaces();
+  const plugins = usePlugins();
   const showEmpty = settings?.showEmptySidebarRows ?? false;
+
+  /** Deleting a collection takes it out of every item that was in it. */
+  const removeCollection = async (id: string) => {
+    const result = await commands.deleteCollection(id);
+    if (result.status === "error") reportError(result.error);
+    else await loadSettings();
+  };
 
   /** Removing one only means it stops being scanned; nothing on disk changes. */
   const removeWorkspace = async (id: string) => {
@@ -76,6 +90,12 @@ export function Sidebar({ facets }: SidebarProps) {
           label="Discover"
           active={route.kind === "discover"}
           onClick={() => go({ kind: "discover" })}
+        />
+        <NavRow
+          icon={<Icon name="gauge" />}
+          label="Cost"
+          active={route.kind === "dashboard"}
+          onClick={() => go({ kind: "dashboard" })}
         />
         <NavRow
           icon={<Icon name="star" />}
@@ -142,7 +162,7 @@ export function Sidebar({ facets }: SidebarProps) {
             active={inLibrary && scope.kind === "project" && scope.projectId === null}
             onClick={() => pick({ kind: "project", projectId: null })}
           />
-          {(settings?.projectWorkspaces ?? []).map((project) => (
+          {workspaces.map((project) => (
             <NavRow
               key={project.id}
               icon={<Icon name="folder-git-2" />}
@@ -159,9 +179,39 @@ export function Sidebar({ facets }: SidebarProps) {
           ))}
         </Section>
 
+        <Section name="extensions" label="Extensions">
+          <NavRow
+            icon={<Icon name="plug" />}
+            label="MCP servers"
+            active={route.kind === "mcp"}
+            onClick={() => go({ kind: "mcp" })}
+          />
+        </Section>
+
+        {collections.length > 0 && (
+          <Section name="collections" label="Collections">
+            {collections.map((collection) => (
+              <NavRow
+                key={collection.id}
+                icon={<Icon name="folder" />}
+                label={collection.name}
+                count={facets.byCollection.get(collection.id) ?? 0}
+                active={
+                  inLibrary && scope.kind === "collection" && scope.collectionId === collection.id
+                }
+                onClick={() => pick({ kind: "collection", collectionId: collection.id })}
+                onRemove={{
+                  label: `Delete the collection ${collection.name}`,
+                  onClick: () => void removeCollection(collection.id),
+                }}
+              />
+            ))}
+          </Section>
+        )}
+
         {facets.byPlugin.size > 0 && (
-          <Section name="extensions" label="Plugin bundles">
-            {(snapshot?.plugins ?? [])
+          <Section name="plugins" label="Plugin bundles">
+            {plugins
               .filter((plugin) => showEmpty || (facets.byPlugin.get(plugin.id) ?? 0) > 0)
               .map((plugin) => (
                 <NavRow

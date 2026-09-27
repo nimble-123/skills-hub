@@ -47,6 +47,16 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::updates::prepare_review,
         commands::updates::apply_review,
         commands::updates::cancel_review,
+        commands::insights::load_usage,
+        commands::insights::compute_dashboard,
+        commands::insights::disregard,
+        commands::insights::undisregard,
+        commands::insights::list_disregarded,
+        commands::insights::list_mcp_servers,
+        commands::items::set_plugin_enabled,
+        commands::collections::save_collection,
+        commands::collections::delete_collection,
+        commands::collections::set_item_in_collection,
         commands::shell::reveal_in_file_manager,
         commands::shell::open_path,
     ])
@@ -87,6 +97,7 @@ pub fn run() {
 /// defaults: refusing to open over a config file would cost the user access to
 /// their whole library.
 fn load_state(app: &tauri::AppHandle) -> Result<state::AppState, Box<dyn std::error::Error>> {
+    use skills_core::dashboard::DismissalsFile;
     use skills_core::discover::CatalogFile;
     use skills_core::settings::SettingsFile;
 
@@ -105,6 +116,7 @@ fn load_state(app: &tauri::AppHandle) -> Result<state::AppState, Box<dyn std::er
         settings_file,
         loaded.settings,
         CatalogFile::new(&config_dir),
+        DismissalsFile::new(&config_dir),
     ))
 }
 

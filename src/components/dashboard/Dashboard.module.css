@@ -1,0 +1,163 @@
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.stat {
+  flex: 1 1 130px;
+  padding: 10px 12px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-primary);
+}
+
+.statValue {
+  font-size: 19px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+.statHint {
+  margin-top: 2px;
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.accent {
+  color: var(--interactive-accent);
+}
+
+.warn {
+  color: var(--text-error);
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  font-size: var(--font-ui-smaller);
+  background: none;
+  border: 0;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.barName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-normal);
+}
+
+.bar:hover .barName {
+  color: var(--interactive-accent);
+}
+
+.barMeta {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.barTrack {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-secondary-alt);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--interactive-accent);
+}
+
+.barValue {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.select {
+  padding: 4px 8px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.reason {
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  background: var(--bg-secondary-alt);
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.small {
+  padding: 3px 9px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.small:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
+.masked {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  color: var(--text-faint);
+}
+
+.envRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-ui-smaller);
+}
+
+.envKey {
+  color: var(--interactive-accent);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}

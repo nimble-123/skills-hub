@@ -10,6 +10,8 @@ import { create } from "zustand";
 export type Route =
   | { kind: "library" }
   | { kind: "discover" }
+  | { kind: "dashboard" }
+  | { kind: "mcp" }
   | { kind: "tools" }
   | { kind: "orphans" }
   | { kind: "settings" };

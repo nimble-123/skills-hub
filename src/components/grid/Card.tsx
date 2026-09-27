@@ -12,6 +12,8 @@ type CardProps = {
   /** The workspace this item belongs to, or undefined for the global scope. */
   projectName: string | undefined;
   onSelect: () => void;
+  /** Switches the whole bundle, for an item that came from one. */
+  onTogglePlugin: ((pluginId: string, enabled: boolean) => void) | undefined;
 };
 
 /**
@@ -21,7 +23,7 @@ type CardProps = {
  * holds controls of its own — a `button` inside a `button` is not valid, and
  * the switch has to be a real control since it performs a real action.
  */
-export function Card({ item, selected, projectName, onSelect }: CardProps) {
+export function Card({ item, selected, projectName, onSelect, onTogglePlugin }: CardProps) {
   const patchItem = useLibrary((store) => store.patchItem);
   const [busy, setBusy] = useState(false);
 
@@ -68,10 +70,10 @@ export function Card({ item, selected, projectName, onSelect }: CardProps) {
         <button
           type="button"
           className={`${styles.switch} ${item.enabled ? styles.switchOn : ""}`}
-          disabled={busy || fromPlugin}
+          disabled={busy || (fromPlugin && !onTogglePlugin)}
           title={
             fromPlugin
-              ? "Part of an installed plugin — enable or disable the whole bundle instead"
+              ? "Part of an installed plugin — this switches the whole bundle"
               : item.enabled
                 ? "Disable: moves the file out of where the tool reads it"
                 : "Enable: moves the file back"
@@ -79,6 +81,12 @@ export function Card({ item, selected, projectName, onSelect }: CardProps) {
           aria-label={item.enabled ? `Disable ${item.name}` : `Enable ${item.name}`}
           onClick={(event) =>
             void act(event, async () => {
+              // A bundled item is not individually toggleable: the bundle is
+              // the unit its own tool understands.
+              if (item.pluginId !== null) {
+                onTogglePlugin?.(item.pluginId, !item.enabled);
+                return;
+              }
               const result = await commands.setItemEnabled(item.entryId, !item.enabled);
               if (result.status === "error") reportError(result.error);
               else patchItem(result.data);

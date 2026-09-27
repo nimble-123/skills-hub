@@ -222,6 +222,35 @@ pub fn unlink_from_project(entry_id: String, state: State<'_, AppState>) -> Comm
     Ok(())
 }
 
+/// Enables or disables a whole plugin bundle through its own tool's settings.
+///
+/// A bundled item cannot be toggled on its own — the bundle is the unit the
+/// owning tool understands — so this is the only way to switch one off.
+#[tauri::command]
+#[specta::specta]
+pub fn set_plugin_enabled(
+    tool_id: String,
+    plugin_id: String,
+    enabled: bool,
+    state: State<'_, AppState>,
+) -> CommandResult<()> {
+    use skills_core::settings::effective_tools;
+
+    let settings = lock(&state.settings)?.clone();
+    let all_tools = effective_tools(skills_core::tools::default_tools(), &settings);
+    let tool = all_tools
+        .iter()
+        .find(|tool| tool.id == tool_id)
+        .ok_or_else(|| CommandError::new("unknown-tool", "No tool with that id."))?;
+
+    Ok(skills_core::toggle::set_plugin_enabled(
+        tool,
+        &plugin_id,
+        enabled,
+        &state.home,
+    )?)
+}
+
 /// Deletes an item from disk, and its note with it.
 #[tauri::command]
 #[specta::specta]

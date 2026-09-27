@@ -2,6 +2,7 @@ import { useState } from "react";
 import { commands, type DiscoverEntry } from "../../bindings";
 import { reportError, reportInfo } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
+import { useWorkspaces } from "../../stores/selectors";
 import { useSettings } from "../../stores/settings";
 import { TOOL_META, TYPE_META } from "../../toolMeta";
 import paletteStyles from "../shell/Palette.module.css";
@@ -21,7 +22,7 @@ type InstallDialogProps = {
  */
 export function InstallDialog({ entry, onClose }: InstallDialogProps) {
   const tools = useSettings((store) => store.tools);
-  const workspaces = useSettings((store) => store.settings?.projectWorkspaces ?? []);
+  const workspaces = useWorkspaces();
   const rescan = useLibrary((store) => store.rescan);
 
   // Only tools that have somewhere to put this type.

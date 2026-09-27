@@ -1,7 +1,7 @@
 import { commands, type ItemMetadata } from "../../bindings";
 import { reportError, reportInfo } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
-import { useSettings } from "../../stores/settings";
+import { useSnapshotItems, useWorkspaces } from "../../stores/selectors";
 import styles from "./Rail.module.css";
 
 type ProjectLinksProps = {
@@ -16,8 +16,8 @@ type ProjectLinksProps = {
  * drift out of step and unlinking takes nothing away from it.
  */
 export function ProjectLinks({ item }: ProjectLinksProps) {
-  const workspaces = useSettings((store) => store.settings?.projectWorkspaces ?? []);
-  const items = useLibrary((store) => store.snapshot?.items ?? []);
+  const workspaces = useWorkspaces();
+  const items = useSnapshotItems();
   const rescan = useLibrary((store) => store.rescan);
 
   // Only a global item can be linked into a project; a project's own item is

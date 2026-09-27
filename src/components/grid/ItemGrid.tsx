@@ -14,6 +14,7 @@ type ItemGridProps = {
   projectNames: Map<string, string>;
   onSelect: (entryId: string) => void;
   onColumnsChange: (columns: number) => void;
+  onTogglePlugin: (pluginId: string, enabled: boolean) => void;
 };
 
 /**
@@ -30,6 +31,7 @@ export function ItemGrid({
   projectNames,
   onSelect,
   onColumnsChange,
+  onTogglePlugin,
 }: ItemGridProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const columns = useColumnCount(scrollRef);
@@ -82,6 +84,7 @@ export function ItemGrid({
                       item.projectId === null ? undefined : projectNames.get(item.projectId)
                     }
                     onSelect={() => onSelect(item.entryId)}
+                    onTogglePlugin={onTogglePlugin}
                   />
                 ))}
               </div>

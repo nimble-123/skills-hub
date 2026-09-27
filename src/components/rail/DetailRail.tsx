@@ -9,6 +9,7 @@ import { useUi } from "../../stores/ui";
 import { TOOL_META, TYPE_META } from "../../toolMeta";
 import { Icon } from "../common/Icon";
 import { CodeBlock } from "./CodeBlock";
+import { Collections } from "./Collections";
 import { ProjectLinks } from "./ProjectLinks";
 import styles from "./Rail.module.css";
 import { SourceEditor } from "./SourceEditor";
@@ -99,6 +100,8 @@ export function DetailRail({ item }: DetailRailProps) {
 
         <div className={styles.sectionTitle}>Tags</div>
         <TagEditor item={item} />
+
+        <Collections item={item} />
 
         <ProjectLinks item={item} />
 

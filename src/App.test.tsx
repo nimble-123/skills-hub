@@ -32,6 +32,16 @@ const commands = vi.hoisted(() => ({
   prepareReview: vi.fn(),
   applyReview: vi.fn(),
   cancelReview: vi.fn(),
+  computeDashboard: vi.fn(),
+  loadUsage: vi.fn(),
+  disregard: vi.fn(),
+  undisregard: vi.fn(),
+  listDisregarded: vi.fn(),
+  listMcpServers: vi.fn(),
+  setPluginEnabled: vi.fn(),
+  saveCollection: vi.fn(),
+  deleteCollection: vi.fn(),
+  setItemInCollection: vi.fn(),
   getSnapshot: vi.fn(),
   rescan: vi.fn(),
   setItemEnabled: vi.fn(),
@@ -72,6 +82,17 @@ beforeEach(() => {
   commands.getSnapshot.mockResolvedValue(ok(aSnapshot(LIBRARY)));
   commands.listOrphanedMetadata.mockResolvedValue(ok([]));
   commands.getDiscoverCatalog.mockResolvedValue(ok({ sources: [], entries: [] }));
+  commands.listMcpServers.mockResolvedValue(ok({ servers: [], warnings: [] }));
+  commands.computeDashboard.mockResolvedValue(
+    ok({
+      costs: [],
+      prune: [],
+      overlaps: [],
+      totalSourceChars: 0,
+      totalAvailableChars: 0,
+      totalInvocationChars: 0,
+    }),
+  );
   commands.probeCapabilities.mockResolvedValue(
     ok({
       home: "/home/someone",
@@ -581,6 +602,194 @@ describe("the shell", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(commands.cancelReview).toHaveBeenCalledWith("rev-3");
+  });
+
+  it("shows what the library costs, and what stands out", async () => {
+    const user = userEvent.setup();
+    commands.computeDashboard.mockResolvedValue(
+      ok({
+        costs: [
+          {
+            entryId: "writing-abc123",
+            name: "writing",
+            tool: "claude-code",
+            type: "skill",
+            sourceChars: 8000,
+            availableChars: 200,
+            invocationChars: 7600,
+            modified: "2026-01-01T00:00:00Z",
+          },
+          {
+            entryId: "deploy-abc",
+            name: "deploy",
+            tool: "claude-code",
+            type: "command",
+            sourceChars: 400,
+            availableChars: null,
+            invocationChars: null,
+            modified: "2026-01-01T00:00:00Z",
+          },
+        ],
+        prune: [
+          {
+            entryId: "stale-abc",
+            name: "stale",
+            tool: "claude-code",
+            reason: "never-used",
+            sourceChars: 5000,
+            lastUsed: null,
+            modified: "2024-01-01T00:00:00Z",
+          },
+        ],
+        overlaps: [
+          {
+            a: "a",
+            b: "b",
+            aName: "review",
+            bName: "Review",
+            pairId: "a::b",
+            reason: "same-name",
+            similarity: 1,
+          },
+        ],
+        totalSourceChars: 8400,
+        totalAvailableChars: 200,
+        totalInvocationChars: 7600,
+      }),
+    );
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Cost" }));
+
+    await waitFor(() => expect(screen.getByText("writing")).toBeTruthy());
+    // A command's per-turn cost is not guessed at.
+    expect(screen.getByText(/context not modelled/)).toBeTruthy();
+    expect(screen.getByText("never used")).toBeTruthy();
+    expect(screen.getByText("same name")).toBeTruthy();
+  });
+
+  it("waves a suggestion away without touching the item", async () => {
+    const user = userEvent.setup();
+    commands.computeDashboard.mockResolvedValue(
+      ok({
+        costs: [],
+        prune: [
+          {
+            entryId: "stale-abc",
+            name: "stale",
+            tool: "claude-code",
+            reason: "never-used",
+            sourceChars: 5000,
+            lastUsed: null,
+            modified: null,
+          },
+        ],
+        overlaps: [],
+        totalSourceChars: 0,
+        totalAvailableChars: 0,
+        totalInvocationChars: 0,
+      }),
+    );
+    commands.disregard.mockResolvedValue(ok(null));
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Cost" }));
+
+    await waitFor(() => expect(screen.getByText("never used")).toBeTruthy());
+    await user.click(screen.getAllByRole("button", { name: "Disregard" })[0] as HTMLElement);
+
+    expect(commands.disregard).toHaveBeenCalledWith("stale-abc");
+    expect(commands.setItemEnabled).not.toHaveBeenCalled();
+  });
+
+  it("lists MCP servers and keeps their secrets covered until asked", async () => {
+    const user = userEvent.setup();
+    commands.listMcpServers.mockResolvedValue(
+      ok({
+        servers: [
+          {
+            id: "claude-code:global:obsidian",
+            name: "obsidian",
+            tool: "claude-code",
+            projectId: null,
+            config: {
+              command: "npx",
+              args: ["-y", "obsidian-mcp"],
+              env: { TOKEN: "super-secret" },
+              url: null,
+              type: null,
+            },
+            sourcePath: "/home/.claude.json",
+          },
+        ],
+        warnings: [],
+      }),
+    );
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "MCP servers" }));
+
+    await waitFor(() => expect(screen.getByText("obsidian")).toBeTruthy());
+    expect(screen.getByText("npx -y obsidian-mcp")).toBeTruthy();
+    expect(screen.queryByText("super-secret")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Show" }));
+    expect(screen.getByText("super-secret")).toBeTruthy();
+  });
+
+  it("switches a whole bundle when the item came from one", async () => {
+    const user = userEvent.setup();
+    const bundled = anItem({ name: "bundled", pluginId: "toolkit@acme" });
+    commands.getSnapshot.mockResolvedValue(
+      ok({
+        ...aSnapshot([bundled]),
+        plugins: [
+          {
+            id: "toolkit@acme",
+            name: "toolkit",
+            group: "acme",
+            path: "/home/.claude/plugins/cache/acme/toolkit/1.0.0",
+            toolId: "claude-code",
+            enabled: true,
+            repoUrl: null,
+          },
+        ],
+      }),
+    );
+    commands.setPluginEnabled.mockResolvedValue(ok(null));
+    commands.rescan.mockResolvedValue(ok(aSnapshot([])));
+
+    await renderApp();
+    await user.click(screen.getByRole("button", { name: "Disable bundled" }));
+
+    // Not the item: the bundle is the unit its own tool understands.
+    expect(commands.setItemEnabled).not.toHaveBeenCalled();
+    expect(commands.setPluginEnabled).toHaveBeenCalledWith("claude-code", "toolkit@acme", false);
+  });
+
+  it("puts an item into a collection", async () => {
+    const user = userEvent.setup();
+    commands.getSettings.mockResolvedValue(
+      ok({
+        ...aSettingsView(),
+        settings: {
+          ...aSettingsView().settings,
+          collections: [{ id: "col-1", name: "Daily", icon: null }],
+        },
+      }),
+    );
+    commands.setItemInCollection.mockResolvedValue(ok({ ...LIBRARY[0], collections: ["col-1"] }));
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+
+    await user.click(screen.getByRole("checkbox", { name: "Daily" }));
+
+    expect(commands.setItemInCollection).toHaveBeenCalledWith("writing-abc123", "col-1", true);
   });
 
   it("asks for a folder when there is nowhere to keep the notes", async () => {

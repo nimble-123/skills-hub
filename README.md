@@ -21,7 +21,15 @@ and any host git can reach, not only GitHub. Anything installed this way
 records the commit it came from, so it can be checked for updates, shown as a
 diff before anything is overwritten, and put back the way it was.
 
-Not yet: the context cost dashboard and the read-only MCP server view.
+Cost: what the library is worth in tokens, separating what a tool carries
+every turn from what it loads when something is actually used. Where a tool
+keeps a history — Claude Code and Codex do — that history says which items
+have really been used, rather than guessing from how old a file is. It also
+points out pairs of items that look like they are after the same request.
+
+MCP servers: every one every tool is configured with, global and per project,
+read straight from each tool's own file. Read-only, with anything that looks
+like a secret covered until you ask.
 
 ## Keyboard
 

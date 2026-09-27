@@ -1,8 +1,11 @@
 import { useMemo } from "react";
 import type { ItemMetadata } from "../../bindings";
+import { commands } from "../../bindings";
 import type { Facets, Scope } from "../../lib/library";
+import { reportError } from "../../stores/errors";
 import { useFilters } from "../../stores/filters";
-import { useSettings } from "../../stores/settings";
+import { useLibrary } from "../../stores/library";
+import { usePlugins, useWorkspaces } from "../../stores/selectors";
 import { useUi } from "../../stores/ui";
 import { TOOL_META, TYPE_META } from "../../toolMeta";
 import gridStyles from "../grid/Grid.module.css";
@@ -21,10 +24,24 @@ export function LibraryPane({ visible, facets, searchRef, onColumnsChange }: Lib
   const scope = useFilters((f) => f.scope);
   const selected = useUi((ui) => ui.selected);
   const select = useUi((ui) => ui.select);
-  const workspaces = useSettings((store) => store.settings?.projectWorkspaces);
+  const workspaces = useWorkspaces();
+  const plugins = usePlugins();
+  const rescan = useLibrary((store) => store.rescan);
+
+  /**
+   * A bundled item cannot be switched on its own, so the card's switch acts
+   * on the bundle — which means rescanning, since every item in it changes.
+   */
+  const togglePlugin = async (pluginId: string, enabled: boolean) => {
+    const plugin = plugins.find((candidate) => candidate.id === pluginId);
+    if (!plugin) return;
+    const result = await commands.setPluginEnabled(plugin.toolId, pluginId, enabled);
+    if (result.status === "error") reportError(result.error);
+    else await rescan();
+  };
 
   const projectNames = useMemo(
-    () => new Map((workspaces ?? []).map((project) => [project.id, project.name])),
+    () => new Map(workspaces.map((project) => [project.id, project.name])),
     [workspaces],
   );
   const title = useMemo(() => scopeTitle(scope, projectNames), [scope, projectNames]);
@@ -46,6 +63,7 @@ export function LibraryPane({ visible, facets, searchRef, onColumnsChange }: Lib
         selected={selected}
         projectNames={projectNames}
         onColumnsChange={onColumnsChange}
+        onTogglePlugin={(pluginId, enabled) => void togglePlugin(pluginId, enabled)}
         onSelect={(entryId) => select(entryId === selected ? null : entryId)}
       />
     </div>

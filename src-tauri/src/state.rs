@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::Instant;
 
+use skills_core::dashboard::{Dismissals, DismissalsFile};
 use skills_core::discover::{CatalogFile, DiscoverCatalog};
 use skills_core::install::Review;
 use skills_core::rescan::LibrarySnapshot;
@@ -39,6 +40,9 @@ pub struct AppState {
     /// the very files the diff was shown for — cloning again could apply
     /// something the user never saw.
     pub reviews: Mutex<HashMap<String, PendingReview>>,
+
+    pub dismissals_file: DismissalsFile,
+    pub dismissals: Mutex<Dismissals>,
 }
 
 /// A prepared review, and when it was prepared.
@@ -67,12 +71,14 @@ impl AppState {
         settings_file: SettingsFile,
         settings: AppSettings,
         catalog_file: CatalogFile,
+        dismissals_file: DismissalsFile,
     ) -> Self {
         let store = settings
             .metadata_folder
             .as_ref()
             .and_then(|folder| MetaStore::open(folder).ok());
         let catalog = catalog_file.load();
+        let dismissals = dismissals_file.load();
 
         Self {
             home,
@@ -85,6 +91,8 @@ impl AppState {
             catalog_file,
             catalog: Mutex::new(catalog),
             reviews: Mutex::new(HashMap::new()),
+            dismissals_file,
+            dismissals: Mutex::new(dismissals),
         }
     }
 

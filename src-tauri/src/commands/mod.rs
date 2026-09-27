@@ -6,7 +6,9 @@
 //! `#[tauri::command]` macro generates alongside each function.
 
 pub mod capabilities;
+pub mod collections;
 pub mod discover;
+pub mod insights;
 pub mod items;
 pub mod library;
 pub mod settings;

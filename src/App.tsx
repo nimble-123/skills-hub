@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { DashboardPane } from "./components/dashboard/DashboardPane";
+import { McpPane } from "./components/dashboard/McpPane";
 import { DiscoverPane } from "./components/discover/DiscoverPane";
 import { DetailRail } from "./components/rail/DetailRail";
 import { AttentionPane } from "./components/shell/AttentionPane";
@@ -142,6 +144,8 @@ export function App() {
               />
             )}
             {route.kind === "discover" && <DiscoverPane />}
+            {route.kind === "dashboard" && <DashboardPane />}
+            {route.kind === "mcp" && <McpPane />}
             {route.kind === "tools" && <ToolsPane facets={facets} />}
             {route.kind === "orphans" && <AttentionPane />}
             {route.kind === "settings" && <SettingsPane />}

@@ -22,6 +22,8 @@ Usage:
                                 Enable or disable a scanned item by name
   skills-cli discover <url> [--ref <r>] [--subpath <p>]
                                 Clone a repository and list what is installable
+  skills-cli usage <tool>       Read a tool's own session history
+  skills-cli mcp                List every configured MCP server
   skills-cli --help
 
 Options:
@@ -98,6 +100,20 @@ fn main() -> ExitCode {
                     .map_or("", String::as_str)
             };
             discover_command(url, flag("--ref"), flag("--subpath"))
+        }
+        Some("usage") => {
+            let Some(home) = dirs::home_dir() else {
+                eprintln!("error: could not determine your home directory");
+                return ExitCode::FAILURE;
+            };
+            usage_command(&home, args.get(1).map_or("claude-code", String::as_str))
+        }
+        Some("mcp") => {
+            let Some(home) = dirs::home_dir() else {
+                eprintln!("error: could not determine your home directory");
+                return ExitCode::FAILURE;
+            };
+            mcp_command(&home)
         }
         Some("--help" | "-h") | None => {
             print!("{USAGE}");
@@ -391,6 +407,86 @@ fn discover_command(url: &str, ref_name: &str, subpath: &str) -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+/// Reads a tool's own history and reports what has actually been used.
+fn usage_command(home: &Path, tool_id: &str) -> ExitCode {
+    use skills_core::usage;
+
+    let started = std::time::Instant::now();
+    let report = |done: u32, total: u32| {
+        if done == total {
+            eprintln!("read {total} files");
+        }
+    };
+
+    let raw = match tool_id {
+        "claude-code" => usage::claude::scan(home, &report),
+        "codex" => {
+            let outcome = skills_core::scan::scan_all_tools(tools::default_tools(), home);
+            let items: Vec<_> = outcome
+                .items
+                .into_iter()
+                .map(|discovered| skills_core::model::ItemMetadata {
+                    discovered,
+                    tags: Vec::new(),
+                    favorite: false,
+                    collections: Vec::new(),
+                    source: skills_core::model::InstallSource::default(),
+                })
+                .collect();
+            usage::codex::scan(home, &usage::codex::needles(&items), &report)
+        }
+        other => {
+            eprintln!("error: {other} keeps no history this application can read");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    let mut rows: Vec<_> = raw.into_iter().collect();
+    rows.sort_by(|a, b| b.1.count.cmp(&a.1.count));
+
+    for (key, stats) in rows.iter().take(25) {
+        println!(
+            "{:>5}  {:<40} last {}",
+            stats.count,
+            key,
+            stats.last_used.as_deref().unwrap_or("never")
+        );
+    }
+    println!(
+        "\n{} distinct, in {:.0} ms",
+        rows.len(),
+        started.elapsed().as_secs_f64() * 1000.0
+    );
+    ExitCode::SUCCESS
+}
+
+/// Lists every MCP server every tool is configured with.
+fn mcp_command(home: &Path) -> ExitCode {
+    let scan = skills_core::mcp::scan(tools::default_tools(), &[], home);
+
+    for server in &scan.servers {
+        let how = server.config.url.clone().unwrap_or_else(|| {
+            let mut parts = vec![server.config.command.clone().unwrap_or_default()];
+            parts.extend(server.config.args.clone());
+            parts.join(" ")
+        });
+        println!("{:<14} {:<22} {}", server.tool, server.name, how.trim());
+        if !server.config.env.is_empty() {
+            let keys: Vec<&str> = server.config.env.keys().map(String::as_str).collect();
+            println!("{:<14} {:<22} env: {}", "", "", keys.join(", "));
+        }
+    }
+    for warning in &scan.warnings {
+        eprintln!("warning: {} ({})", warning.path.display(), warning.message);
+    }
+    println!(
+        "\n{} servers, {} warnings",
+        scan.servers.len(),
+        scan.warnings.len()
+    );
+    ExitCode::SUCCESS
 }
 
 struct ResolvedPath {

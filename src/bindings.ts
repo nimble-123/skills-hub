@@ -109,6 +109,43 @@ export const commands = {
 	/**  Throws a review away, and the clone it was holding with it. */
 	cancelReview: (reviewId: string) => typedError<null, CommandError>(__TAURI_INVOKE("cancel_review", { reviewId })),
 	/**
+	 *  Reads a tool's own session history and reports what has actually been used.
+	 * 
+	 *  Only Claude Code and Codex keep anything to read. For everything else this
+	 *  returns nothing, and the dashboard falls back to what a file looks like.
+	 * 
+	 *  This can be hundreds of megabytes, so it is asked for rather than done on
+	 *  every scan.
+	 */
+	loadUsage: (toolId: string, onProgress: Channel<UsageProgress>) => typedError<{ [key in string]: UsageStats }, CommandError>(__TAURI_INVOKE("load_usage", { toolId, onProgress })),
+	/**  Costs, prune suggestions and overlaps, over whatever was last scanned. */
+	computeDashboard: (usageByEntry: { [key in string]: UsageStats }) => typedError<DashboardReport, CommandError>(__TAURI_INVOKE("compute_dashboard", { usageByEntry })),
+	/**  Waves a suggestion away without touching the item behind it. */
+	disregard: (id: string) => typedError<null, CommandError>(__TAURI_INVOKE("disregard", { id })),
+	/**  Takes a suggestion off the dismissed list. */
+	undisregard: (id: string) => typedError<null, CommandError>(__TAURI_INVOKE("undisregard", { id })),
+	listDisregarded: () => typedError<string[], CommandError>(__TAURI_INVOKE("list_disregarded")),
+	listMcpServers: () => typedError<McpReport, CommandError>(__TAURI_INVOKE("list_mcp_servers")),
+	/**
+	 *  Enables or disables a whole plugin bundle through its own tool's settings.
+	 * 
+	 *  A bundled item cannot be toggled on its own — the bundle is the unit the
+	 *  owning tool understands — so this is the only way to switch one off.
+	 */
+	setPluginEnabled: (toolId: string, pluginId: string, enabled: boolean) => typedError<null, CommandError>(__TAURI_INVOKE("set_plugin_enabled", { toolId, pluginId, enabled })),
+	/**  Creates a collection, or renames one. */
+	saveCollection: (collection: CollectionDef) => typedError<CollectionDef[], CommandError>(__TAURI_INVOKE("save_collection", { collection })),
+	/**
+	 *  Removes a collection, and takes it out of every item that was in it.
+	 * 
+	 *  Scrubbing the notes afterwards is idempotent and re-runnable, so a failure
+	 *  halfway through leaves nothing inconsistent — the next attempt finishes
+	 *  the job.
+	 */
+	deleteCollection: (collectionId: string) => typedError<CollectionDef[], CommandError>(__TAURI_INVOKE("delete_collection", { collectionId })),
+	/**  Puts an item into a collection, or takes it out again. */
+	setItemInCollection: (entryId: string, collectionId: string, member: boolean) => typedError<ItemMetadata, CommandError>(__TAURI_INVOKE("set_item_in_collection", { entryId, collectionId, member })),
+	/**
 	 *  Shows a file in Finder, Explorer or the desktop's file manager.
 	 * 
 	 *  `resolve_symlink` follows a link to where it really points, which is what
@@ -199,6 +236,17 @@ export type CompanionChange = {
 };
 
 export type CompanionStatus = "added" | "removed" | "modified";
+
+/**  Everything the dashboard shows. */
+export type DashboardReport = {
+	costs: ItemCost[],
+	prune: PruneCandidate[],
+	overlaps: Overlap[],
+	/**  Totals across everything enabled. */
+	totalSourceChars: number,
+	totalAvailableChars: number,
+	totalInvocationChars: number,
+};
 
 /**  One rendered line of a diff. */
 export type DiffLine = {
@@ -334,6 +382,26 @@ export type ItemContent = {
 	siblingFiles: SiblingFile[],
 };
 
+/**  What one item costs. */
+export type ItemCost = {
+	entryId: string,
+	name: string,
+	tool: string,
+	type: ItemType,
+	/**  The whole file. */
+	sourceChars: number,
+	/**
+	 *  Name and description: what a tool carries every turn.
+	 * 
+	 *  `None` for commands and rules, whose loading is not modelled.
+	 */
+	availableChars: number | null,
+	/**  The instructions loaded once the item is invoked. */
+	invocationChars: number | null,
+	/**  When the file was last written. */
+	modified: string | null,
+};
+
 /**  A discovered item plus everything the user has said about it. */
 export type ItemMetadata = {
 	tags: string[],
@@ -366,6 +434,33 @@ export type LibrarySnapshot = {
 
 export type McpConfigFormat = "json" | "toml";
 
+/**  Every MCP server every tool is configured with. */
+export type McpReport = {
+	servers: McpServer[],
+	warnings: ScanWarning[],
+};
+
+/**  One configured server, and where that configuration lives. */
+export type McpServer = {
+	id: string,
+	name: string,
+	tool: string,
+	/**  `None` is the global scope. */
+	projectId: string | null,
+	config: McpServerConfig,
+	sourcePath: string,
+};
+
+/**  How a server is started, or where it is reached. */
+export type McpServerConfig = {
+	command?: string | null,
+	args?: string[],
+	/**  Environment, often holding a token — never shown unmasked by default. */
+	env?: { [key in string]: string },
+	url?: string | null,
+	type?: string | null,
+};
+
 /**  A note whose item is no longer on disk. */
 export type Orphan = {
 	entryId: string,
@@ -375,6 +470,25 @@ export type Orphan = {
 	hasUserData: boolean,
 	path: string,
 };
+
+/**  Two items that look like they are after the same request. */
+export type Overlap = {
+	a: string,
+	b: string,
+	aName: string,
+	bName: string,
+	/**  Stable across the pair, whichever order they come in. */
+	pairId: string,
+	reason: OverlapReason,
+	/**  How alike their descriptions are, from 0 to 1. */
+	similarity: number | null,
+};
+
+export type OverlapReason = 
+/**  The same name and type: an outright collision. */
+"same-name" | 
+/**  Descriptions alike enough to compete. */
+"similar-description";
 
 /**
  *  A plugin bundle installed into one of the tools.
@@ -410,6 +524,25 @@ export type ProjectWorkspace = {
 	name: string,
 	path: string,
 };
+
+/**  A suggestion, and why it is being made. */
+export type PruneCandidate = {
+	entryId: string,
+	name: string,
+	tool: string,
+	reason: PruneReason,
+	sourceChars: number,
+	lastUsed: string | null,
+	modified: string | null,
+};
+
+export type PruneReason = 
+/**  The tool's own history says it has never run. */
+"never-used" | 
+/**  It has run, but not for a long time. */
+"not-used-lately" | 
+/**  No usage to go on, so: large and long untouched. */
+"large-and-old";
 
 /**  What to scan. */
 export type RescanOptions = {
@@ -616,6 +749,19 @@ export type UpdateStatus =
 "stale" | 
 /**  Not installed through this application, so there is nothing to check. */
 "untracked";
+
+/**  How far along reading a tool's history is. */
+export type UsageProgress = {
+	done: number,
+	total: number,
+};
+
+/**  How often one thing was used, and when it last was. */
+export type UsageStats = {
+	count: number,
+	/**  RFC 3339, or `None` if it has never been used. */
+	lastUsed: string | null,
+};
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {
