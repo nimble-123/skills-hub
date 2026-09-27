@@ -9,6 +9,7 @@ import { create } from "zustand";
 
 export type Route =
   | { kind: "library" }
+  | { kind: "discover" }
   | { kind: "tools" }
   | { kind: "orphans" }
   | { kind: "settings" };

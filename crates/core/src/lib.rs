@@ -5,10 +5,14 @@
 //! notably `$HOME`, which is injected rather than read, so the scanner can be
 //! exercised against temporary directories.
 
+pub mod diff;
+pub mod discover;
 pub mod error;
 pub mod frontmatter;
 pub mod fsunit;
+pub mod git;
 pub mod ids;
+pub mod install;
 pub mod model;
 pub mod paths;
 pub mod platform;

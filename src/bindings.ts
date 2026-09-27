@@ -75,6 +75,39 @@ export const commands = {
 	deleteItem: (entryId: string) => typedError<null, CommandError>(__TAURI_INVOKE("delete_item", { entryId })),
 	/**  Every tool and where it looks, so the tools page can show what was found. */
 	describeTools: () => typedError<ToolReport[], CommandError>(__TAURI_INVOKE("describe_tools")),
+	getDiscoverCatalog: () => typedError<DiscoverCatalog, CommandError>(__TAURI_INVOKE("get_discover_catalog")),
+	/**
+	 *  Clones a repository, records everything installable in it, and asks GitHub
+	 *  how many stars it has.
+	 */
+	discoverAddSource: (repoUrl: string, refName: string, subpath: string) => typedError<DiscoverCatalog, CommandError>(__TAURI_INVOKE("discover_add_source", { repoUrl, refName, subpath })),
+	/**  Clones a watched repository again and replaces what was known about it. */
+	discoverRefreshSource: (sourceId: string) => typedError<DiscoverCatalog, CommandError>(__TAURI_INVOKE("discover_refresh_source", { sourceId })),
+	discoverRemoveSource: (sourceId: string) => typedError<DiscoverCatalog, CommandError>(__TAURI_INVOKE("discover_remove_source", { sourceId })),
+	/**  Installs one item and records where it came from. */
+	installFromGithub: (spec: InstallSpec) => typedError<ItemMetadata, CommandError>(__TAURI_INVOKE("install_from_github", { spec })),
+	/**
+	 *  Asks every named item's remote whether it has moved on.
+	 * 
+	 *  In parallel: each is a separate `ls-remote` and they wait on the network,
+	 *  not on each other. A check that fails is reported as a failure for that
+	 *  item rather than sinking the rest.
+	 */
+	checkForUpdates: (entryIds: string[], onProgress: Channel<CheckProgress>) => typedError<UpdateCheck[], CommandError>(__TAURI_INVOKE("check_for_updates", { entryIds, onProgress })),
+	/**
+	 *  Fetches the other version and works out what differs, without touching the
+	 *  local copy.
+	 */
+	prepareReview: (entryId: string, mode: ReviewMode) => typedError<ReviewHandle, CommandError>(__TAURI_INVOKE("prepare_review", { entryId, mode })),
+	/**
+	 *  Replaces the local copy with the version the review showed.
+	 * 
+	 *  A review whose diff showed nothing still advances the recorded commit, so
+	 *  the item stops being reported as stale for a change that was not about it.
+	 */
+	applyReview: (reviewId: string) => typedError<ItemMetadata, CommandError>(__TAURI_INVOKE("apply_review", { reviewId })),
+	/**  Throws a review away, and the clone it was holding with it. */
+	cancelReview: (reviewId: string) => typedError<null, CommandError>(__TAURI_INVOKE("cancel_review", { reviewId })),
 	/**
 	 *  Shows a file in Finder, Explorer or the desktop's file manager.
 	 * 
@@ -133,6 +166,12 @@ export type Capabilities = {
 	platform: string,
 };
 
+/**  Progress through a bulk check. */
+export type CheckProgress = {
+	done: number,
+	total: number,
+};
+
 /**
  *  A named grouping of items.
  * 
@@ -150,6 +189,70 @@ export type CollectionDef = {
 export type CommandError = {
 	code: string,
 	message: string,
+};
+
+/**  What happened to one of a skill's other files. */
+export type CompanionChange = {
+	/**  Path relative to the skill's folder. */
+	path: string,
+	status: CompanionStatus,
+};
+
+export type CompanionStatus = "added" | "removed" | "modified";
+
+/**  One rendered line of a diff. */
+export type DiffLine = {
+	/**  `+` added, `-` removed, ` ` unchanged. */
+	marker: string,
+	/**  Line number in whichever side this line belongs to. */
+	number: number | null,
+	segments: Segment[],
+};
+
+/**  How much changed, for a summary before anyone reads the detail. */
+export type DiffStats = {
+	added: number,
+	removed: number,
+};
+
+/**  Everything the user is watching, and what was found in it. */
+export type DiscoverCatalog = {
+	sources?: DiscoverSource[],
+	entries?: DiscoverEntry[],
+};
+
+/**  One installable item found in a repository. */
+export type DiscoverEntry = {
+	id: string,
+	/**  The source it came from. */
+	sourceId: string,
+	repoUrl: string,
+	refName: string,
+	/**  Where in the repository this item is. */
+	subpath: string,
+	type: ItemType,
+	name: string,
+	description: string,
+	tags: string[],
+	/**  The commit it was found at. */
+	commit: string,
+	/**  The manifest's text, cached so a preview needs no second clone. */
+	manifest: string,
+	discoveredAt: string,
+};
+
+/**  A repository the user is watching for installable items. */
+export type DiscoverSource = {
+	id: string,
+	repoUrl: string,
+	/**  Empty means the default branch. */
+	refName: string,
+	/**  Empty means the whole repository. */
+	subpath: string,
+	addedAt: string,
+	/**  Stars, and when that was last asked. `None` means never asked. */
+	stars?: number | null,
+	starsFetchedAt?: string | null,
 };
 
 /**  What a scan found on disk, before any user metadata is attached. */
@@ -202,6 +305,17 @@ export type InstallSource = {
 	/**  Empty string means the repository root is the item. */
 	sourceSubpath: string | null,
 	sourceCommit: string | null,
+};
+
+/**  Where an item from a repository should be installed. */
+export type InstallSpec = {
+	repoUrl: string,
+	refName: string,
+	subpath: string,
+	toolId: string,
+	type: ItemType,
+	/**  `None` installs into the home directory. */
+	projectId: string | null,
 };
 
 /**  One item's file, as the detail view needs it. */
@@ -315,6 +429,27 @@ export type ResolvedPath = {
 	projectId: string | null,
 };
 
+/**  What an update or restore would do. */
+export type ReviewHandle = {
+	/**  Pass this back to apply or cancel. */
+	reviewId: string,
+	entryId: string,
+	lines: DiffLine[],
+	stats: DiffStats,
+	companions: CompanionChange[],
+	/**  The commit that would be recorded. */
+	commit: string,
+	/**  The repository moved on, but nothing about this item did. */
+	unchanged: boolean,
+};
+
+/**  Which version of a tracked item to fetch. */
+export type ReviewMode = 
+/**  Whatever the remote has now. */
+"update" | 
+/**  The commit it was installed at. */
+"restore";
+
 /**
  *  An extra rule location beyond the tool's single configured one.
  * 
@@ -352,6 +487,17 @@ export type ScanWarningKind =
 "unreadable" | 
 /**  A file was found but could not be understood. */
 "malformed";
+
+/**
+ *  A run of text within a line.
+ * 
+ *  `emphasis` marks the part that actually differs, so an added line that
+ *  changed one word does not read as though all of it is new.
+ */
+export type Segment = {
+	text: string,
+	emphasis: boolean,
+};
 
 /**
  *  Settings plus the tool registry they resolve to.
@@ -451,6 +597,25 @@ export type ToolReport = {
 	/**  Whether any of its folders is actually on this machine. */
 	detected: boolean,
 };
+
+/**  What a check found out about one item. */
+export type UpdateCheck = {
+	entryId: string,
+	status: UpdateStatus,
+	/**  What the remote has now, when it could be read. */
+	remoteCommit: string | null,
+	/**  Why the check failed, when it did. */
+	error: string | null,
+};
+
+/**  Whether a tracked item's source has moved on. */
+export type UpdateStatus = 
+/**  The recorded commit is still the remote's tip. */
+"current" | 
+/**  The remote has moved on. */
+"stale" | 
+/**  Not installed through this application, so there is nothing to check. */
+"untracked";
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {

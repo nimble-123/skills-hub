@@ -38,6 +38,15 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::items::unlink_from_project,
         commands::items::delete_item,
         commands::tools::describe_tools,
+        commands::discover::get_discover_catalog,
+        commands::discover::discover_add_source,
+        commands::discover::discover_refresh_source,
+        commands::discover::discover_remove_source,
+        commands::discover::install_from_github,
+        commands::updates::check_for_updates,
+        commands::updates::prepare_review,
+        commands::updates::apply_review,
+        commands::updates::cancel_review,
         commands::shell::reveal_in_file_manager,
         commands::shell::open_path,
     ])
@@ -55,6 +64,7 @@ pub fn run() {
     let builder = specta_builder();
 
     let run = tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(builder.invoke_handler())
@@ -77,6 +87,7 @@ pub fn run() {
 /// defaults: refusing to open over a config file would cost the user access to
 /// their whole library.
 fn load_state(app: &tauri::AppHandle) -> Result<state::AppState, Box<dyn std::error::Error>> {
+    use skills_core::discover::CatalogFile;
     use skills_core::settings::SettingsFile;
 
     let home = dirs::home_dir().ok_or("could not determine the home directory")?;
@@ -89,7 +100,12 @@ fn load_state(app: &tauri::AppHandle) -> Result<state::AppState, Box<dyn std::er
         tracing::warn!(path = %quarantined.display(), "started on defaults; the old settings were kept");
     }
 
-    Ok(state::AppState::new(home, settings_file, loaded.settings))
+    Ok(state::AppState::new(
+        home,
+        settings_file,
+        loaded.settings,
+        CatalogFile::new(&config_dir),
+    ))
 }
 
 #[cfg(test)]

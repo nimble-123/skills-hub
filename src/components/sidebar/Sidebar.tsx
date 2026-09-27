@@ -72,6 +72,12 @@ export function Sidebar({ facets }: SidebarProps) {
           onClick={() => pick({ kind: "all" })}
         />
         <NavRow
+          icon={<Icon name="compass" />}
+          label="Discover"
+          active={route.kind === "discover"}
+          onClick={() => go({ kind: "discover" })}
+        />
+        <NavRow
           icon={<Icon name="star" />}
           label="Favourites"
           count={facets.favourites}

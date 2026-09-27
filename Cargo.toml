@@ -29,6 +29,7 @@ rayon = "1.12"
 similar = { version = "3.2", features = ["text", "inline"] }
 tempfile = "3"
 trash = "5"
+wait-timeout = "0.2"
 walkdir = "2.5"
 
 specta = { version = "=2.0.0-rc.25", features = ["derive"] }

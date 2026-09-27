@@ -11,12 +11,17 @@ see [NOTICE.md](NOTICE.md).
 
 ## What works today
 
-Phase one: the library. Every configured folder is scanned, items are listed
-and filtered, tags and favourites are yours to set, enabling and disabling
-moves the real file, and a global item can be linked into a project.
+The library: every configured folder is scanned, items are listed and
+filtered, tags and favourites are yours to set, enabling and disabling moves
+the real file, and a global item can be linked into a project.
 
-Not yet: installing from GitHub with a diff before you apply it, the context
-cost dashboard, and the read-only MCP server view.
+Discover: point it at a repository and it is cloned, walked for skills,
+agents, commands and rules, and thrown away again. No account and no token —
+and any host git can reach, not only GitHub. Anything installed this way
+records the commit it came from, so it can be checked for updates, shown as a
+diff before anything is overwritten, and put back the way it was.
+
+Not yet: the context cost dashboard and the read-only MCP server view.
 
 ## Keyboard
 

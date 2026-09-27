@@ -20,6 +20,8 @@ Usage:
   skills-cli rescan <dir>       Run the full pipeline: scan, record into <dir>, prune
   skills-cli toggle <name> on|off [--tool <id>] [--dry-run]
                                 Enable or disable a scanned item by name
+  skills-cli discover <url> [--ref <r>] [--subpath <p>]
+                                Clone a repository and list what is installable
   skills-cli --help
 
 Options:
@@ -82,6 +84,20 @@ fn main() -> ExitCode {
                 print!("{USAGE}");
                 ExitCode::FAILURE
             }
+        }
+        Some("discover") => {
+            let Some(url) = args.get(1).filter(|a| !a.starts_with("--")) else {
+                eprintln!("error: discover needs a repository URL\n");
+                print!("{USAGE}");
+                return ExitCode::FAILURE;
+            };
+            let flag = |name: &str| {
+                args.iter()
+                    .position(|a| a == name)
+                    .and_then(|i| args.get(i + 1))
+                    .map_or("", String::as_str)
+            };
+            discover_command(url, flag("--ref"), flag("--subpath"))
         }
         Some("--help" | "-h") | None => {
             print!("{USAGE}");
@@ -336,6 +352,38 @@ fn toggle_command(
     match skills_core::toggle::set_item_enabled(&metadata, enabled) {
         Ok(path) => {
             println!("  now at {}", path.display());
+            ExitCode::SUCCESS
+        }
+        Err(err) => {
+            eprintln!("error: {err}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+/// Clones a repository and reports what could be installed from it.
+fn discover_command(url: &str, ref_name: &str, subpath: &str) -> ExitCode {
+    let started = std::time::Instant::now();
+    let result = skills_core::discover::discover(
+        &skills_core::git::SystemGit,
+        url,
+        ref_name,
+        subpath,
+        "1970-01-01T00:00:00Z",
+    );
+
+    match result {
+        Ok((source, entries)) => {
+            println!("{} items in {}", entries.len(), source.repo_url);
+            for entry in &entries {
+                println!(
+                    "  {:<8} {:<34} {}",
+                    entry.item_type.as_str(),
+                    entry.name,
+                    entry.subpath
+                );
+            }
+            println!("\nin {:.0} ms", started.elapsed().as_secs_f64() * 1000.0);
             ExitCode::SUCCESS
         }
         Err(err) => {

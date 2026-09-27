@@ -6,11 +6,13 @@
 //! `#[tauri::command]` macro generates alongside each function.
 
 pub mod capabilities;
+pub mod discover;
 pub mod items;
 pub mod library;
 pub mod settings;
 pub mod shell;
 pub mod tools;
+pub mod updates;
 
 use std::sync::{Mutex, MutexGuard};
 

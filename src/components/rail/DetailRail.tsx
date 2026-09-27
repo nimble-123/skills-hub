@@ -13,6 +13,7 @@ import { ProjectLinks } from "./ProjectLinks";
 import styles from "./Rail.module.css";
 import { SourceEditor } from "./SourceEditor";
 import { TagEditor } from "./TagEditor";
+import { UpdatePanel } from "./UpdatePanel";
 
 type DetailRailProps = {
   item: ItemMetadata;
@@ -94,19 +95,14 @@ export function DetailRail({ item }: DetailRailProps) {
               <dd className={`${styles.bandValue} ${styles.pathValue}`}>{item.realPath}</dd>
             </>
           )}
-
-          {item.sourceRepo && (
-            <>
-              <dt className={styles.bandKey}>From</dt>
-              <dd className={`${styles.bandValue} ${styles.pathValue}`}>{item.sourceRepo}</dd>
-            </>
-          )}
         </dl>
 
         <div className={styles.sectionTitle}>Tags</div>
         <TagEditor item={item} />
 
         <ProjectLinks item={item} />
+
+        <UpdatePanel item={item} />
 
         {content.state === "loading" && <div className={styles.loading}>Reading the file…</div>}
         {content.state === "failed" && <div className={styles.failed}>{content.message}</div>}

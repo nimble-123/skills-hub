@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { DiscoverPane } from "./components/discover/DiscoverPane";
 import { DetailRail } from "./components/rail/DetailRail";
 import { AttentionPane } from "./components/shell/AttentionPane";
 import { CommandPalette } from "./components/shell/CommandPalette";
@@ -140,6 +141,7 @@ export function App() {
                 }}
               />
             )}
+            {route.kind === "discover" && <DiscoverPane />}
             {route.kind === "tools" && <ToolsPane facets={facets} />}
             {route.kind === "orphans" && <AttentionPane />}
             {route.kind === "settings" && <SettingsPane />}

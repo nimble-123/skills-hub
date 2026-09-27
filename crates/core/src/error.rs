@@ -44,6 +44,24 @@ pub enum CoreError {
 
     #[error("{path} is not a link, so removing it would delete the item itself")]
     NotALink { path: PathBuf },
+
+    #[error("git is not installed, or is not on this application's PATH")]
+    GitMissing,
+
+    #[error("git took longer than 45 seconds: git {args}")]
+    GitTimedOut { args: String },
+
+    #[error("git {args} failed: {message}")]
+    GitFailed { args: String, message: String },
+
+    #[error("the host would not hand over commit {sha}; check for updates instead")]
+    CommitUnavailable { sha: String },
+
+    #[error("the repository has nothing at {subpath}")]
+    SubpathMissing { subpath: String },
+
+    #[error("this item was not installed through skills-hub, so there is nothing to update")]
+    NotTracked,
 }
 
 impl CoreError {
@@ -61,6 +79,12 @@ impl CoreError {
             Self::PluginToggleUnsupported { .. } => "plugin-toggle-unsupported",
             Self::NoProjectPath { .. } => "no-project-path",
             Self::NotALink { .. } => "not-a-link",
+            Self::GitMissing => "git-missing",
+            Self::GitTimedOut { .. } => "git-timed-out",
+            Self::GitFailed { .. } => "git-failed",
+            Self::CommitUnavailable { .. } => "commit-unavailable",
+            Self::SubpathMissing { .. } => "subpath-missing",
+            Self::NotTracked => "not-tracked",
         }
     }
 

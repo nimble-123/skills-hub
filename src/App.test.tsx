@@ -23,6 +23,15 @@ const commands = vi.hoisted(() => ({
   listOrphanedMetadata: vi.fn(),
   forgetOrphanedMetadata: vi.fn(),
   probeCapabilities: vi.fn(),
+  getDiscoverCatalog: vi.fn(),
+  discoverAddSource: vi.fn(),
+  discoverRefreshSource: vi.fn(),
+  discoverRemoveSource: vi.fn(),
+  installFromGithub: vi.fn(),
+  checkForUpdates: vi.fn(),
+  prepareReview: vi.fn(),
+  applyReview: vi.fn(),
+  cancelReview: vi.fn(),
   getSnapshot: vi.fn(),
   rescan: vi.fn(),
   setItemEnabled: vi.fn(),
@@ -62,6 +71,7 @@ beforeEach(() => {
   commands.getSettings.mockResolvedValue(ok(aSettingsView()));
   commands.getSnapshot.mockResolvedValue(ok(aSnapshot(LIBRARY)));
   commands.listOrphanedMetadata.mockResolvedValue(ok([]));
+  commands.getDiscoverCatalog.mockResolvedValue(ok({ sources: [], entries: [] }));
   commands.probeCapabilities.mockResolvedValue(
     ok({
       home: "/home/someone",
@@ -375,6 +385,202 @@ describe("the shell", () => {
     await waitFor(() => expect(screen.getByText("old")).toBeTruthy());
     // A note with the user's own tags in it says so rather than being removed.
     expect(screen.getByText(/has your tags/)).toBeTruthy();
+  });
+
+  it("suggests somewhere to start when nothing is watched yet", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Discover" }));
+
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("Discover");
+    expect(screen.getByRole("button", { name: /anthropics\/skills/ })).toBeTruthy();
+  });
+
+  it("watches a repository, splitting a pasted subfolder link apart", async () => {
+    const user = userEvent.setup();
+    commands.discoverAddSource.mockResolvedValue(ok({ sources: [], entries: [] }));
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Discover" }));
+
+    await user.type(
+      screen.getByRole("textbox", { name: /repository to watch/i }),
+      "https://github.com/acme/skills/tree/next/packs/writing{Enter}",
+    );
+
+    expect(commands.discoverAddSource).toHaveBeenCalledWith(
+      "https://github.com/acme/skills",
+      "next",
+      "packs/writing",
+    );
+  });
+
+  it("lists what a watched repository holds, and marks what is already installed", async () => {
+    const user = userEvent.setup();
+    const entry = (name: string, subpath: string) => ({
+      id: `${name}-1`,
+      sourceId: "src-1",
+      repoUrl: "https://github.com/acme/skills",
+      refName: "",
+      subpath,
+      type: "skill" as const,
+      name,
+      description: `${name} does things`,
+      tags: [],
+      commit: "abc1234",
+      manifest: "---\n---\n",
+      discoveredAt: "2026-09-27T12:00:00Z",
+    });
+    commands.getDiscoverCatalog.mockResolvedValue(
+      ok({
+        sources: [
+          {
+            id: "src-1",
+            repoUrl: "https://github.com/acme/skills",
+            refName: "",
+            subpath: "",
+            addedAt: "2026-09-27T12:00:00Z",
+            stars: 42,
+            starsFetchedAt: "2026-09-27T12:00:00Z",
+          },
+        ],
+        entries: [entry("fresh", "skills/fresh"), entry("already", "skills/already")],
+      }),
+    );
+    commands.getSnapshot.mockResolvedValue(
+      ok(
+        aSnapshot([
+          ...LIBRARY,
+          anItem({
+            name: "already",
+            sourceRepo: "https://github.com/acme/skills",
+            sourceSubpath: "skills/already",
+          }),
+        ]),
+      ),
+    );
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Discover" }));
+
+    await waitFor(() => expect(screen.getByText("acme/skills")).toBeTruthy());
+    expect(screen.getByText(/★ 42/)).toBeTruthy();
+    // One can be installed; the other already is.
+    expect(screen.getAllByRole("button", { name: "Install" })).toHaveLength(1);
+    expect(screen.getByText("installed")).toBeTruthy();
+  });
+
+  it("shows a diff before replacing anything, and applies it on request", async () => {
+    const user = userEvent.setup();
+    const tracked = anItem({
+      name: "writing",
+      sourceRepo: "https://github.com/acme/skills",
+      sourceSubpath: "skills/writing",
+      sourceCommit: "1111111aaaa",
+    });
+    commands.getSnapshot.mockResolvedValue(ok(aSnapshot([tracked])));
+    commands.checkForUpdates.mockResolvedValue(
+      ok([{ entryId: tracked.entryId, status: "stale", remoteCommit: "2222222bbbb", error: null }]),
+    );
+    commands.prepareReview.mockResolvedValue(
+      ok({
+        reviewId: "rev-1",
+        entryId: tracked.entryId,
+        lines: [
+          { marker: "-", number: 1, segments: [{ text: "First version.", emphasis: true }] },
+          { marker: "+", number: 1, segments: [{ text: "Second version.", emphasis: true }] },
+        ],
+        stats: { added: 1, removed: 1 },
+        companions: [{ path: "scripts/check.py", status: "added" }],
+        commit: "2222222bbbb",
+        unchanged: false,
+      }),
+    );
+    commands.applyReview.mockResolvedValue(ok({ ...tracked, sourceCommit: "2222222bbbb" }));
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+
+    await user.click(screen.getByRole("button", { name: "Check for updates" }));
+
+    // The diff is shown and nothing has been written yet.
+    await waitFor(() => expect(screen.getByText("Second version.")).toBeTruthy());
+    expect(screen.getByText("scripts/check.py")).toBeTruthy();
+    expect(screen.getByText(/replaces your local copy/i)).toBeTruthy();
+    expect(commands.applyReview).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+    expect(commands.applyReview).toHaveBeenCalledWith("rev-1");
+  });
+
+  it("says so when the repository moved but the item did not", async () => {
+    const user = userEvent.setup();
+    const tracked = anItem({
+      name: "writing",
+      sourceRepo: "https://github.com/acme/skills",
+      sourceSubpath: "skills/writing",
+      sourceCommit: "1111111aaaa",
+    });
+    commands.getSnapshot.mockResolvedValue(ok(aSnapshot([tracked])));
+    commands.checkForUpdates.mockResolvedValue(
+      ok([{ entryId: tracked.entryId, status: "stale", remoteCommit: "2222222bbbb", error: null }]),
+    );
+    commands.prepareReview.mockResolvedValue(
+      ok({
+        reviewId: "rev-2",
+        entryId: tracked.entryId,
+        lines: [],
+        stats: { added: 0, removed: 0 },
+        companions: [],
+        commit: "2222222bbbb",
+        unchanged: true,
+      }),
+    );
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+    await user.click(screen.getByRole("button", { name: "Check for updates" }));
+
+    await waitFor(() => expect(screen.getByText(/nothing about this item did/i)).toBeTruthy());
+    expect(screen.getByRole("button", { name: "Record the newer commit" })).toBeTruthy();
+  });
+
+  it("throws the review away when it is cancelled, so its clone goes too", async () => {
+    const user = userEvent.setup();
+    const tracked = anItem({
+      name: "writing",
+      sourceRepo: "https://github.com/acme/skills",
+      sourceCommit: "1111111aaaa",
+    });
+    commands.getSnapshot.mockResolvedValue(ok(aSnapshot([tracked])));
+    commands.prepareReview.mockResolvedValue(
+      ok({
+        reviewId: "rev-3",
+        entryId: tracked.entryId,
+        lines: [],
+        stats: { added: 0, removed: 0 },
+        companions: [],
+        commit: "3333333cccc",
+        unchanged: false,
+      }),
+    );
+    commands.cancelReview.mockResolvedValue(ok(null));
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+    await user.click(screen.getByRole("button", { name: "Restore installed version" }));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Cancel" })).toBeTruthy());
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(commands.cancelReview).toHaveBeenCalledWith("rev-3");
   });
 
   it("asks for a folder when there is nowhere to keep the notes", async () => {

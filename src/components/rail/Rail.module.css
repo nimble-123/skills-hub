@@ -431,3 +431,116 @@
 :global(:root[data-theme="dark"]) .highlighted :global(.shiki span) {
   color: var(--shiki-dark);
 }
+
+/* Where an item came from, and what updating it would do. */
+
+.sourceRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+.sourceName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commit {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  color: var(--text-faint);
+}
+
+.review {
+  margin-top: 10px;
+}
+
+.diffStats {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+}
+
+.added {
+  color: var(--text-success);
+}
+
+.removed {
+  color: var(--text-error);
+}
+
+.diff {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-secondary);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.diffLine {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lineAdded {
+  background: color-mix(in srgb, var(--text-success) 12%, transparent);
+}
+
+.lineRemoved {
+  background: color-mix(in srgb, var(--text-error) 12%, transparent);
+}
+
+.diffNumber {
+  flex: 0 0 34px;
+  text-align: right;
+  color: var(--text-faint);
+  user-select: none;
+}
+
+.diffMarker {
+  flex: 0 0 8px;
+  color: var(--text-faint);
+  user-select: none;
+}
+
+.diffText {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The words that actually differ, so a changed line does not read as new. */
+.emphasis {
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+  font-weight: 600;
+}
+
+.companionStatus {
+  flex: 0 0 68px;
+  font-size: var(--font-ui-smaller);
+}
+
+.statusAdded {
+  color: var(--text-success);
+}
+
+.statusRemoved {
+  color: var(--text-error);
+}
+
+.statusModified {
+  color: var(--text-warning);
+}
