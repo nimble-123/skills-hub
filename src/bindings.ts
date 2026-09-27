@@ -67,6 +67,10 @@ export const commands = {
 	setItemFavorite: (entryId: string, favorite: boolean) => typedError<ItemMetadata, CommandError>(__TAURI_INVOKE("set_item_favorite", { entryId, favorite })),
 	setItemTags: (entryId: string, tags: string[]) => typedError<ItemMetadata, CommandError>(__TAURI_INVOKE("set_item_tags", { entryId, tags })),
 	setItemCollections: (entryId: string, collections: string[]) => typedError<ItemMetadata, CommandError>(__TAURI_INVOKE("set_item_collections", { entryId, collections })),
+	/**  Makes a global item visible inside a project, by symlink. */
+	linkIntoProject: (entryId: string, projectId: string) => typedError<string, CommandError>(__TAURI_INVOKE("link_into_project", { entryId, projectId })),
+	/**  Removes a link from a project, leaving what it pointed at alone. */
+	unlinkFromProject: (entryId: string) => typedError<null, CommandError>(__TAURI_INVOKE("unlink_from_project", { entryId })),
 	/**  Deletes an item from disk, and its note with it. */
 	deleteItem: (entryId: string) => typedError<null, CommandError>(__TAURI_INVOKE("delete_item", { entryId })),
 	/**

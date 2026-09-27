@@ -1,3 +1,4 @@
+import { open } from "@tauri-apps/plugin-dialog";
 import type { Facets } from "../../lib/library";
 import { GLOBAL } from "../../lib/library";
 import { useFilters } from "../../stores/filters";
@@ -24,7 +25,26 @@ export function Sidebar({ facets }: SidebarProps) {
   const rescan = useLibrary((store) => store.rescan);
   const progress = useLibrary((store) => store.progress);
 
+  const addProjectWorkspace = useSettings((store) => store.addProjectWorkspace);
+  const removeProjectWorkspace = useSettings((store) => store.removeProjectWorkspace);
   const showEmpty = settings?.showEmptySidebarRows ?? false;
+
+  /** Removing one only means it stops being scanned; nothing on disk changes. */
+  const removeWorkspace = async (id: string) => {
+    await removeProjectWorkspace(id);
+    await rescan();
+  };
+
+  /** Adding a workspace only matters once it has been scanned. */
+  const addWorkspace = async () => {
+    const folder = await open({
+      directory: true,
+      multiple: false,
+      title: "Which project folder should be scanned?",
+    });
+    if (typeof folder !== "string") return;
+    if (await addProjectWorkspace(folder)) await rescan();
+  };
   const inLibrary = route.kind === "library";
   const attention = (snapshot?.brokenSymlinks.length ?? 0) + (snapshot?.orphanCount ?? 0);
 
@@ -99,7 +119,15 @@ export function Sidebar({ facets }: SidebarProps) {
           })}
         </Section>
 
-        <Section name="projects" label="Workspaces">
+        <Section
+          name="projects"
+          label="Workspaces"
+          action={{
+            icon: "folder-plus",
+            label: "Add a project folder",
+            onClick: () => void addWorkspace(),
+          }}
+        >
           <NavRow
             icon={<Icon name="house" />}
             label="Global"
@@ -117,6 +145,10 @@ export function Sidebar({ facets }: SidebarProps) {
               title={project.path}
               active={inLibrary && scope.kind === "project" && scope.projectId === project.id}
               onClick={() => pick({ kind: "project", projectId: project.id })}
+              onRemove={{
+                label: `Stop scanning ${project.name}`,
+                onClick: () => void removeWorkspace(project.id),
+              }}
             />
           ))}
         </Section>

@@ -38,6 +38,12 @@ pub enum CoreError {
 
     #[error("{tool} has no settings file this application can use to enable or disable a plugin")]
     PluginToggleUnsupported { tool: String },
+
+    #[error("{tool} has nowhere in a project to put a {item_type}")]
+    NoProjectPath { tool: String, item_type: String },
+
+    #[error("{path} is not a link, so removing it would delete the item itself")]
+    NotALink { path: PathBuf },
 }
 
 impl CoreError {
@@ -53,6 +59,8 @@ impl CoreError {
             Self::DestinationExists { .. } => "destination-exists",
             Self::NoParentDirectory { .. } => "no-parent-directory",
             Self::PluginToggleUnsupported { .. } => "plugin-toggle-unsupported",
+            Self::NoProjectPath { .. } => "no-project-path",
+            Self::NotALink { .. } => "not-a-link",
         }
     }
 

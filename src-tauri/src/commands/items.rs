@@ -168,6 +168,60 @@ pub fn set_item_collections(
     )
 }
 
+/// Makes a global item visible inside a project, by symlink.
+#[tauri::command]
+#[specta::specta]
+pub fn link_into_project(
+    entry_id: String,
+    project_id: String,
+    state: State<'_, AppState>,
+) -> CommandResult<std::path::PathBuf> {
+    use skills_core::settings::effective_tools;
+
+    let item = find(&state, &entry_id)?;
+    let settings = lock(&state.settings)?.clone();
+
+    let project = settings
+        .project_workspaces
+        .iter()
+        .find(|workspace| workspace.id == project_id)
+        .ok_or_else(|| CommandError::new("unknown-project", "No workspace with that id."))?;
+
+    let all_tools = effective_tools(skills_core::tools::default_tools(), &settings);
+    let tool = all_tools
+        .iter()
+        .find(|tool| tool.id == item.discovered.tool)
+        .ok_or_else(|| CommandError::new("unknown-tool", "No tool with that id."))?;
+
+    Ok(skills_core::projectlink::add_to_project(
+        &item,
+        tool,
+        project,
+        &state.home,
+    )?)
+}
+
+/// Removes a link from a project, leaving what it pointed at alone.
+#[tauri::command]
+#[specta::specta]
+pub fn unlink_from_project(entry_id: String, state: State<'_, AppState>) -> CommandResult<()> {
+    let item = find(&state, &entry_id)?;
+    skills_core::projectlink::remove_from_project(&item.discovered.source_path)?;
+
+    with_store(&state, |store| {
+        store.forget(std::slice::from_ref(&entry_id))?;
+        Ok(())
+    })?;
+
+    let mut guard = lock(&state.snapshot)?;
+    if let Some(snapshot) = guard.as_mut() {
+        snapshot
+            .items
+            .retain(|existing| existing.discovered.entry_id != entry_id);
+    }
+    Ok(())
+}
+
 /// Deletes an item from disk, and its note with it.
 #[tauri::command]
 #[specta::specta]

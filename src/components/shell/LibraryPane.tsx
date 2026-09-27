@@ -13,9 +13,11 @@ type LibraryPaneProps = {
   visible: ItemMetadata[];
   facets: Facets;
   searchRef: React.RefObject<HTMLInputElement | null>;
+  /** How many cards fit across, so arrow keys know what "up" means. */
+  onColumnsChange: (columns: number) => void;
 };
 
-export function LibraryPane({ visible, facets, searchRef }: LibraryPaneProps) {
+export function LibraryPane({ visible, facets, searchRef, onColumnsChange }: LibraryPaneProps) {
   const scope = useFilters((f) => f.scope);
   const selected = useUi((ui) => ui.selected);
   const select = useUi((ui) => ui.select);
@@ -43,6 +45,7 @@ export function LibraryPane({ visible, facets, searchRef }: LibraryPaneProps) {
         items={visible}
         selected={selected}
         projectNames={projectNames}
+        onColumnsChange={onColumnsChange}
         onSelect={(entryId) => select(entryId === selected ? null : entryId)}
       />
     </div>

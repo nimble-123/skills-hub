@@ -13,6 +13,7 @@ type ItemGridProps = {
   selected: string | null;
   projectNames: Map<string, string>;
   onSelect: (entryId: string) => void;
+  onColumnsChange: (columns: number) => void;
 };
 
 /**
@@ -23,10 +24,18 @@ type ItemGridProps = {
  * visible rows keeps filtering instant, and retrofitting it later would mean
  * rewriting the grid and its scroll handling.
  */
-export function ItemGrid({ items, selected, projectNames, onSelect }: ItemGridProps) {
+export function ItemGrid({
+  items,
+  selected,
+  projectNames,
+  onSelect,
+  onColumnsChange,
+}: ItemGridProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const columns = useColumnCount(scrollRef);
   const rowCount = Math.ceil(items.length / columns);
+
+  useEffect(() => onColumnsChange(columns), [columns, onColumnsChange]);
 
   const virtualizer = useVirtualizer({
     count: rowCount,
@@ -34,6 +43,12 @@ export function ItemGrid({ items, selected, projectNames, onSelect }: ItemGridPr
     estimateSize: () => ESTIMATED_ROW_HEIGHT + GAP,
     overscan: 3,
   });
+
+  const selectedIndex = items.findIndex((item) => item.entryId === selected);
+  useEffect(() => {
+    if (selectedIndex < 0) return;
+    virtualizer.scrollToIndex(Math.floor(selectedIndex / columns), { align: "auto" });
+  }, [selectedIndex, columns, virtualizer]);
 
   return (
     <div className={styles.scroller} ref={scrollRef}>

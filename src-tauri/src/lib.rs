@@ -34,6 +34,8 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::items::set_item_favorite,
         commands::items::set_item_tags,
         commands::items::set_item_collections,
+        commands::items::link_into_project,
+        commands::items::unlink_from_project,
         commands::items::delete_item,
         commands::shell::reveal_in_file_manager,
         commands::shell::open_path,

@@ -15,6 +15,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const commands = vi.hoisted(() => ({
   getSettings: vi.fn(),
+  readItemContent: vi.fn(),
+  setItemTags: vi.fn(),
+  revealInFileManager: vi.fn(),
   getSnapshot: vi.fn(),
   rescan: vi.fn(),
   setItemEnabled: vi.fn(),
@@ -53,6 +56,18 @@ beforeEach(() => {
   vi.clearAllMocks();
   commands.getSettings.mockResolvedValue(ok(aSettingsView()));
   commands.getSnapshot.mockResolvedValue(ok(aSnapshot(LIBRARY)));
+  commands.readItemContent.mockResolvedValue(
+    ok({
+      raw: "---\nname: writing\n---\n\n# Writing\n\nSome guidance.\n",
+      frontmatter: [{ key: "name", value: "writing" }],
+      body: "\n# Writing\n\nSome guidance.\n",
+      bytes: 48,
+      modified: "2026-01-01T00:00:00Z",
+      isSymlink: false,
+      realPath: "/home/.claude/skills/writing/SKILL.md",
+      siblingFiles: [{ path: "helper.py", bytes: 120 }],
+    }),
+  );
   // Zustand stores outlive a single render, so they are reset between tests.
   resetStores();
 });
@@ -154,6 +169,72 @@ describe("the shell", () => {
     await waitFor(() =>
       expect(screen.getByText(/something called writing is already there/)).toBeTruthy(),
     );
+  });
+
+  it("opens the detail rail on a card, and closes it with escape", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    await user.click(screen.getByText("writing"));
+    const rail = await screen.findByRole("complementary", { name: /details for writing/i });
+    // The body is rendered as markdown, not shown as source.
+    expect(within(rail).getByRole("heading", { name: "Writing" })).toBeTruthy();
+    expect(within(rail).getByText("Some guidance.")).toBeTruthy();
+    expect(within(rail).getByText("helper.py")).toBeTruthy();
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("complementary")).toBeNull());
+  });
+
+  it("adds a tag from the rail", async () => {
+    const user = userEvent.setup();
+    const tagged = { ...LIBRARY[0], tags: ["prose"] } as (typeof LIBRARY)[number];
+    commands.setItemTags.mockResolvedValue(ok(tagged));
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+
+    await user.click(screen.getByRole("button", { name: "+ tag" }));
+    await user.type(screen.getByRole("textbox", { name: "New tag" }), "prose{Enter}");
+
+    expect(commands.setItemTags).toHaveBeenCalledWith("writing-abc123", ["prose"]);
+  });
+
+  it("moves the selection with the arrow keys", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    await user.keyboard("{ArrowDown}");
+    // Sorted by name: review, starred, tdd, writing.
+    await screen.findByRole("complementary", { name: /details for review/i });
+
+    await user.keyboard("{ArrowRight}");
+    await screen.findByRole("complementary", { name: /details for starred/i });
+  });
+
+  it("focuses the search box on slash, and leaves the slash out of it", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    await user.keyboard("/");
+    const box = screen.getByRole("searchbox", { name: /search/i });
+    expect(document.activeElement).toBe(box);
+    expect((box as HTMLInputElement).value).toBe("");
+  });
+
+  it("opens the command palette and jumps to what is picked", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    await user.keyboard("{Meta>}k{/Meta}");
+    const palette = await screen.findByRole("dialog", { name: /find an item/i });
+
+    await user.type(within(palette).getByRole("textbox"), "tdd");
+    await user.keyboard("{Enter}");
+
+    await screen.findByRole("complementary", { name: /details for tdd/i });
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("asks for a folder when there is nowhere to keep the notes", async () => {

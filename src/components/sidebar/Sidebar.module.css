@@ -34,11 +34,32 @@
   margin-top: 10px;
 }
 
+.sectionRow {
+  display: flex;
+  align-items: center;
+}
+
+.sectionAction {
+  display: inline-flex;
+  margin-right: 8px;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.sectionAction:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
 .sectionHeading {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 4px;
-  width: 100%;
   padding: 4px 12px;
   border: 0;
   background: none;
@@ -60,6 +81,32 @@
 
 .chevronCollapsed {
   transform: rotate(-90deg);
+}
+
+.rowWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.rowRemove {
+  position: absolute;
+  right: 8px;
+  display: none;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-secondary);
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.rowWrap:hover .rowRemove {
+  display: inline-flex;
+}
+
+.rowRemove:hover {
+  color: var(--text-error);
 }
 
 .row {
