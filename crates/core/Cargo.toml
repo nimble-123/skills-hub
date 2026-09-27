@@ -1,0 +1,27 @@
+[package]
+name = "skills-core"
+description = "Domain logic for skills-hub: scanning, toggling and metadata for AI coding-tool skills."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml_ng = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+blake3 = { workspace = true }
+dunce = { workspace = true }
+rayon = { workspace = true }
+tempfile = { workspace = true }
+trash = { workspace = true }
+walkdir = { workspace = true }
+specta = { workspace = true }
+
+
+[lints]
+workspace = true

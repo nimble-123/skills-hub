@@ -1,0 +1,20 @@
+# Build output
+/dist/
+/target/
+/src-tauri/target/
+/src-tauri/gen/
+
+# Dependencies
+/node_modules/
+
+# macOS. The working volume is exFAT, so Finder scatters AppleDouble
+# sidecar files next to everything.
+.DS_Store
+._*
+
+# Local tooling
+*.log
+.vite/
+
+# Machine-specific: see the note inside.
+/.cargo/config.toml

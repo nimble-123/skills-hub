@@ -1,0 +1,66 @@
+/*
+ * Design tokens.
+ *
+ * The names deliberately mirror the ones the Obsidian plugin was written
+ * against, so its stylesheet can serve as a layout reference without a
+ * rename pass. Light is the default; dark overrides follow.
+ */
+:root {
+  --bg-primary: #ffffff;
+  --bg-primary-alt: #f5f6f8;
+  --bg-secondary: #f2f3f5;
+  --bg-secondary-alt: #e3e5e8;
+  --bg-modifier-border: #ddddde;
+  --bg-modifier-hover: rgba(0, 0, 0, 0.045);
+  --bg-modifier-active: rgba(0, 0, 0, 0.08);
+
+  --text-normal: #1f2124;
+  --text-muted: #5c6068;
+  --text-faint: #8a8f98;
+  --text-on-accent: #ffffff;
+  --text-error: #c0392b;
+  --text-success: #1f8b4c;
+  --text-warning: #b7791f;
+
+  --interactive-accent: #5b6ef5;
+  --interactive-accent-hover: #4a5de4;
+
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+
+  --font-ui-smaller: 12px;
+  --font-ui-small: 13px;
+  --font-ui-medium: 15px;
+  --font-ui-large: 20px;
+
+  --sidebar-width: 240px;
+  --rail-width: 400px;
+  --card-min-width: 280px;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-m: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #1e1f22;
+  --bg-primary-alt: #26282c;
+  --bg-secondary: #17181a;
+  --bg-secondary-alt: #2a2c30;
+  --bg-modifier-border: #35383d;
+  --bg-modifier-hover: rgba(255, 255, 255, 0.055);
+  --bg-modifier-active: rgba(255, 255, 255, 0.09);
+
+  --text-normal: #e4e6ea;
+  --text-muted: #a0a5ae;
+  --text-faint: #6f757e;
+  --text-error: #e06c5f;
+  --text-success: #4cc38a;
+  --text-warning: #e0a458;
+
+  --interactive-accent: #7c8cff;
+  --interactive-accent-hover: #8e9cff;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,22 @@
+pre-commit:
+  parallel: true
+  commands:
+    rust-fmt:
+      glob: "*.rs"
+      run: cargo fmt --check
+    rust-clippy:
+      glob: "*.rs"
+      run: cargo clippy --workspace --all-targets -- -D warnings
+    biome:
+      glob: "*.{ts,tsx,js,jsx,json,css}"
+      run: pnpm biome check --no-errors-on-unmatched {staged_files}
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: pnpm typecheck
+
+pre-push:
+  commands:
+    rust-test:
+      run: cargo test --workspace
+    bindings-current:
+      run: cargo test -p skills-hub export_typescript_bindings && git diff --exit-code src/bindings.ts

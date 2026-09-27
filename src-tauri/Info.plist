@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    The app scans folders the user points it at. macOS gates three of those
+    locations behind consent prompts; without these strings the prompt cannot
+    be shown and the read fails with EPERM mid-walk.
+  -->
+  <key>NSDocumentsFolderUsageDescription</key>
+  <string>skills-hub scans project folders you add for tool-specific skills, agents, commands and rules.</string>
+  <key>NSDesktopFolderUsageDescription</key>
+  <string>skills-hub scans project folders you add for tool-specific skills, agents, commands and rules.</string>
+  <key>NSDownloadsFolderUsageDescription</key>
+  <string>skills-hub scans project folders you add for tool-specific skills, agents, commands and rules.</string>
+  <key>NSRemovableVolumesUsageDescription</key>
+  <string>skills-hub scans project folders on external volumes you add.</string>
+</dict>
+</plist>
