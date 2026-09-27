@@ -18,6 +18,7 @@ const commands = vi.hoisted(() => ({
   readItemContent: vi.fn(),
   setItemTags: vi.fn(),
   revealInFileManager: vi.fn(),
+  writeItemContent: vi.fn(),
   getSnapshot: vi.fn(),
   rescan: vi.fn(),
   setItemEnabled: vi.fn(),
@@ -235,6 +236,53 @@ describe("the shell", () => {
 
     await screen.findByRole("complementary", { name: /details for tdd/i });
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("edits the file and saves it with the keyboard", async () => {
+    const user = userEvent.setup();
+    const renamed = {
+      ...LIBRARY[0],
+      description: "now says something else",
+    } as (typeof LIBRARY)[0];
+    commands.writeItemContent.mockResolvedValue(ok(renamed));
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+
+    await user.click(screen.getByRole("button", { name: "Edit the file" }));
+    const editor = screen.getByRole("textbox", { name: /source of writing/i });
+    await user.clear(editor);
+    await user.type(editor, "rewritten");
+    await user.keyboard("{Meta>}s{/Meta}");
+
+    expect(commands.writeItemContent).toHaveBeenCalledWith("writing-abc123", "rewritten");
+    // Back to the rendered view once it has saved.
+    await waitFor(() => expect(screen.queryByRole("textbox", { name: /source of/i })).toBeNull());
+  });
+
+  it("reveals the link, or what it points at when alt is held", async () => {
+    const user = userEvent.setup();
+    commands.revealInFileManager.mockResolvedValue(ok(null));
+
+    await renderApp();
+    await user.click(screen.getByText("writing"));
+    await screen.findByRole("complementary", { name: /details for writing/i });
+
+    const reveal = screen.getByRole("button", { name: "Show in Finder" });
+    await user.click(reveal);
+    expect(commands.revealInFileManager).toHaveBeenLastCalledWith(
+      "/home/.claude/skills/writing/SKILL.md",
+      false,
+    );
+
+    await user.keyboard("{Alt>}");
+    await user.click(reveal);
+    await user.keyboard("{/Alt}");
+    expect(commands.revealInFileManager).toHaveBeenLastCalledWith(
+      "/home/.claude/skills/writing/SKILL.md",
+      true,
+    );
   });
 
   it("asks for a folder when there is nowhere to keep the notes", async () => {

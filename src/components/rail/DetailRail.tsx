@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
@@ -10,6 +10,7 @@ import { TOOL_META, TYPE_META } from "../../toolMeta";
 import { Icon } from "../common/Icon";
 import { ProjectLinks } from "./ProjectLinks";
 import styles from "./Rail.module.css";
+import { SourceEditor } from "./SourceEditor";
 import { TagEditor } from "./TagEditor";
 
 type DetailRailProps = {
@@ -18,7 +19,8 @@ type DetailRailProps = {
 
 export function DetailRail({ item }: DetailRailProps) {
   const close = useUi((ui) => ui.select);
-  const content = useItemContent(item.entryId);
+  const [editing, setEditing] = useState(false);
+  const { content, reload } = useItemContent(item.entryId);
 
   return (
     <aside className={styles.rail} aria-label={`Details for ${item.name}`}>
@@ -28,12 +30,23 @@ export function DetailRail({ item }: DetailRailProps) {
           <button
             type="button"
             className={styles.iconButton}
-            title="Show in Finder"
+            title="Show in Finder. Hold Alt to show what it links to."
             aria-label="Show in Finder"
-            onClick={() => void reveal(item.sourcePath)}
+            onClick={(event: MouseEvent) => void reveal(item.sourcePath, event.altKey)}
           >
             <Icon name="folder-open" size={15} />
           </button>
+          {content.state === "ready" && !editing && (
+            <button
+              type="button"
+              className={styles.iconButton}
+              title="Edit the file"
+              aria-label="Edit the file"
+              onClick={() => setEditing(true)}
+            >
+              <Icon name="pencil" size={15} />
+            </button>
+          )}
           <button
             type="button"
             className={styles.iconButton}
@@ -130,15 +143,26 @@ export function DetailRail({ item }: DetailRailProps) {
             )}
 
             <div className={styles.sectionTitle}>Content</div>
-            <div className={styles.body}>
-              {/*
-                No rehype-raw: this content comes from arbitrary repositories,
-                and raw HTML in a webview is a way into the command surface.
-              */}
-              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-                {content.data.body}
-              </ReactMarkdown>
-            </div>
+            {editing ? (
+              <SourceEditor
+                item={item}
+                initial={content.data.raw}
+                onDone={() => {
+                  setEditing(false);
+                  reload();
+                }}
+              />
+            ) : (
+              <div className={styles.body}>
+                {/*
+                  No rehype-raw: this content comes from arbitrary repositories,
+                  and raw HTML in a webview is a way into the command surface.
+                */}
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+                  {content.data.body}
+                </ReactMarkdown>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -151,17 +175,26 @@ type ContentState =
   | { state: "ready"; data: ItemContent }
   | { state: "failed"; message: string };
 
-/** Reads an item's file, and forgets it again when the selection changes. */
-function useItemContent(entryId: string): ContentState {
+/**
+ * Reads an item's file.
+ *
+ * `reload` exists because saving changes the file underneath: the frontmatter,
+ * the size and the date all move, so the honest thing is to read it again
+ * rather than to patch what is on screen.
+ */
+function useItemContent(entryId: string): {
+  content: ContentState;
+  reload: () => void;
+} {
   const [content, setContent] = useState<ContentState>({ state: "loading" });
 
-  useEffect(() => {
-    let current = true;
+  const read = useCallback(() => {
+    let cancelled = false;
     setContent({ state: "loading" });
 
     void commands.readItemContent(entryId).then((result) => {
       // The selection moved on while this was in flight.
-      if (!current) return;
+      if (cancelled) return;
       setContent(
         result.status === "ok"
           ? { state: "ready", data: result.data }
@@ -170,14 +203,17 @@ function useItemContent(entryId: string): ContentState {
     });
 
     return () => {
-      current = false;
+      cancelled = true;
     };
   }, [entryId]);
 
-  return content;
+  useEffect(() => read(), [read]);
+
+  return { content, reload: read };
 }
 
-async function reveal(path: string) {
-  const result = await commands.revealInFileManager(path, false);
+/** `resolveSymlink` follows a link to the item it points at. */
+async function reveal(path: string, resolveSymlink: boolean) {
+  const result = await commands.revealInFileManager(path, resolveSymlink);
   if (result.status === "error") reportError(result.error);
 }

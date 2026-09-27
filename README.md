@@ -9,6 +9,27 @@ A standalone desktop application. Derived from the Obsidian plugin
 [AI Skills Manager](https://github.com/notenerdofficial/ai-skills-manager);
 see [NOTICE.md](NOTICE.md).
 
+## What works today
+
+Phase one: the library. Every configured folder is scanned, items are listed
+and filtered, tags and favourites are yours to set, enabling and disabling
+moves the real file, and a global item can be linked into a project.
+
+Not yet: installing from GitHub with a diff before you apply it, the context
+cost dashboard, and the read-only MCP server view.
+
+## Keyboard
+
+| | |
+|---|---|
+| `↑ ↓ ← →` | move through the grid |
+| `Enter` | open the selected item |
+| `Esc` | close the details, or leave a field |
+| `/` | focus the search |
+| `⌘K` / `Ctrl-K` | find an item by name |
+| `⌘R` / `Ctrl-R` | rescan |
+| `⌘S` / `Ctrl-S` | save, while editing a file |
+
 ## Architecture
 
 Three layers, dependencies pointing inwards only:

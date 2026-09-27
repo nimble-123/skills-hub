@@ -341,3 +341,57 @@
   font-size: var(--font-ui-smaller);
   line-height: 1.45;
 }
+
+.editor {
+  width: 100%;
+  min-height: 320px;
+  padding: 10px 12px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-primary);
+  color: var(--text-normal);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.editorActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.save {
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cancel {
+  padding: 4px 12px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.shortcutHint {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
