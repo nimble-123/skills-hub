@@ -3354,6 +3354,7 @@ name = "skills-hub"
 version = "0.1.0"
 dependencies = [
  "dirs",
+ "jiff",
  "serde",
  "serde_json",
  "skills-core",
@@ -3367,6 +3368,7 @@ dependencies = [
  "thiserror 2.0.21",
  "tracing",
  "tracing-subscriber",
+ "walkdir",
 ]
 
 [[package]]

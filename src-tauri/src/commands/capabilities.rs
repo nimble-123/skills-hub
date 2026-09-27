@@ -3,6 +3,11 @@
 //! Probed once at startup so the UI can explain an unavailable feature up front,
 //! rather than letting the user discover it by hitting an error.
 
+// Tauri deserialises command arguments into owned values and injects `State`
+// and `AppHandle` by value. That is the framework's calling convention, not a
+// choice this module gets to make.
+#![allow(clippy::needless_pass_by_value)]
+
 use std::path::PathBuf;
 
 use serde::Serialize;
@@ -24,8 +29,6 @@ pub struct Capabilities {
 
 #[tauri::command]
 #[specta::specta]
-// Tauri injects `AppHandle` by value; it is the framework's contract, not a choice.
-#[allow(clippy::needless_pass_by_value)]
 pub fn probe_capabilities(app: tauri::AppHandle) -> Result<Capabilities, CommandError> {
     let home = dirs::home_dir().ok_or_else(|| CommandError {
         code: "no-home".to_owned(),

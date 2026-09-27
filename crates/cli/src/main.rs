@@ -17,7 +17,7 @@ skills-cli — developer harness for skills-hub
 Usage:
   skills-cli tools [--json]     List configured tools and whether their paths exist
   skills-cli scan  [--json]     Scan every tool's global folders and report what is there
-  skills-cli store <dir>        Scan, then write metadata notes into <dir>
+  skills-cli rescan <dir>       Run the full pipeline: scan, record into <dir>, prune
   skills-cli toggle <name> on|off [--tool <id>] [--dry-run]
                                 Enable or disable a scanned item by name
   skills-cli --help
@@ -50,17 +50,17 @@ fn main() -> ExitCode {
             };
             scan_command(&home, json)
         }
-        Some("store") => {
+        Some("rescan") => {
             let Some(home) = dirs::home_dir() else {
                 eprintln!("error: could not determine your home directory");
                 return ExitCode::FAILURE;
             };
             let Some(dir) = args.get(1).filter(|a| !a.starts_with("--")) else {
-                eprintln!("error: store needs a directory\n");
+                eprintln!("error: rescan needs a directory\n");
                 print!("{USAGE}");
                 return ExitCode::FAILURE;
             };
-            store_command(&home, Path::new(dir))
+            rescan_command(&home, Path::new(dir))
         }
         Some("toggle") => {
             let Some(home) = dirs::home_dir() else {
@@ -224,9 +224,10 @@ fn scan_command(home: &Path, json: bool) -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn store_command(home: &Path, dir: &Path) -> ExitCode {
-    let outcome = skills_core::scan::scan_all_tools(tools::default_tools(), home);
-    let plugins = skills_core::scan::scan_all_plugins(tools::default_tools(), home);
+/// Runs the pipeline the application runs, against real folders.
+fn rescan_command(home: &Path, dir: &Path) -> ExitCode {
+    use skills_core::rescan::{Progress, RescanInput, RescanOptions, perform_rescan};
+    use skills_core::settings::{AppSettings, effective_tools};
 
     let store = match skills_core::store::MetaStore::open(dir) {
         Ok(store) => store,
@@ -235,25 +236,47 @@ fn store_command(home: &Path, dir: &Path) -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
+    let settings = AppSettings::default();
+    let all_tools = effective_tools(tools::default_tools(), &settings);
 
     let started = std::time::Instant::now();
-    let mut counts = (0usize, 0usize, 0usize);
-    for item in outcome.items.iter().chain(plugins.items.iter()) {
-        match store.ensure(item) {
-            Ok(skills_core::store::Wrote::Created) => counts.0 += 1,
-            Ok(skills_core::store::Wrote::Updated) => counts.1 += 1,
-            Ok(skills_core::store::Wrote::Nothing) => counts.2 += 1,
-            Err(err) => eprintln!("error: {err}"),
+    let snapshot = perform_rescan(
+        RescanInput {
+            tools: &all_tools,
+            projects: &settings.project_workspaces,
+            home,
+            store: &store,
+        },
+        RescanOptions::default(),
+        1,
+        &|progress| {
+            if let Progress::Recording { done, total } = progress {
+                eprint!("\rrecording {done}/{total}");
+            }
+        },
+    );
+    eprintln!();
+
+    let snapshot = match snapshot {
+        Ok(snapshot) => snapshot,
+        Err(err) => {
+            eprintln!("error: {err}");
+            return ExitCode::FAILURE;
         }
-    }
+    };
 
     println!(
-        "{} created, {} updated, {} unchanged, in {:.0} ms",
-        counts.0,
-        counts.1,
-        counts.2,
+        "{} items, {} plugin bundles, {} broken links, {} warnings, {} orphaned notes, in {:.0} ms",
+        snapshot.items.len(),
+        snapshot.plugins.len(),
+        snapshot.broken_symlinks.len(),
+        snapshot.warnings.len(),
+        snapshot.orphan_count,
         started.elapsed().as_secs_f64() * 1000.0
     );
+    for warning in &snapshot.warnings {
+        eprintln!("warning: {} ({})", warning.path.display(), warning.message);
+    }
     println!("notes in {}", store.root().display());
     ExitCode::SUCCESS
 }

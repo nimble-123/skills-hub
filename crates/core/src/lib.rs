@@ -12,6 +12,7 @@ pub mod ids;
 pub mod model;
 pub mod paths;
 pub mod platform;
+pub mod rescan;
 pub mod scan;
 pub mod settings;
 pub mod store;

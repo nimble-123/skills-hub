@@ -65,7 +65,8 @@ fn creates_one_note_per_item_named_after_its_id() {
     assert_eq!(
         store
             .ensure(&item("writing-abc", "writing"))
-            .expect("ensure"),
+            .expect("ensure")
+            .wrote,
         Wrote::Created
     );
 
@@ -96,7 +97,8 @@ fn a_second_scan_that_found_the_same_thing_writes_nothing() {
     assert_eq!(
         store
             .ensure(&item("writing-abc", "writing"))
-            .expect("second"),
+            .expect("second")
+            .wrote,
         Wrote::Nothing
     );
 
@@ -116,7 +118,10 @@ fn a_changed_description_is_written_through() {
 
     let mut changed = item("writing-abc", "writing");
     changed.description = "A better description".into();
-    assert_eq!(store.ensure(&changed).expect("second"), Wrote::Updated);
+    assert_eq!(
+        store.ensure(&changed).expect("second").wrote,
+        Wrote::Updated
+    );
 
     assert_eq!(
         store.list().expect("list")[0].discovered.description,

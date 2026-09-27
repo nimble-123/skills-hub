@@ -46,6 +46,14 @@ pub enum Wrote {
     Updated,
 }
 
+/// The outcome of recording one scanned item.
+#[derive(Debug, Clone)]
+pub struct Ensured {
+    pub wrote: Wrote,
+    /// The item as it now stands, scan data and user data together.
+    pub metadata: ItemMetadata,
+}
+
 impl MetaStore {
     /// Opens (and creates, if needed) the folder holding the notes.
     pub fn open(root: impl Into<PathBuf>) -> Result<Self> {
@@ -119,14 +127,18 @@ impl MetaStore {
     /// Returns [`Wrote::Nothing`] when the note already says exactly this,
     /// which is the common case and the reason a rescan does not touch the
     /// mtime of every file in a synced folder.
-    pub fn ensure(&self, item: &DiscoveredItem) -> Result<Wrote> {
+    pub fn ensure(&self, item: &DiscoveredItem) -> Result<Ensured> {
         let path = self.note_path(&item.entry_id);
         let now = now_rfc3339();
 
         if let Some(mut existing) = Self::read_note(&path)? {
             let before = existing.clone();
             existing.front.refresh_from(item, &now);
-            return self.write_if_changed(&path, &before, &existing);
+            let wrote = self.write_if_changed(&path, &before, &existing)?;
+            return Ok(Ensured {
+                wrote,
+                metadata: existing.front.to_metadata(),
+            });
         }
 
         let note = Note {
@@ -134,7 +146,10 @@ impl MetaStore {
             body: String::new(),
         };
         self.write(&path, &note)?;
-        Ok(Wrote::Created)
+        Ok(Ensured {
+            wrote: Wrote::Created,
+            metadata: note.front.to_metadata(),
+        })
     }
 
     /// Applies a user edit to one note.
