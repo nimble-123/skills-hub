@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { DetailRail } from "./components/rail/DetailRail";
+import { AttentionPane } from "./components/shell/AttentionPane";
 import { CommandPalette } from "./components/shell/CommandPalette";
 import { FirstRun } from "./components/shell/FirstRun";
 import { LibraryPane } from "./components/shell/LibraryPane";
+import { SettingsPane } from "./components/shell/SettingsPane";
 import styles from "./components/shell/Shell.module.css";
 import { Toasts } from "./components/shell/Toasts";
+import { ToolsPane } from "./components/shell/ToolsPane";
 import { Sidebar } from "./components/sidebar/Sidebar";
 import { moveWithin, shortcutFor } from "./lib/keyboard";
 import { deriveLibrary } from "./lib/library";
+import { applyTheme, resolveTheme } from "./lib/theme";
 import { useFilters } from "./stores/filters";
 import { useItems, useLibrary } from "./stores/library";
 import { useSettings } from "./stores/settings";
@@ -20,6 +24,8 @@ export function App() {
   const state = useLibrary((store) => store.state);
   const items = useItems();
 
+  const themePreference = useSettings((store) => store.settings?.theme);
+  const route = useUi((ui) => ui.route);
   const selectedId = useUi((ui) => ui.selected);
   const select = useUi((ui) => ui.select);
   const setPaletteOpen = useUi((ui) => ui.setCommandPaletteOpen);
@@ -40,6 +46,15 @@ export function App() {
       await loadLibrary();
     })();
   }, [loadSettings, loadLibrary]);
+
+  // The system can change its mind while the window is open.
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => applyTheme(resolveTheme(themePreference, query.matches));
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, [themePreference]);
 
   /**
    * One pass for the list and the counts, because they answer the same
@@ -115,15 +130,22 @@ export function App() {
         ) : (
           <>
             <Sidebar facets={facets} />
-            <LibraryPane
-              visible={visible}
-              facets={facets}
-              searchRef={searchRef}
-              onColumnsChange={(columns) => {
-                columnsRef.current = columns;
-              }}
-            />
-            {selected && <DetailRail key={selected.entryId} item={selected} />}
+            {route.kind === "library" && (
+              <LibraryPane
+                visible={visible}
+                facets={facets}
+                searchRef={searchRef}
+                onColumnsChange={(columns) => {
+                  columnsRef.current = columns;
+                }}
+              />
+            )}
+            {route.kind === "tools" && <ToolsPane facets={facets} />}
+            {route.kind === "orphans" && <AttentionPane />}
+            {route.kind === "settings" && <SettingsPane />}
+            {route.kind === "library" && selected && (
+              <DetailRail key={selected.entryId} item={selected} />
+            )}
           </>
         )}
       </div>

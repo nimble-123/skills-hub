@@ -73,6 +73,8 @@ export const commands = {
 	unlinkFromProject: (entryId: string) => typedError<null, CommandError>(__TAURI_INVOKE("unlink_from_project", { entryId })),
 	/**  Deletes an item from disk, and its note with it. */
 	deleteItem: (entryId: string) => typedError<null, CommandError>(__TAURI_INVOKE("delete_item", { entryId })),
+	/**  Every tool and where it looks, so the tools page can show what was found. */
+	describeTools: () => typedError<ToolReport[], CommandError>(__TAURI_INVOKE("describe_tools")),
 	/**
 	 *  Shows a file in Finder, Explorer or the desktop's file manager.
 	 * 
@@ -305,6 +307,14 @@ export type RescanOptions = {
 	skipPlugins?: boolean,
 };
 
+export type ResolvedPath = {
+	type: ItemType,
+	path: string,
+	exists: boolean,
+	/**  The scope this path belongs to: the home directory, or a project. */
+	projectId: string | null,
+};
+
 /**
  *  An extra rule location beyond the tool's single configured one.
  * 
@@ -432,6 +442,14 @@ export type ToolOverride = {
 	mcpConfigPath?: string | null,
 	projectMcpConfigPath?: string | null,
 	mcpConfigKey?: string | null,
+};
+
+/**  One tool, with every path it would read resolved against this machine. */
+export type ToolReport = {
+	tool: ToolConfig,
+	paths: ResolvedPath[],
+	/**  Whether any of its folders is actually on this machine. */
+	detected: boolean,
 };
 
 /* Tauri Specta runtime */

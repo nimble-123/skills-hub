@@ -1,0 +1,166 @@
+/* Shared chrome for the pages that are not the card grid. */
+
+.pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  padding: 34px 24px 0;
+  flex-shrink: 0;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-size: var(--font-ui-large);
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px 32px;
+}
+
+.section {
+  margin-bottom: 26px;
+  max-width: 760px;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--bg-modifier-border);
+}
+
+.fieldText {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldName {
+  color: var(--text-normal);
+}
+
+.fieldHint {
+  margin: 1px 0 0;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  overflow-wrap: anywhere;
+}
+
+.control {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-primary);
+  color: var(--text-normal);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.control:hover {
+  background: var(--bg-modifier-hover);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-primary);
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-normal);
+}
+
+.badge {
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  background: var(--bg-secondary-alt);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.badgeWarn {
+  background: color-mix(in srgb, var(--text-error) 16%, transparent);
+  color: var(--text-error);
+}
+
+.badgeOk {
+  background: color-mix(in srgb, var(--text-success) 16%, transparent);
+  color: var(--text-success);
+}
+
+.empty {
+  padding: 40px 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.toolPaths {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 1px 10px;
+  margin-top: 6px;
+  font-size: var(--font-ui-smaller);
+}
+
+.pathState {
+  font-variant-numeric: tabular-nums;
+}
+
+.pathFound {
+  color: var(--text-success);
+}
+
+.pathMissing {
+  color: var(--text-faint);
+}

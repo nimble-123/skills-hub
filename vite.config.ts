@@ -16,6 +16,8 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    sourcemap: true,
+    // Only for `tauri dev`. A release bundle would otherwise carry tens of
+    // megabytes of maps for grammars nobody is going to debug.
+    sourcemap: process.env.TAURI_ENV_DEBUG === "true",
   },
 });

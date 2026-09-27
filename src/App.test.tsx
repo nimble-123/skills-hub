@@ -19,6 +19,10 @@ const commands = vi.hoisted(() => ({
   setItemTags: vi.fn(),
   revealInFileManager: vi.fn(),
   writeItemContent: vi.fn(),
+  describeTools: vi.fn(),
+  listOrphanedMetadata: vi.fn(),
+  forgetOrphanedMetadata: vi.fn(),
+  probeCapabilities: vi.fn(),
   getSnapshot: vi.fn(),
   rescan: vi.fn(),
   setItemEnabled: vi.fn(),
@@ -57,6 +61,27 @@ beforeEach(() => {
   vi.clearAllMocks();
   commands.getSettings.mockResolvedValue(ok(aSettingsView()));
   commands.getSnapshot.mockResolvedValue(ok(aSnapshot(LIBRARY)));
+  commands.listOrphanedMetadata.mockResolvedValue(ok([]));
+  commands.probeCapabilities.mockResolvedValue(
+    ok({
+      home: "/home/someone",
+      symlinksSupported: true,
+      appVersion: "0.1.0",
+      platform: "macos",
+    }),
+  );
+  commands.describeTools.mockResolvedValue(
+    ok([
+      {
+        tool: aSettingsView().tools[0],
+        detected: true,
+        paths: [
+          { type: "skill", path: "/home/.claude/skills", exists: true, projectId: null },
+          { type: "agent", path: "/home/.claude/agents", exists: false, projectId: null },
+        ],
+      },
+    ]),
+  );
   commands.readItemContent.mockResolvedValue(
     ok({
       raw: "---\nname: writing\n---\n\n# Writing\n\nSome guidance.\n",
@@ -283,6 +308,73 @@ describe("the shell", () => {
       "/home/.claude/skills/writing/SKILL.md",
       true,
     );
+  });
+
+  it("opens the settings page from the sidebar", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Settings" }));
+
+    expect(screen.getByRole("heading", { level: 1, name: "Settings" })).toBeTruthy();
+    // It shows what it found out about this machine, not just what was saved.
+    await waitFor(() => expect(screen.getByText("/home/someone")).toBeTruthy());
+  });
+
+  it("opens the tools page and says which folders are there", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "All tools" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("Tools"),
+    );
+    expect(screen.getByText("/home/.claude/skills")).toBeTruthy();
+  });
+
+  it("shows broken links and orphaned notes on their own page", async () => {
+    const user = userEvent.setup();
+    commands.getSnapshot.mockResolvedValue(
+      ok({
+        ...aSnapshot(LIBRARY),
+        brokenSymlinks: [
+          {
+            path: "/home/.claude/skills/gone/SKILL.md",
+            target: "../../elsewhere",
+            targetPath: "/home/elsewhere",
+            tool: "claude-code",
+            type: "skill",
+            projectId: null,
+          },
+        ],
+        orphanCount: 1,
+      }),
+    );
+    commands.listOrphanedMetadata.mockResolvedValue(
+      ok([
+        {
+          entryId: "old-abc",
+          name: "old",
+          tool: "codex",
+          orphanedAt: "2026-09-01T00:00:00Z",
+          hasUserData: true,
+          path: "/home/.codex/skills/old/SKILL.md",
+        },
+      ]),
+    );
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: /Broken links/ }));
+
+    expect(screen.getByRole("heading", { level: 1, name: "Needs a look" })).toBeTruthy();
+    expect(screen.getByText("/home/.claude/skills/gone/SKILL.md")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("old")).toBeTruthy());
+    // A note with the user's own tags in it says so rather than being removed.
+    expect(screen.getByText(/has your tags/)).toBeTruthy();
   });
 
   it("asks for a folder when there is nowhere to keep the notes", async () => {

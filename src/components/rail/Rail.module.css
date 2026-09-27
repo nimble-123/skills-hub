@@ -1,5 +1,7 @@
 .rail {
-  width: var(--rail-width);
+  /* Capped against the viewport so a narrow window still leaves the grid
+     something to show. */
+  width: min(var(--rail-width), 60vw);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -262,11 +264,16 @@
   font-size: 0.9em;
 }
 
-.body pre {
+.body pre,
+.plainCode {
+  margin: 8px 0;
   padding: 10px 12px;
   border-radius: var(--radius-m);
   background: var(--bg-secondary);
   overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
 }
 
 .body pre code {
@@ -394,4 +401,33 @@
 .shortcutHint {
   color: var(--text-faint);
   font-size: var(--font-ui-smaller);
+}
+
+/*
+ * Highlighted code.
+ *
+ * Shiki writes both themes onto each span as custom properties, so switching
+ * between them is these four rules rather than highlighting the file again.
+ * Its own background is ignored in favour of the application's, so a code
+ * block sits in the page rather than looking pasted in from GitHub.
+ */
+.highlighted :global(.shiki) {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-m);
+  background: var(--bg-secondary);
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.highlighted :global(.shiki),
+.highlighted :global(.shiki span) {
+  color: var(--shiki-light);
+}
+
+:global(:root[data-theme="dark"]) .highlighted :global(.shiki),
+:global(:root[data-theme="dark"]) .highlighted :global(.shiki span) {
+  color: var(--shiki-dark);
 }

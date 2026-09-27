@@ -10,6 +10,7 @@ pub mod items;
 pub mod library;
 pub mod settings;
 pub mod shell;
+pub mod tools;
 
 use std::sync::{Mutex, MutexGuard};
 

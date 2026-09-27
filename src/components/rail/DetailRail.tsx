@@ -1,5 +1,5 @@
 import { type MouseEvent, useCallback, useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { commands, type ItemContent, type ItemMetadata } from "../../bindings";
@@ -8,6 +8,7 @@ import { reportError } from "../../stores/errors";
 import { useUi } from "../../stores/ui";
 import { TOOL_META, TYPE_META } from "../../toolMeta";
 import { Icon } from "../common/Icon";
+import { CodeBlock } from "./CodeBlock";
 import { ProjectLinks } from "./ProjectLinks";
 import styles from "./Rail.module.css";
 import { SourceEditor } from "./SourceEditor";
@@ -158,7 +159,11 @@ export function DetailRail({ item }: DetailRailProps) {
                   No rehype-raw: this content comes from arbitrary repositories,
                   and raw HTML in a webview is a way into the command surface.
                 */}
-                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeSanitize]}
+                  components={MARKDOWN_COMPONENTS}
+                >
                   {content.data.body}
                 </ReactMarkdown>
               </div>
@@ -169,6 +174,30 @@ export function DetailRail({ item }: DetailRailProps) {
     </aside>
   );
 }
+
+/**
+ * A fenced block becomes a highlighted one; inline code is left alone.
+ *
+ * Defined outside the component so react-markdown is not handed a new object
+ * on every render, which would remount every block in the document.
+ */
+const MARKDOWN_COMPONENTS: Components = {
+  code({ className, children, ...rest }) {
+    const language = /language-(\w+)/.exec(className ?? "")?.[1];
+    if (!language) {
+      return (
+        <code className={className} {...rest}>
+          {children}
+        </code>
+      );
+    }
+    return <CodeBlock code={String(children).replace(/\n$/, "")} language={language} />;
+  },
+  // Shiki emits its own `pre`, so the wrapper markdown would add is dropped.
+  pre({ children }) {
+    return <>{children}</>;
+  },
+};
 
 type ContentState =
   | { state: "loading" }

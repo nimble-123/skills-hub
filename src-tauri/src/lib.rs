@@ -37,6 +37,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::items::link_into_project,
         commands::items::unlink_from_project,
         commands::items::delete_item,
+        commands::tools::describe_tools,
         commands::shell::reveal_in_file_manager,
         commands::shell::open_path,
     ])
