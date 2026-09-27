@@ -24,6 +24,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 blake3 = "1.8"
 dirs = "7"
 dunce = "1.0"
+jiff = { version = "0.2", features = ["serde"] }
 rayon = "1.12"
 similar = { version = "3.2", features = ["text", "inline"] }
 tempfile = "3"

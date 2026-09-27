@@ -17,6 +17,7 @@ skills-cli — developer harness for skills-hub
 Usage:
   skills-cli tools [--json]     List configured tools and whether their paths exist
   skills-cli scan  [--json]     Scan every tool's global folders and report what is there
+  skills-cli store <dir>        Scan, then write metadata notes into <dir>
   skills-cli --help
 
 Options:
@@ -46,6 +47,18 @@ fn main() -> ExitCode {
                 return ExitCode::FAILURE;
             };
             scan_command(&home, json)
+        }
+        Some("store") => {
+            let Some(home) = dirs::home_dir() else {
+                eprintln!("error: could not determine your home directory");
+                return ExitCode::FAILURE;
+            };
+            let Some(dir) = args.get(1).filter(|a| !a.starts_with("--")) else {
+                eprintln!("error: store needs a directory\n");
+                print!("{USAGE}");
+                return ExitCode::FAILURE;
+            };
+            store_command(&home, Path::new(dir))
         }
         Some("--help" | "-h") | None => {
             print!("{USAGE}");
@@ -185,6 +198,40 @@ fn scan_command(home: &Path, json: bool) -> ExitCode {
         outcome.warnings.len(),
         elapsed.as_secs_f64() * 1000.0
     );
+    ExitCode::SUCCESS
+}
+
+fn store_command(home: &Path, dir: &Path) -> ExitCode {
+    let outcome = skills_core::scan::scan_all_tools(tools::default_tools(), home);
+    let plugins = skills_core::scan::scan_all_plugins(tools::default_tools(), home);
+
+    let store = match skills_core::store::MetaStore::open(dir) {
+        Ok(store) => store,
+        Err(err) => {
+            eprintln!("error: {err}");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    let started = std::time::Instant::now();
+    let mut counts = (0usize, 0usize, 0usize);
+    for item in outcome.items.iter().chain(plugins.items.iter()) {
+        match store.ensure(item) {
+            Ok(skills_core::store::Wrote::Created) => counts.0 += 1,
+            Ok(skills_core::store::Wrote::Updated) => counts.1 += 1,
+            Ok(skills_core::store::Wrote::Nothing) => counts.2 += 1,
+            Err(err) => eprintln!("error: {err}"),
+        }
+    }
+
+    println!(
+        "{} created, {} updated, {} unchanged, in {:.0} ms",
+        counts.0,
+        counts.1,
+        counts.2,
+        started.elapsed().as_secs_f64() * 1000.0
+    );
+    println!("notes in {}", store.root().display());
     ExitCode::SUCCESS
 }
 

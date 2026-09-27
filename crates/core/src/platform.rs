@@ -61,6 +61,29 @@ pub fn remove_symlink(link: &Path) -> io::Result<()> {
     }
 }
 
+/// Moves a file to the operating system's trash.
+///
+/// On macOS this deliberately goes through `NSFileManager` rather than the
+/// default, which drives Finder over `AppleScript`. Finder needs an automation
+/// permission the user has to grant, plays the trash sound, and — as this
+/// project found the hard way — blocks for a minute and then fails outright
+/// when Finder is not reachable. `NSFileManager` still puts the file in the
+/// Trash, where the user can recover it; only Finder's "Put Back" entry is
+/// lost. For a background operation that is the right trade.
+pub fn move_to_trash(path: &Path) -> std::result::Result<(), trash::Error> {
+    #[cfg(target_os = "macos")]
+    {
+        use trash::macos::{DeleteMethod, TrashContextExtMacos as _};
+        let mut context = trash::TrashContext::default();
+        context.set_delete_method(DeleteMethod::NsFileManager);
+        context.delete(path)
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        trash::delete(path)
+    }
+}
+
 /// Whether this process can create symlinks here.
 ///
 /// Windows requires Developer Mode or `SeCreateSymbolicLinkPrivilege`. Probing

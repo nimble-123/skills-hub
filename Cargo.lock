@@ -3336,6 +3336,7 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "dunce",
+ "jiff",
  "rayon",
  "serde",
  "serde_json",

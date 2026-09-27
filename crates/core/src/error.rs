@@ -1,7 +1,7 @@
 //! Typed errors.
 //!
-//! Every variant carries a stable `code()` so the frontend can branch on the code
-//! rather than on a message string that is free to be reworded.
+//! Every variant carries a stable `code()` so the frontend can branch on the
+//! code rather than on a message string that is free to be reworded.
 
 use std::path::PathBuf;
 
@@ -15,6 +15,15 @@ pub enum CoreError {
         #[source]
         source: std::io::Error,
     },
+
+    #[error("no item with id {entry_id}")]
+    UnknownItem { entry_id: String },
+
+    #[error("{path} is not a metadata note this application can read: {reason}")]
+    UnreadableNote { path: PathBuf, reason: String },
+
+    #[error("could not move {path} to the trash: {reason}")]
+    Trash { path: PathBuf, reason: String },
 }
 
 impl CoreError {
@@ -23,6 +32,9 @@ impl CoreError {
     pub fn code(&self) -> &'static str {
         match self {
             Self::Io { .. } => "io",
+            Self::UnknownItem { .. } => "unknown-item",
+            Self::UnreadableNote { .. } => "unreadable-note",
+            Self::Trash { .. } => "trash",
         }
     }
 
