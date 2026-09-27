@@ -24,6 +24,20 @@ pub enum CoreError {
 
     #[error("could not move {path} to the trash: {reason}")]
     Trash { path: PathBuf, reason: String },
+
+    #[error(
+        "{name} is part of the installed plugin {plugin_id}; enable or disable the whole plugin instead"
+    )]
+    ItemBelongsToPlugin { name: String, plugin_id: String },
+
+    #[error("something called {name} is already at {path}")]
+    DestinationExists { path: PathBuf, name: String },
+
+    #[error("{path} has no parent directory")]
+    NoParentDirectory { path: PathBuf },
+
+    #[error("{tool} has no settings file this application can use to enable or disable a plugin")]
+    PluginToggleUnsupported { tool: String },
 }
 
 impl CoreError {
@@ -35,6 +49,10 @@ impl CoreError {
             Self::UnknownItem { .. } => "unknown-item",
             Self::UnreadableNote { .. } => "unreadable-note",
             Self::Trash { .. } => "trash",
+            Self::ItemBelongsToPlugin { .. } => "item-belongs-to-plugin",
+            Self::DestinationExists { .. } => "destination-exists",
+            Self::NoParentDirectory { .. } => "no-parent-directory",
+            Self::PluginToggleUnsupported { .. } => "plugin-toggle-unsupported",
         }
     }
 

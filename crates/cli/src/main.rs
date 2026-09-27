@@ -18,6 +18,8 @@ Usage:
   skills-cli tools [--json]     List configured tools and whether their paths exist
   skills-cli scan  [--json]     Scan every tool's global folders and report what is there
   skills-cli store <dir>        Scan, then write metadata notes into <dir>
+  skills-cli toggle <name> on|off [--tool <id>] [--dry-run]
+                                Enable or disable a scanned item by name
   skills-cli --help
 
 Options:
@@ -59,6 +61,27 @@ fn main() -> ExitCode {
                 return ExitCode::FAILURE;
             };
             store_command(&home, Path::new(dir))
+        }
+        Some("toggle") => {
+            let Some(home) = dirs::home_dir() else {
+                eprintln!("error: could not determine your home directory");
+                return ExitCode::FAILURE;
+            };
+            let dry_run = args.iter().any(|a| a == "--dry-run");
+            let tool_filter = args
+                .iter()
+                .position(|a| a == "--tool")
+                .and_then(|i| args.get(i + 1))
+                .map(String::as_str);
+            if let (Some(name), Some(state @ ("on" | "off"))) =
+                (args.get(1), args.get(2).map(String::as_str))
+            {
+                toggle_command(&home, name, state == "on", tool_filter, dry_run)
+            } else {
+                eprintln!("error: toggle needs a name and on|off\n");
+                print!("{USAGE}");
+                ExitCode::FAILURE
+            }
         }
         Some("--help" | "-h") | None => {
             print!("{USAGE}");
@@ -233,6 +256,70 @@ fn store_command(home: &Path, dir: &Path) -> ExitCode {
     );
     println!("notes in {}", store.root().display());
     ExitCode::SUCCESS
+}
+
+/// Enables or disables one item, by the name the scanner reports.
+///
+/// `--dry-run` prints what would move without touching anything, which is the
+/// only responsible way to try this against a real skills folder.
+fn toggle_command(
+    home: &Path,
+    name: &str,
+    enabled: bool,
+    tool_filter: Option<&str>,
+    dry_run: bool,
+) -> ExitCode {
+    let outcome = skills_core::scan::scan_all_tools(tools::default_tools(), home);
+    let matches: Vec<_> = outcome
+        .items
+        .into_iter()
+        .filter(|item| item.name == name)
+        .filter(|item| tool_filter.is_none_or(|tool| item.tool == tool))
+        .collect();
+
+    let [found] = matches.as_slice() else {
+        if matches.is_empty() {
+            eprintln!("error: nothing scanned is called {name:?}");
+        } else {
+            eprintln!("error: {} items are called {name:?}:", matches.len());
+            for item in &matches {
+                eprintln!("  {} {}", item.tool, item.source_path.display());
+            }
+            eprintln!("(narrow it down with --tool <id>)");
+        }
+        return ExitCode::FAILURE;
+    };
+
+    let unit = skills_core::fsunit::linkable_unit(&found.source_path);
+    let verb = if enabled { "enable" } else { "disable" };
+    println!("{verb}: {}", unit.path.display());
+    if let Ok(target) = std::fs::read_link(&unit.path) {
+        println!("  it is a symlink to {}", target.display());
+        println!("  it will be re-created with an absolute target at the new location");
+    }
+
+    if dry_run {
+        println!("  (dry run: nothing was changed)");
+        return ExitCode::SUCCESS;
+    }
+
+    let metadata = skills_core::model::ItemMetadata {
+        discovered: found.clone(),
+        tags: Vec::new(),
+        favorite: false,
+        collections: Vec::new(),
+        source: skills_core::model::InstallSource::default(),
+    };
+    match skills_core::toggle::set_item_enabled(&metadata, enabled) {
+        Ok(path) => {
+            println!("  now at {}", path.display());
+            ExitCode::SUCCESS
+        }
+        Err(err) => {
+            eprintln!("error: {err}");
+            ExitCode::FAILURE
+        }
+    }
 }
 
 struct ResolvedPath {

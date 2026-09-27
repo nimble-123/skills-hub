@@ -226,6 +226,21 @@ pub enum ScanWarningKind {
     Malformed,
 }
 
+/// A named grouping of items.
+///
+/// Only the definition lives in settings. Which items belong is recorded in
+/// each item's own note, so there is one answer to the question rather than
+/// two that can disagree — and `contains(collections, "work")` in Dataview is
+/// the real answer, not a shadow of it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct CollectionDef {
+    pub id: String,
+    pub name: String,
+    #[serde(default)]
+    pub icon: Option<String>,
+}
+
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "kebab-case")]
 pub enum SortOrder {

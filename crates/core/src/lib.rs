@@ -13,7 +13,9 @@ pub mod model;
 pub mod paths;
 pub mod platform;
 pub mod scan;
+pub mod settings;
 pub mod store;
+pub mod toggle;
 pub mod tools;
 
 pub use error::{CoreError, Result};

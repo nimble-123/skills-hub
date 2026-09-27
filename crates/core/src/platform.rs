@@ -41,6 +41,35 @@ pub fn read_link_absolute(link: &Path) -> io::Result<PathBuf> {
     Ok(normalize(&base.join(raw)))
 }
 
+/// Expresses `target` as a path relative to `base`.
+///
+/// Used to keep a relative symlink relative when it moves: rewriting it
+/// absolute would work today and break the moment the home directory has a
+/// different name, which is exactly the situation a relative link was chosen
+/// to survive.
+#[must_use]
+pub fn relative_to(target: &Path, base: &Path) -> PathBuf {
+    let target: Vec<_> = target.components().collect();
+    let base: Vec<_> = base.components().collect();
+    let shared = target
+        .iter()
+        .zip(base.iter())
+        .take_while(|(a, b)| a == b)
+        .count();
+
+    let mut out = PathBuf::new();
+    for _ in shared..base.len() {
+        out.push("..");
+    }
+    for component in &target[shared..] {
+        out.push(component);
+    }
+    if out.as_os_str().is_empty() {
+        out.push(".");
+    }
+    out
+}
+
 /// Removes a symlink without touching what it points at.
 ///
 /// `remove_dir_all` on a directory symlink deletes the *target tree*; this is the
