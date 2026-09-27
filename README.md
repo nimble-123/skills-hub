@@ -27,6 +27,11 @@ keeps a history — Claude Code and Codex do — that history says which items
 have really been used, rather than guessing from how old a file is. It also
 points out pairs of items that look like they are after the same request.
 
+Tools: every tool, every path it reads, and whether that path is on this
+machine — all of it editable. Only the difference from the shipped default is
+stored, per path, so everything you leave alone stays free to be corrected by
+an update, and any field can be put back.
+
 MCP servers: every one every tool is configured with, global and per project,
 read straight from each tool's own file. Read-only, with anything that looks
 like a secret covered until you ask.

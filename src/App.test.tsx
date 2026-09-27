@@ -39,6 +39,10 @@ const commands = vi.hoisted(() => ({
   listDisregarded: vi.fn(),
   listMcpServers: vi.fn(),
   setPluginEnabled: vi.fn(),
+  checkPath: vi.fn(),
+  addCustomTool: vi.fn(),
+  removeCustomTool: vi.fn(),
+  setToolOverride: vi.fn(),
   saveCollection: vi.fn(),
   deleteCollection: vi.fn(),
   setItemInCollection: vi.fn(),
@@ -101,14 +105,22 @@ beforeEach(() => {
       platform: "macos",
     }),
   );
+  commands.checkPath.mockResolvedValue({ expanded: "/home/x", exists: true, isDirectory: true });
   commands.describeTools.mockResolvedValue(
     ok([
       {
         tool: aSettingsView().tools[0],
+        shipped: aSettingsView().tools[0],
+        overrides: { paths: {}, projectPaths: {} },
         detected: true,
         paths: [
-          { type: "skill", path: "/home/.claude/skills", exists: true, projectId: null },
-          { type: "agent", path: "/home/.claude/agents", exists: false, projectId: null },
+          {
+            type: "skill",
+            configured: "~/.claude/skills",
+            path: "/home/.claude/skills",
+            exists: true,
+            projectId: null,
+          },
         ],
       },
     ]),
@@ -353,7 +365,7 @@ describe("the shell", () => {
     await waitFor(() => expect(screen.getByText("/home/someone")).toBeTruthy());
   });
 
-  it("opens the tools page and says which folders are there", async () => {
+  it("opens the tools page and shows each path as an editable field", async () => {
     const user = userEvent.setup();
     await renderApp();
 
@@ -363,7 +375,121 @@ describe("the shell", () => {
     await waitFor(() =>
       expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("Tools"),
     );
-    expect(screen.getByText("/home/.claude/skills")).toBeTruthy();
+    const field = screen.getByLabelText("Skills") as HTMLInputElement;
+    expect(field.value).toBe("~/.claude/skills");
+  });
+
+  /// Every tool card renders the same four labels, so the ids have to differ.
+  it("gives every path field its own id, across tools and scopes", async () => {
+    const user = userEvent.setup();
+    commands.describeTools.mockResolvedValue(
+      ok(
+        ["claude-code", "cursor"].map((id) => ({
+          tool: { ...aSettingsView().tools[0], id },
+          shipped: { ...aSettingsView().tools[0], id },
+          overrides: { paths: {}, projectPaths: {} },
+          detected: true,
+          paths: [],
+        })),
+      ),
+    );
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "All tools" }));
+    await waitFor(() => expect(screen.getAllByLabelText("Skills").length).toBe(2));
+
+    const ids = screen.getAllByLabelText("Skills").map((field) => field.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("stores only the difference when a path is changed", async () => {
+    const user = userEvent.setup();
+    commands.setToolOverride.mockResolvedValue(ok(aSettingsView()));
+    commands.rescan.mockResolvedValue(ok(aSnapshot(LIBRARY)));
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "All tools" }));
+    await screen.findByLabelText("Skills");
+
+    const field = screen.getByLabelText("Skills");
+    await user.clear(field);
+    await user.type(field, "~/elsewhere/skills");
+    await user.tab();
+
+    expect(commands.setToolOverride).toHaveBeenCalledWith("claude-code", {
+      paths: { skill: "~/elsewhere/skills" },
+      projectPaths: {},
+    });
+  });
+
+  /** Typing the shipped value back should stop storing a difference at all. */
+  it("stops storing an override once a path is back to the default", async () => {
+    const user = userEvent.setup();
+    commands.describeTools.mockResolvedValue(
+      ok([
+        {
+          tool: { ...aSettingsView().tools[0], paths: { skill: "~/elsewhere/skills" } },
+          shipped: aSettingsView().tools[0],
+          overrides: { paths: { skill: "~/elsewhere/skills" }, projectPaths: {} },
+          detected: true,
+          paths: [],
+        },
+      ]),
+    );
+    commands.setToolOverride.mockResolvedValue(ok(aSettingsView()));
+    commands.rescan.mockResolvedValue(ok(aSnapshot(LIBRARY)));
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "All tools" }));
+    await screen.findByLabelText("Skills");
+
+    await user.click(screen.getAllByRole("button", { name: "Reset" })[0] as HTMLElement);
+
+    expect(commands.setToolOverride).toHaveBeenCalledWith("claude-code", {
+      paths: {},
+      projectPaths: {},
+    });
+  });
+
+  it("hides a tool from the sidebar without stopping it being scanned", async () => {
+    const user = userEvent.setup();
+    commands.setToolOverride.mockResolvedValue(ok(aSettingsView()));
+    commands.rescan.mockResolvedValue(ok(aSnapshot(LIBRARY)));
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "All tools" }));
+    await screen.findByLabelText("Skills");
+
+    await user.click(screen.getByRole("checkbox", { name: /show in the sidebar/i }));
+
+    expect(commands.setToolOverride).toHaveBeenCalledWith("claude-code", {
+      paths: {},
+      projectPaths: {},
+      disabled: true,
+    });
+  });
+
+  it("adds a tool it does not ship", async () => {
+    const user = userEvent.setup();
+    commands.addCustomTool.mockResolvedValue(ok(null));
+    commands.rescan.mockResolvedValue(ok(aSnapshot(LIBRARY)));
+
+    await renderApp();
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "All tools" }));
+    await screen.findByLabelText("Name");
+
+    await user.type(screen.getByLabelText("Name"), "my-tool");
+    await user.type(screen.getByLabelText("Skills folder"), "~/.my-tool/skills");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(commands.addCustomTool).toHaveBeenCalledWith("my-tool", {
+      skill: "~/.my-tool/skills",
+    });
   });
 
   it("shows broken links and orphaned notes on their own page", async () => {

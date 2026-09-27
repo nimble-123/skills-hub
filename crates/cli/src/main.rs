@@ -15,7 +15,8 @@ const USAGE: &str = "\
 skills-cli — developer harness for skills-hub
 
 Usage:
-  skills-cli tools [--json]     List configured tools and whether their paths exist
+  skills-cli tools [--json] [--settings <file>]
+                                List configured tools and whether their paths exist
   skills-cli scan  [--json]     Scan every tool's global folders and report what is there
   skills-cli rescan <dir>       Run the full pipeline: scan, record into <dir>, prune
   skills-cli toggle <name> on|off [--tool <id>] [--dry-run]
@@ -27,108 +28,116 @@ Usage:
   skills-cli --help
 
 Options:
-  --json    Emit JSON instead of a table
+  --json              Emit JSON instead of a table
+  --settings <file>   Apply a settings file's tool overrides, as the
+                      application would. Without it the shipped registry
+                      is used as-is.
 ";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let json = args.iter().any(|a| a == "--json");
-
-    match args.first().map(String::as_str) {
-        Some("tools") => {
-            let Some(home) = dirs::home_dir() else {
-                eprintln!("error: could not determine your home directory");
-                return ExitCode::FAILURE;
-            };
-            if json {
-                print_tools_json(&home);
-            } else {
-                print_tools_table(&home);
-            }
-            ExitCode::SUCCESS
-        }
-        Some("scan") => {
-            let Some(home) = dirs::home_dir() else {
-                eprintln!("error: could not determine your home directory");
-                return ExitCode::FAILURE;
-            };
-            scan_command(&home, json)
-        }
-        Some("rescan") => {
-            let Some(home) = dirs::home_dir() else {
-                eprintln!("error: could not determine your home directory");
-                return ExitCode::FAILURE;
-            };
-            let Some(dir) = args.get(1).filter(|a| !a.starts_with("--")) else {
-                eprintln!("error: rescan needs a directory\n");
-                print!("{USAGE}");
-                return ExitCode::FAILURE;
-            };
-            rescan_command(&home, Path::new(dir))
-        }
-        Some("toggle") => {
-            let Some(home) = dirs::home_dir() else {
-                eprintln!("error: could not determine your home directory");
-                return ExitCode::FAILURE;
-            };
-            let dry_run = args.iter().any(|a| a == "--dry-run");
-            let tool_filter = args
-                .iter()
-                .position(|a| a == "--tool")
-                .and_then(|i| args.get(i + 1))
-                .map(String::as_str);
-            if let (Some(name), Some(state @ ("on" | "off"))) =
-                (args.get(1), args.get(2).map(String::as_str))
-            {
-                toggle_command(&home, name, state == "on", tool_filter, dry_run)
-            } else {
-                eprintln!("error: toggle needs a name and on|off\n");
-                print!("{USAGE}");
-                ExitCode::FAILURE
-            }
-        }
-        Some("discover") => {
-            let Some(url) = args.get(1).filter(|a| !a.starts_with("--")) else {
-                eprintln!("error: discover needs a repository URL\n");
-                print!("{USAGE}");
-                return ExitCode::FAILURE;
-            };
-            let flag = |name: &str| {
-                args.iter()
-                    .position(|a| a == name)
-                    .and_then(|i| args.get(i + 1))
-                    .map_or("", String::as_str)
-            };
-            discover_command(url, flag("--ref"), flag("--subpath"))
-        }
-        Some("usage") => {
-            let Some(home) = dirs::home_dir() else {
-                eprintln!("error: could not determine your home directory");
-                return ExitCode::FAILURE;
-            };
-            usage_command(&home, args.get(1).map_or("claude-code", String::as_str))
-        }
-        Some("mcp") => {
-            let Some(home) = dirs::home_dir() else {
-                eprintln!("error: could not determine your home directory");
-                return ExitCode::FAILURE;
-            };
-            mcp_command(&home)
-        }
-        Some("--help" | "-h") | None => {
-            print!("{USAGE}");
-            ExitCode::SUCCESS
-        }
-        Some(other) => {
-            eprintln!("error: unknown command {other:?}\n");
-            print!("{USAGE}");
+    match dispatch(&args) {
+        Ok(code) => code,
+        Err(message) => {
+            eprintln!("error: {message}");
             ExitCode::FAILURE
         }
     }
 }
 
-fn print_tools_table(home: &Path) {
-    let all = tools::default_tools();
+/// Runs one command. Returning an error here prints it and exits non-zero, so
+/// no branch has to remember to do both.
+fn dispatch(args: &[String]) -> Result<ExitCode, String> {
+    let flag = |name: &str| {
+        args.iter()
+            .position(|a| a == name)
+            .and_then(|i| args.get(i + 1))
+            .map(String::as_str)
+    };
+    let positional = |index: usize| {
+        args.get(index)
+            .map(String::as_str)
+            .filter(|a| !a.starts_with("--"))
+    };
+    let json = args.iter().any(|a| a == "--json");
+
+    match args.first().map(String::as_str) {
+        Some("tools") => {
+            let home = home()?;
+            let all_tools = load_tools(flag("--settings"))?;
+            if json {
+                print_tools_json(&all_tools, &home);
+            } else {
+                print_tools_table(&all_tools, &home);
+            }
+            Ok(ExitCode::SUCCESS)
+        }
+        Some("scan") => Ok(scan_command(&home()?, json)),
+        Some("rescan") => {
+            let dir = positional(1).ok_or("rescan needs a directory")?;
+            Ok(rescan_command(&home()?, Path::new(dir)))
+        }
+        Some("toggle") => {
+            let name = positional(1).ok_or("toggle needs a name")?;
+            let state = positional(2).ok_or("toggle needs on or off")?;
+            if state != "on" && state != "off" {
+                return Err("toggle needs on or off".to_owned());
+            }
+            Ok(toggle_command(
+                &home()?,
+                name,
+                state == "on",
+                flag("--tool"),
+                args.iter().any(|a| a == "--dry-run"),
+            ))
+        }
+        Some("discover") => {
+            let url = positional(1).ok_or("discover needs a repository URL")?;
+            Ok(discover_command(
+                url,
+                flag("--ref").unwrap_or(""),
+                flag("--subpath").unwrap_or(""),
+            ))
+        }
+        Some("usage") => Ok(usage_command(
+            &home()?,
+            positional(1).unwrap_or("claude-code"),
+        )),
+        Some("mcp") => Ok(mcp_command(&home()?)),
+        Some("--help" | "-h") | None => {
+            print!("{USAGE}");
+            Ok(ExitCode::SUCCESS)
+        }
+        Some(other) => {
+            eprintln!("error: unknown command {other:?}\n");
+            print!("{USAGE}");
+            Ok(ExitCode::FAILURE)
+        }
+    }
+}
+
+fn home() -> Result<PathBuf, String> {
+    dirs::home_dir().ok_or_else(|| "could not determine your home directory".to_owned())
+}
+
+/// The registry, with a settings file's overrides applied if one is given.
+///
+/// The same merge the application does, so the harness can be used to check
+/// that an override lands where it should.
+fn load_tools(settings_path: Option<&str>) -> Result<Vec<ToolConfig>, String> {
+    use skills_core::settings::{AppSettings, effective_tools};
+
+    let Some(path) = settings_path else {
+        return Ok(tools::default_tools().to_vec());
+    };
+    let raw = std::fs::read_to_string(path).map_err(|err| format!("{path}: {err}"))?;
+    let settings: AppSettings =
+        serde_json::from_str(&raw).map_err(|err| format!("{path}: {err}"))?;
+
+    Ok(effective_tools(tools::default_tools(), &settings))
+}
+
+fn print_tools_table(all: &[ToolConfig], home: &Path) {
     let mut present = 0usize;
 
     for tool in all {
@@ -137,7 +146,8 @@ fn print_tools_table(home: &Path) {
         if found > 0 {
             present += 1;
         }
-        println!("{:<14} {found}/{} present", tool.id, rows.len());
+        let hidden = if tool.disabled { "  (hidden)" } else { "" };
+        println!("{:<14} {found}/{} present{hidden}", tool.id, rows.len());
         for row in rows {
             let mark = if row.exists { "+" } else { "-" };
             println!(
@@ -154,8 +164,8 @@ fn print_tools_table(home: &Path) {
     );
 }
 
-fn print_tools_json(home: &Path) {
-    let report: Vec<_> = tools::default_tools()
+fn print_tools_json(all: &[ToolConfig], home: &Path) {
+    let report: Vec<_> = all
         .iter()
         .map(|tool| {
             serde_json::json!({

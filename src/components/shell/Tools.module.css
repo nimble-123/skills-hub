@@ -1,0 +1,146 @@
+.tool {
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.toolHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.toolHead::-webkit-details-marker {
+  display: none;
+}
+
+.toolName {
+  font-weight: 600;
+}
+
+.grow {
+  flex: 1;
+}
+
+.body {
+  padding: 4px 12px 14px;
+  border-top: 1px solid var(--bg-modifier-border);
+}
+
+.group {
+  margin-top: 12px;
+}
+
+.groupTitle {
+  margin-bottom: 4px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pathField {
+  display: grid;
+  grid-template-columns: 74px 1fr 90px auto;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.pathLabel {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.pathInput {
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--bg-primary);
+  color: var(--text-normal);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 11.5px;
+}
+
+.pathInput::placeholder {
+  font-family: inherit;
+  color: var(--text-faint);
+}
+
+.pathState {
+  font-size: var(--font-ui-smaller);
+  white-space: nowrap;
+}
+
+.pathFound {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-success);
+}
+
+.pathMissing {
+  color: var(--text-faint);
+}
+
+.pathOff {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.reset {
+  padding: 2px 8px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.reset:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
+.note {
+  margin: 4px 0 0;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.45;
+}
+
+.newTool {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.newField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.newLabel {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+.newInput {
+  padding: 5px 8px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--bg-primary);
+  color: var(--text-normal);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+}

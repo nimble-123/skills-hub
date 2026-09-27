@@ -31,14 +31,20 @@ pub const DEFAULT_SECTION_ORDER: [&str; 5] =
 
 /// What a user may change about a tool.
 ///
-/// Every field is optional and absence means "whatever the application ships".
-/// Adding a field to [`ToolConfig`] does not belong here unless the user is
-/// meant to be able to override it.
+/// Absence means "whatever the application ships". Adding a field to
+/// [`ToolConfig`] does not belong here unless the user is meant to be able to
+/// override it.
+///
+/// The path maps merge per type rather than replacing wholesale, so changing
+/// where one tool keeps its commands leaves its skills alone — and leaves them
+/// free to be corrected by an update. An **empty string** is how a type is
+/// turned off: it says "do not scan this at all", which is different from
+/// saying nothing and getting the default.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase", default)]
 pub struct ToolOverride {
-    pub paths: Option<TypePaths>,
-    pub project_paths: Option<TypePaths>,
+    pub paths: TypePaths,
+    pub project_paths: TypePaths,
     pub disabled: Option<bool>,
     pub rule_additional_paths: Option<Vec<RulePathEntry>>,
     pub rule_additional_project_paths: Option<Vec<RulePathEntry>>,
@@ -50,6 +56,20 @@ pub struct ToolOverride {
     pub mcp_config_key: Option<String>,
 }
 
+/// Applies a per-type override onto a tool's shipped paths.
+///
+/// An entry replaces that type's path; an empty one removes it, which is how
+/// a type is turned off. Types not mentioned keep whatever shipped.
+fn merge_paths(target: &mut TypePaths, overrides: &TypePaths) {
+    for (item_type, path) in overrides {
+        if path.trim().is_empty() {
+            target.remove(item_type);
+        } else {
+            target.insert(*item_type, path.clone());
+        }
+    }
+}
+
 impl ToolOverride {
     #[must_use]
     pub fn is_empty(&self) -> bool {
@@ -57,12 +77,8 @@ impl ToolOverride {
     }
 
     fn apply_to(&self, tool: &mut ToolConfig) {
-        if let Some(paths) = &self.paths {
-            tool.paths.clone_from(paths);
-        }
-        if let Some(project_paths) = &self.project_paths {
-            tool.project_paths.clone_from(project_paths);
-        }
+        merge_paths(&mut tool.paths, &self.paths);
+        merge_paths(&mut tool.project_paths, &self.project_paths);
         if let Some(disabled) = self.disabled {
             tool.disabled = disabled;
         }

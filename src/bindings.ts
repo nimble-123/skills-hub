@@ -75,6 +75,16 @@ export const commands = {
 	deleteItem: (entryId: string) => typedError<null, CommandError>(__TAURI_INVOKE("delete_item", { entryId })),
 	/**  Every tool and where it looks, so the tools page can show what was found. */
 	describeTools: () => typedError<ToolReport[], CommandError>(__TAURI_INVOKE("describe_tools")),
+	checkPath: (path: string) => __TAURI_INVOKE<PathStatus>("check_path", { path }),
+	/**
+	 *  Adds a tool the application does not ship.
+	 * 
+	 *  For something new, or something whose layout is different enough that
+	 *  changing paths on an existing entry would be a lie about which tool it is.
+	 */
+	addCustomTool: (id: string, paths: Partial<{ [key in ItemType]: string }>) => typedError<null, CommandError>(__TAURI_INVOKE("add_custom_tool", { id, paths })),
+	/**  Removes a tool the user added. Nothing on disk is touched. */
+	removeCustomTool: (toolId: string) => typedError<null, CommandError>(__TAURI_INVOKE("remove_custom_tool", { toolId })),
 	getDiscoverCatalog: () => typedError<DiscoverCatalog, CommandError>(__TAURI_INVOKE("get_discover_catalog")),
 	/**
 	 *  Clones a repository, records everything installable in it, and asks GitHub
@@ -491,6 +501,18 @@ export type OverlapReason =
 "similar-description";
 
 /**
+ *  Whether a path a user is typing actually exists.
+ * 
+ *  Checked as they type rather than on save, because a path that is nearly
+ *  right looks exactly like one that is right.
+ */
+export type PathStatus = {
+	expanded: string,
+	exists: boolean,
+	isDirectory: boolean,
+};
+
+/**
  *  A plugin bundle installed into one of the tools.
  * 
  *  The items inside it are scanned like any others, but are not individually
@@ -556,6 +578,9 @@ export type RescanOptions = {
 
 export type ResolvedPath = {
 	type: ItemType,
+	/**  As configured, with a leading `~` still in it. */
+	configured: string,
+	/**  The same path, expanded against this machine. */
 	path: string,
 	exists: boolean,
 	/**  The scope this path belongs to: the home directory, or a project. */
@@ -705,13 +730,19 @@ export type ToolConfig = {
 /**
  *  What a user may change about a tool.
  * 
- *  Every field is optional and absence means "whatever the application ships".
- *  Adding a field to [`ToolConfig`] does not belong here unless the user is
- *  meant to be able to override it.
+ *  Absence means "whatever the application ships". Adding a field to
+ *  [`ToolConfig`] does not belong here unless the user is meant to be able to
+ *  override it.
+ * 
+ *  The path maps merge per type rather than replacing wholesale, so changing
+ *  where one tool keeps its commands leaves its skills alone — and leaves them
+ *  free to be corrected by an update. An **empty string** is how a type is
+ *  turned off: it says "do not scan this at all", which is different from
+ *  saying nothing and getting the default.
  */
 export type ToolOverride = {
-	paths?: Partial<{ [key in ItemType]: string }> | null,
-	projectPaths?: Partial<{ [key in ItemType]: string }> | null,
+	paths?: Partial<{ [key in ItemType]: string }>,
+	projectPaths?: Partial<{ [key in ItemType]: string }>,
 	disabled?: boolean | null,
 	ruleAdditionalPaths?: RulePathEntry[] | null,
 	ruleAdditionalProjectPaths?: RulePathEntry[] | null,
@@ -726,6 +757,14 @@ export type ToolOverride = {
 /**  One tool, with every path it would read resolved against this machine. */
 export type ToolReport = {
 	tool: ToolConfig,
+	/**
+	 *  What the application ships, before the user's changes.
+	 * 
+	 *  Sent alongside so a field can say what it would go back to, and
+	 *  offer to.
+	 */
+	shipped: ToolConfig | null,
+	overrides: ToolOverride,
 	paths: ResolvedPath[],
 	/**  Whether any of its folders is actually on this machine. */
 	detected: boolean,

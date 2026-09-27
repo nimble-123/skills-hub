@@ -37,10 +37,7 @@ fn an_override_replaces_only_what_it_names() {
     settings.tool_overrides.insert(
         "claude-code".to_owned(),
         ToolOverride {
-            paths: Some(BTreeMap::from([(
-                ItemType::Skill,
-                "~/elsewhere/skills".to_owned(),
-            )])),
+            paths: BTreeMap::from([(ItemType::Skill, "~/elsewhere/skills".to_owned())]),
             ..ToolOverride::default()
         },
     );
@@ -92,6 +89,61 @@ fn a_settings_file_written_by_an_older_version_cannot_shadow_the_registry() {
     );
     assert_eq!(claude.mcp_config_format, original.mcp_config_format);
     assert_eq!(claude.unconfirmed_paths, original.unconfirmed_paths);
+}
+
+/// Changing where one type lives leaves the others alone, so they stay free
+/// to be corrected by an update.
+#[test]
+fn an_override_of_one_path_does_not_disturb_the_others() {
+    let mut settings = AppSettings::default();
+    settings.tool_overrides.insert(
+        "claude-code".to_owned(),
+        ToolOverride {
+            paths: BTreeMap::from([(ItemType::Command, "~/elsewhere/commands".to_owned())]),
+            ..ToolOverride::default()
+        },
+    );
+
+    let claude = find(
+        &effective_tools(tools::default_tools(), &settings),
+        "claude-code",
+    );
+    let original = find(tools::default_tools(), "claude-code");
+
+    assert_eq!(claude.paths[&ItemType::Command], "~/elsewhere/commands");
+    assert_eq!(
+        claude.paths[&ItemType::Skill],
+        original.paths[&ItemType::Skill]
+    );
+    assert_eq!(
+        claude.paths[&ItemType::Agent],
+        original.paths[&ItemType::Agent]
+    );
+}
+
+/// Turning a type off is different from saying nothing and getting the
+/// default, so it needs a way to be said.
+#[test]
+fn an_empty_path_turns_that_type_off_entirely() {
+    let mut settings = AppSettings::default();
+    settings.tool_overrides.insert(
+        "claude-code".to_owned(),
+        ToolOverride {
+            paths: BTreeMap::from([(ItemType::Agent, String::new())]),
+            ..ToolOverride::default()
+        },
+    );
+
+    let claude = find(
+        &effective_tools(tools::default_tools(), &settings),
+        "claude-code",
+    );
+
+    assert!(!claude.paths.contains_key(&ItemType::Agent));
+    assert!(
+        claude.paths.contains_key(&ItemType::Skill),
+        "the rest is untouched"
+    );
 }
 
 #[test]
