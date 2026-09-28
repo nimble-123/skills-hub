@@ -117,40 +117,47 @@ that may never report. The by-hand approval command is in `CONTRIBUTING.md`.
 
 ### Make the build faster
 
-**Done: a cheaper profile for CI verification builds.** `[profile.release]` is
-tuned for a shipped binary — fat LTO, one codegen unit, optimised for size — and
-paid for it on every run, because the cache spares only the dependencies while
-our own crates and the final LTO link are redone each time. The CI bundle job now
-overrides those three settings through `CARGO_PROFILE_RELEASE_*`. Measured
-locally on an incremental rebuild after touching `skills-core`: **71.7s → 14.9s**.
-The release workflow keeps the shipping profile.
+**Done, and measured in CI.** `[profile.release]` is tuned for a shipped binary
+— fat LTO, one codegen unit, optimised for size — and the bundle job paid for
+that on every run although it only exists to prove packaging works. It now
+overrides the three settings through `CARGO_PROFILE_RELEASE_*`; the release
+workflow keeps the shipping profile.
 
-**Warm-cache measurements, which changed the picture:**
+Same commit, warm cache, before and after:
 
-| Job | cold | warm | of which `tauri build` |
+| | shipping | CI profile | |
 |---|---|---|---|
-| Bundle (windows) | 1019s | 366s | 278s |
-| Bundle (ubuntu) | 306s | 295s | 228s (+30s apt) |
-| Bundle (macos) | 168s | 155s | 130s |
-| Rust | 152s | 118s | — (35s cache, 32s apt, 43s work) |
+| Bundle (windows) | 366s | 269s | −27% |
+| Bundle (ubuntu) | 295s | 218s | −26% |
+| Bundle (macos) | 155s | 79s | −49% |
+| Wall clock (they run in parallel) | 366s | 269s | −97s |
 
-`Swatinem/rust-cache` alone cut Windows to a third. Windows is no longer the
-outlier it looked like.
+Weighted the way Actions bills a private repository — Linux 1×, Windows 2×,
+macOS 10× — that is 2577 → 1546, a 40% cut, because the most expensive leg is
+the one that halved.
 
-**A prebuilt container image is not worth it.** It helps Linux only — GitHub's
-macOS and Windows runners cannot run Linux containers — and on that one leg it
-would save the 30s `apt-get` beside a 228s compile. The arithmetic does not work.
+Turning LTO off makes a *cold* build worse: every dependency does full codegen
+instead of emitting bitcode for one link-time pass, and Ubuntu went from ~283s
+to 604s. It does not matter. Cold, Windows is the critical path at 971s (against
+~1020s before), and Ubuntu runs alongside it. `lto = "thin"` was held in reserve
+for the case where the warm numbers disappointed; they did not.
+
+**Measurement discipline, learned the hard way:** the first local A/B compared
+incremental rebuilds after touching `skills-core` and reported 71.7s → 14.9s.
+That isolated exactly the case LTO-off wins — dependencies already built — and
+said nothing about the cold build it made three times slower. Measure the
+scenario you are actually changing.
 
 **Still open, in order of expected payoff:**
 
-1. Re-measure CI after the profile change; the numbers above are all from the
-   shipping profile.
+1. `Swatinem/rust-cache` restore is 10–35s per job, and its save cost grows with
+   the target directory. Two profile variants now compete for the repository's
+   10 GB cache allowance, which shortens how long either survives.
 2. A faster linker — `lld` on Windows and Linux, `mold` on Linux. Less
-   interesting now that LTO is off for CI, since that was most of the link cost.
-3. `sccache` with the Actions cache as its backend. Marginal while
-   `rust-cache` already covers the dependencies.
-4. The `Rust` job spends 67s of 118s on cache restore and `apt-get`, and 43s
-   doing work. Little left to win, but it is the most lopsided job.
+   interesting now that LTO is off for CI, which was most of the link cost.
+3. The `Rust` job spends 67s of 128s on cache restore and `apt-get`, and the
+   rest doing work. Little left to win, but the most lopsided job.
+4. `sccache` — marginal while `rust-cache` already covers the dependencies.
 
 ### UI5 Web Components with React
 
