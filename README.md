@@ -82,13 +82,23 @@ never standard — does not have to wait for a release.
 
 ## Installing
 
-Builds are not signed yet, so macOS will object the first time: right-click
-the app and choose Open, or `xattr -dr com.apple.quarantine skills-hub.app`.
-
 ```bash
 pnpm install
 pnpm tauri build     # → .app and .dmg
 ```
+
+Builds are not signed yet, so macOS will object the first time. Open the app,
+let it be refused, then allow it under System Settings → Privacy & Security,
+where an **Open Anyway** button now sits. Or take the quarantine flag off
+yourself:
+
+```bash
+xattr -dr com.apple.quarantine skills-hub.app
+```
+
+Control-clicking the app and choosing Open no longer works — macOS 15 removed
+that bypass. The flag is set when a file is *downloaded*, so a build carried
+over on a USB stick or with `scp` has none and simply opens.
 
 On first launch it asks where to keep its notes. Your skills are never moved
 or copied — only those notes live there.

@@ -489,9 +489,12 @@ pnpm install
 pnpm tauri build</pre>
 
         <div class="note">
-          Builds are not signed yet, so macOS will object the first time. Right-click the app and
-          choose Open, or run
-          <code>xattr -dr com.apple.quarantine skills-hub.app</code>.
+          Builds are not signed yet, so macOS will object the first time. Open the app, let it be
+          refused, then allow it under System Settings &rarr; Privacy &amp; Security, where an
+          <strong>Open Anyway</strong> button now sits &mdash; or take the quarantine flag off
+          yourself with <code>xattr -dr com.apple.quarantine skills-hub.app</code>.
+          Control-clicking the app and choosing Open no longer works; macOS&nbsp;15 removed that
+          bypass.
         </div>
 
         <p class="section-lede" style="margin-top: 22px">
