@@ -25,15 +25,20 @@
         --bg: #ffffff;
         --bg-soft: #f5f6f8;
         --bg-sunken: #eef0f4;
+        --bg-blur: rgba(255, 255, 255, 0.78);
         --border: #dddde1;
+        --border-soft: #e8e8ec;
         --text: #1f2124;
         --muted: #5c6068;
         --faint: #8a8f98;
         --accent: #5b6ef5;
         --accent-hover: #4a5de4;
+        --accent-soft: #eceefe;
+        --glow: rgba(91, 110, 245, 0.16);
         --on-accent: #ffffff;
         --radius: 12px;
         --shadow: 0 8px 30px rgba(20, 24, 40, 0.1);
+        --shadow-lift: 0 18px 50px rgba(20, 24, 40, 0.16);
         --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
       }
 
@@ -42,34 +47,26 @@
           --bg: #16171a;
           --bg-soft: #1e1f22;
           --bg-sunken: #131417;
+          --bg-blur: rgba(22, 23, 26, 0.78);
           --border: #2f3237;
+          --border-soft: #26282c;
           --text: #e4e6ea;
           --muted: #a0a5ae;
           --faint: #6f757e;
           --accent: #7c8cff;
           --accent-hover: #8e9cff;
+          --accent-soft: rgba(124, 140, 255, 0.14);
+          --glow: rgba(124, 140, 255, 0.2);
           --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+          --shadow-lift: 0 18px 50px rgba(0, 0, 0, 0.6);
         }
-      }
-
-      :root[data-theme="dark"] {
-        --bg: #16171a;
-        --bg-soft: #1e1f22;
-        --bg-sunken: #131417;
-        --border: #2f3237;
-        --text: #e4e6ea;
-        --muted: #a0a5ae;
-        --faint: #6f757e;
-        --accent: #7c8cff;
-        --accent-hover: #8e9cff;
-        --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
       }
 
       *,
       *::before,
       *::after { box-sizing: border-box; }
 
-      html { scroll-behavior: smooth; }
+      html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 
       body {
         margin: 0;
@@ -90,9 +87,24 @@
 
       a { color: var(--accent); }
 
-      /* ---------------------------------------------------------- header */
+      /* ------------------------------------------------------------- nav */
 
-      header { padding: 22px 0; }
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--border-soft);
+        background: var(--bg-blur);
+        backdrop-filter: saturate(160%) blur(12px);
+        -webkit-backdrop-filter: saturate(160%) blur(12px);
+      }
+
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        height: 56px;
+      }
 
       .brand {
         display: flex;
@@ -100,6 +112,9 @@
         gap: 10px;
         font-weight: 650;
         letter-spacing: -0.01em;
+        color: inherit;
+        text-decoration: none;
+        margin-right: auto;
       }
 
       .mark {
@@ -121,21 +136,95 @@
         box-shadow: 0 4px 0 var(--on-accent), 0 -4px 0 var(--on-accent);
       }
 
+      .nav-links {
+        display: flex;
+        gap: 4px;
+      }
+
+      .nav-links a {
+        padding: 6px 10px;
+        border-radius: 7px;
+        color: var(--muted);
+        font-size: 14.5px;
+        text-decoration: none;
+        transition: background 120ms ease, color 120ms ease;
+      }
+
+      .nav-links a:hover { background: var(--bg-soft); color: var(--text); }
+
+      /* Six links are more than a phone can hold beside the brand. */
+      @media (max-width: 720px) {
+        .nav-links { display: none; }
+      }
+
+      .nav-cta {
+        padding: 6px 13px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-soft);
+        color: var(--text);
+        font-size: 14.5px;
+        font-weight: 550;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .nav-cta:hover { background: var(--bg-sunken); border-color: var(--faint); }
+
       /* ------------------------------------------------------------ hero */
 
-      .hero { padding: 40px 0 8px; text-align: center; }
+      .hero {
+        position: relative;
+        padding: 76px 0 8px;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      /* A single soft light behind the headline, not a gradient wash. */
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: -28% 8% auto;
+        height: 560px;
+        background: radial-gradient(ellipse at top, var(--glow), transparent 62%);
+        pointer-events: none;
+      }
+
+      .hero > * { position: relative; }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 22px;
+        padding: 5px 13px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--bg-soft);
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+
+      .badge i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        font-style: normal;
+      }
 
       h1 {
-        margin: 0 0 14px;
-        font-size: clamp(34px, 6vw, 54px);
-        line-height: 1.08;
-        letter-spacing: -0.03em;
+        margin: 0 0 16px;
+        font-size: clamp(36px, 6.4vw, 60px);
+        line-height: 1.05;
+        letter-spacing: -0.035em;
         font-weight: 680;
       }
 
       .lede {
-        margin: 0 auto 26px;
-        max-width: 60ch;
+        margin: 0 auto 28px;
+        max-width: 58ch;
         font-size: clamp(17px, 2.2vw, 20px);
         color: var(--muted);
       }
@@ -145,14 +234,14 @@
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
       }
 
       .button {
         display: inline-flex;
         align-items: center;
         gap: 7px;
-        padding: 10px 20px;
+        padding: 11px 22px;
         border: 1px solid var(--border);
         border-radius: 9px;
         background: var(--bg-soft);
@@ -179,17 +268,51 @@
 
       figure { margin: 0; }
 
-      .shot {
+      /*
+       * A frame around the screenshots. They are taken headlessly and have no
+       * window of their own — drawing a plain one here is honest about that
+       * and keeps a picture of an interface from bleeding into the page.
+       */
+      .window {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-soft);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .window.lift { box-shadow: var(--shadow-lift); }
+
+      .titlebar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 13px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-sunken);
+      }
+
+      .titlebar i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--border);
+      }
+
+      .titlebar span {
+        margin-left: 8px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--faint);
+      }
+
+      .window img {
         display: block;
         width: 100%;
         height: auto;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        background: var(--bg-soft);
       }
 
-      .hero-shot { margin-top: 32px; }
+      .hero-shot { margin-top: 38px; }
 
       figcaption {
         margin-top: 10px;
@@ -200,18 +323,28 @@
 
       /* --------------------------------------------------------- content */
 
-      section { padding: 56px 0; }
+      section { padding: 72px 0; }
 
-      section + section { border-top: 1px solid var(--border); }
+      section + section { border-top: 1px solid var(--border-soft); }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
 
       h2 {
-        margin: 0 0 8px;
-        font-size: clamp(24px, 3.4vw, 32px);
-        letter-spacing: -0.02em;
+        margin: 0 0 10px;
+        font-size: clamp(25px, 3.4vw, 34px);
+        letter-spacing: -0.025em;
         font-weight: 650;
       }
 
-      .section-lede { margin: 0 0 28px; max-width: 64ch; color: var(--muted); }
+      .section-lede { margin: 0 0 30px; max-width: 64ch; color: var(--muted); }
 
       .points {
         display: grid;
@@ -223,7 +356,7 @@
       }
 
       .point {
-        padding: 20px;
+        padding: 22px;
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background: var(--bg-soft);
@@ -245,27 +378,41 @@
         align-items: start;
       }
 
-      .tools {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 7px;
-        margin: 0 0 18px;
+      /* Hairline grid: the gap is the border showing through. */
+      .tool-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1px;
+        margin: 0 0 26px;
         padding: 0;
         list-style: none;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--border);
+        overflow: hidden;
       }
 
-      .tools li {
-        padding: 4px 11px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: var(--bg-soft);
-        font-size: 14px;
-        color: var(--muted);
+      .tool-grid li {
+        padding: 13px 16px;
+        background: var(--bg);
+      }
+
+      .tool-grid b {
+        display: block;
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+
+      .tool-grid code {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--faint);
+        word-break: break-all;
       }
 
       pre {
         margin: 0;
-        padding: 14px 16px;
+        padding: 15px 17px;
         border: 1px solid var(--border);
         border-radius: 10px;
         background: var(--bg-sunken);
@@ -279,7 +426,7 @@
       .comment { color: var(--faint); }
 
       .note {
-        margin-top: 14px;
+        margin-top: 16px;
         padding: 14px 16px;
         border: 1px solid var(--border);
         border-left: 3px solid var(--accent);
@@ -297,7 +444,7 @@
 
       .layers th,
       .layers td {
-        padding: 9px 12px;
+        padding: 10px 12px;
         border-bottom: 1px solid var(--border);
         text-align: left;
       }
@@ -308,27 +455,116 @@
 
       .layers code { font-family: var(--mono); font-size: 13px; color: var(--muted); }
 
+      /* ----------------------------------------------------------- build */
+
+      .steps {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        margin: 0 0 20px;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .step {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-soft);
+      }
+
+      .step h3 {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0 0 8px;
+        font-size: 15.5px;
+        font-weight: 620;
+      }
+
+      .step h3::before {
+        counter-increment: step;
+        content: counter(step);
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      .step p { margin: 0 0 10px; font-size: 14.5px; color: var(--muted); }
+
+      .step p:last-child { margin-bottom: 0; }
+
+      .step pre { font-size: 13px; }
+
+      /* ---------------------------------------------------------- footer */
+
       footer {
-        padding: 34px 0 52px;
+        padding: 44px 0 56px;
         border-top: 1px solid var(--border);
         color: var(--faint);
         font-size: 14px;
       }
 
-      footer a { color: var(--muted); }
+      .foot-grid {
+        display: grid;
+        gap: 28px;
+        grid-template-columns: minmax(260px, 2fr) repeat(auto-fit, minmax(140px, 1fr));
+        margin-bottom: 30px;
+      }
+
+      .foot-grid h4 {
+        margin: 0 0 10px;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 620;
+      }
+
+      .foot-grid ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 7px;
+      }
+
+      .foot-grid a { color: var(--muted); text-decoration: none; }
+
+      .foot-grid a:hover { color: var(--accent); }
+
+      .colophon { max-width: 46ch; }
+
+      .colophon a { color: var(--muted); }
     </style>
   </head>
 
   <body>
-    <div class="wrap">
-      <header>
-        <div class="brand">
+    <nav class="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top">
           <span class="mark" aria-hidden="true"><span></span></span>
           skills-hub
+        </a>
+        <div class="nav-links">
+          <a href="#library">Library</a>
+          <a href="#install">Install</a>
+          <a href="#cost">Cost</a>
+          <a href="#tools">Tools</a>
+          <a href="#build">Build</a>
         </div>
-      </header>
+        <a class="nav-cta" href="https://github.com/nimble-123/skills-hub">GitHub</a>
+      </div>
+    </nav>
 
+    <div class="wrap" id="top">
       <div class="hero">
+        <span class="badge"><i aria-hidden="true"></i> v0.3.1 · macOS · Windows · Linux · MIT</span>
         <h1>Every tool's skills, in one library</h1>
         <p class="lede">
           Your skills, agents, commands and rules are scattered across a dozen folders, one
@@ -336,19 +572,28 @@
           everything it does is a real change.
         </p>
         <div class="actions">
-          <a class="button primary" href="#get-it">Get it</a>
-          <a class="button" href="https://github.com/notenerdofficial/ai-skills-manager">The plugin this came from</a>
+          <a class="button primary" href="#build">Build it</a>
+          <a class="button" href="https://github.com/nimble-123/skills-hub">View source</a>
         </div>
-        <p class="small">macOS, Windows and Linux · 8 MB · MIT</p>
+        <p class="small">No account, no telemetry, nothing to sign in to.</p>
 
         <figure class="hero-shot">
-          <img class="shot" src="images/library.png" alt="The library: a sidebar of tools and types, a grid of cards, and a detail panel showing a skill's content" />
+          <div class="window lift">
+            <div class="titlebar" aria-hidden="true">
+              <i></i><i></i><i></i><span>skills-hub</span>
+            </div>
+            <picture>
+              <source srcset="images/library-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="images/library.png" alt="The library: a sidebar of tools and types, a grid of cards, and a detail panel showing a skill's content" />
+            </picture>
+          </div>
         </figure>
       </div>
     </div>
 
     <div class="wrap">
-      <section>
+      <section id="library">
+        <p class="eyebrow">On disk</p>
         <h2>It acts on the real files</h2>
         <p class="section-lede">
           A checkbox in a manager that never touches the file a tool reads has not disabled
@@ -388,7 +633,8 @@
         </ul>
       </section>
 
-      <section>
+      <section id="install">
+        <p class="eyebrow">Discover</p>
         <h2>Install from anywhere, update with your eyes open</h2>
         <p class="section-lede">
           Search the skills.sh registry by name, or point it at any repository git can reach. No
@@ -398,11 +644,23 @@
 
         <div class="split">
           <figure>
-            <img class="shot" src="images/discover.png" alt="Discover: a registry search grouped by repository, and below it a watched repository with the skills found in it, each with an install button" />
+            <div class="window">
+              <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Discover</span></div>
+              <picture>
+                <source srcset="images/discover-dark.png" media="(prefers-color-scheme: dark)" />
+                <img src="images/discover.png" alt="Discover: a registry search grouped by repository, and below it a watched repository with the skills found in it, each with an install button" />
+              </picture>
+            </div>
             <figcaption>Search finds the repository; watching it finds the skills.</figcaption>
           </figure>
           <figure>
-            <img class="shot" src="images/diff.png" alt="An update shown as a line diff with the changed words picked out, and the other changed files listed" />
+            <div class="window">
+              <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Update</span></div>
+              <picture>
+                <source srcset="images/diff-dark.png" media="(prefers-color-scheme: dark)" />
+                <img src="images/diff.png" alt="An update shown as a line diff with the changed words picked out, and the other changed files listed" />
+              </picture>
+            </div>
             <figcaption>The changed words picked out, and what else moves.</figcaption>
           </figure>
         </div>
@@ -413,7 +671,8 @@
         </div>
       </section>
 
-      <section>
+      <section id="cost">
+        <p class="eyebrow">Cost</p>
         <h2>See what it all costs</h2>
         <p class="section-lede">
           What a tool carries every turn — a name and a description, so the model knows the item
@@ -422,7 +681,13 @@
         </p>
 
         <figure>
-          <img class="shot" src="images/cost.png" alt="The cost page: totals for enabled items, always-available and on-invocation tokens, the largest items, and suggestions" />
+          <div class="window">
+            <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Cost</span></div>
+            <picture>
+              <source srcset="images/cost-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="images/cost.png" alt="The cost page: totals for enabled items, always-available and on-invocation tokens, items ranked by cost, and suggestions" />
+            </picture>
+          </div>
         </figure>
 
         <div class="note">
@@ -432,26 +697,47 @@
         </div>
       </section>
 
-      <section>
+      <section id="tools">
+        <p class="eyebrow">Tools</p>
         <h2>Sixteen tools, and room for yours</h2>
-        <ul class="tools">
-          <li>Claude Code</li><li>Cursor</li><li>Codex</li><li>OpenCode</li>
-          <li>Antigravity</li><li>GitHub Copilot</li><li>Cline</li><li>Trae</li>
-          <li>Windsurf</li><li>Goose</li><li>Hermes</li><li>Pi</li>
-          <li>Gemini CLI</li><li>Roo Code</li><li>Continue</li><li>~/.agents/skills</li>
-        </ul>
         <p class="section-lede">
-          Every path is editable and checked against your machine as you type. Only the
-          difference from the default is stored, so a path you leave alone stays free to be
-          corrected by an update.
+          It writes where they already read. Every path below is a default, editable and checked
+          against your machine as you type — only the difference from the default is stored, so a
+          path you leave alone stays free to be corrected by an update.
         </p>
 
+        <ul class="tool-grid">
+          <li><b>Claude Code</b><code>~/.claude/skills</code></li>
+          <li><b>Cursor</b><code>~/.cursor/skills</code></li>
+          <li><b>Codex</b><code>~/.codex/skills</code></li>
+          <li><b>OpenCode</b><code>~/.config/opencode/skills</code></li>
+          <li><b>Antigravity</b><code>~/.gemini/config/skills</code></li>
+          <li><b>Gemini CLI</b><code>~/.gemini/commands</code></li>
+          <li><b>GitHub Copilot</b><code>~/.copilot/skills</code></li>
+          <li><b>Cline</b><code>~/Documents/Cline/Rules</code></li>
+          <li><b>Trae</b><code>~/.trae/skills</code></li>
+          <li><b>Windsurf</b><code>~/.codeium/windsurf/skills</code></li>
+          <li><b>Goose</b><code>~/.config/goose/skills</code></li>
+          <li><b>Hermes</b><code>~/.hermes/skills</code></li>
+          <li><b>Pi</b><code>~/.pi/agent/skills</code></li>
+          <li><b>Roo Code</b><code>~/.roo/rules</code></li>
+          <li><b>Continue</b><code>.continue/prompts</code></li>
+          <li><b>Shared</b><code>~/.agents/skills</code></li>
+        </ul>
+
         <figure>
-          <img class="shot" src="images/tools.png" alt="The tools page with one tool expanded, each of its paths an editable field" />
+          <div class="window">
+            <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Tools</span></div>
+            <picture>
+              <source srcset="images/tools-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="images/tools.png" alt="The tools page with one tool expanded, each of its paths an editable field" />
+            </picture>
+          </div>
         </figure>
       </section>
 
-      <section>
+      <section id="architecture">
+        <p class="eyebrow">Architecture</p>
         <h2>Built to be checked</h2>
         <p class="section-lede">
           Three layers, dependencies pointing inwards only. The domain crate never imports the
@@ -477,16 +763,33 @@
         </div>
       </section>
 
-      <section id="get-it">
-        <h2>Get it</h2>
+      <section id="build">
+        <p class="eyebrow">Get it</p>
+        <h2>Two commands and a coffee</h2>
         <p class="section-lede">
-          No installer yet. Building it takes two commands and produces a <code>.app</code> and a
-          <code>.dmg</code>.
+          There is no installer yet. Building it yourself needs Rust, Node and pnpm, and produces
+          a <code>.app</code> and a <code>.dmg</code> — or the equivalent for your platform.
         </p>
 
-<pre><span class="comment"># Rust, Node and pnpm, then:</span>
-pnpm install
+        <ul class="steps">
+          <li class="step">
+            <h3>Clone it</h3>
+<pre>git clone https://github.com/<span class="comment">\</span>
+  nimble-123/skills-hub</pre>
+          </li>
+          <li class="step">
+            <h3>Build it</h3>
+<pre>pnpm install
 pnpm tauri build</pre>
+          </li>
+          <li class="step">
+            <h3>Open it</h3>
+            <p>
+              On first launch it asks where to keep its notes. Your skills themselves are never
+              moved or copied — only those notes live there.
+            </p>
+          </li>
+        </ul>
 
         <div class="note">
           Builds are not signed yet, so macOS will object the first time. Open the app, let it be
@@ -496,22 +799,36 @@ pnpm tauri build</pre>
           Control-clicking the app and choosing Open no longer works; macOS&nbsp;15 removed that
           bypass.
         </div>
-
-        <p class="section-lede" style="margin-top: 22px">
-          On first launch it asks where to keep its notes. Your skills themselves are never moved
-          or copied — only those notes live there.
-        </p>
       </section>
     </div>
 
     <div class="wrap">
       <footer>
-        MIT licensed. The feature set, tool registry and on-disk conventions are derived from
-        <a href="https://github.com/notenerdofficial/ai-skills-manager">AI Skills Manager</a>, an
-        Obsidian plugin by NoteNerd; the implementation here is a fresh one in Rust.
-        <br />
+        <div class="foot-grid">
+          <div class="colophon">
+            <h4>skills-hub</h4>
+            MIT licensed. The feature set, tool registry and on-disk conventions are derived from
+            <a href="https://github.com/notenerdofficial/ai-skills-manager">AI Skills Manager</a>,
+            an Obsidian plugin by NoteNerd; the implementation here is a fresh one in Rust.
+          </div>
+          <div>
+            <h4>Source</h4>
+            <ul>
+              <li><a href="https://github.com/nimble-123/skills-hub">Repository</a></li>
+              <li><a href="https://github.com/nimble-123/skills-hub/issues">Issues</a></li>
+              <li><a href="https://github.com/nimble-123/skills-hub/pulls">Pull requests</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Elsewhere</h4>
+            <ul>
+              <li><a href="https://github.com/notenerdofficial/ai-skills-manager">The plugin this came from</a></li>
+              <li><a href="https://skills.sh">skills.sh registry</a></li>
+            </ul>
+          </div>
+        </div>
         The screenshots are of the real interface against sample data, taken headlessly — which
-        is why they have no window frame.
+        is why the window around them is drawn by this page rather than by macOS.
       </footer>
     </div>
   </body>
