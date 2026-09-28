@@ -20,3 +20,15 @@ pre-push:
       run: cargo test --workspace
     bindings-current:
       run: cargo test -p skills-hub export_typescript_bindings && git diff --exit-code src/bindings.ts
+
+# The same rule the PR title is held to, applied locally — because commits made
+# straight on a branch are what a squash merge summarises, and release-please
+# reads the result.
+commit-msg:
+  commands:
+    conventional:
+      run: |
+        pattern='^(feat|fix|perf|refactor|docs|build|test|ci|chore|style|revert)(\([a-z0-9.-]+\))?!?: .+|^(Merge|Revert|fixup!|squash!)'
+        head -1 {1} | grep -qE "$pattern" && exit 0
+        echo "commit message must be a Conventional Commit, e.g. 'feat(scan): walk category folders'" >&2
+        exit 1
