@@ -100,6 +100,9 @@ pnpm screenshots                # docs/images/, incl. the palette gallery
   on macOS is WKWebView. A window drags from an element carrying
   `data-tauri-drag-region`, and only with `core:window:allow-start-dragging`,
   which `core:default` does not include.
+- **Interface text is not selectable.** `base.css` turns selection off for the
+  whole body; a component that renders content — markdown, paths, a diff —
+  opts back in with `user-select: text`. `code`, `pre` and inputs already do.
 - **Skip `._*` when walking a directory.** This checkout is on exFAT, where
   macOS writes a binary AppleDouble sidecar beside every file.
 - **The pull request title becomes the commit message** on a squash merge, and

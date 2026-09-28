@@ -19,6 +19,20 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
+  /* An application, not a page: dragging across a label or a button selects
+     nothing. What is content rather than interface opts back in below, and a
+     component that renders content opts in with `user-select: text`. */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable],
+code,
+pre {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 button {
