@@ -136,14 +136,6 @@ cargo run -p skills-cli -- usage codex     # what a tool's history says
 cargo run -p skills-cli -- mcp             # every configured MCP server
 ```
 
-### A note on this checkout's filesystem
-
-This working copy sits on an exFAT volume, which has no hard links. Cargo
-therefore copies instead of linking its incremental cache, and Finder scatters
-`._*` sidecar files. Neither affects the application, whose tests create their
-symlinks under `$TMPDIR`. `.cargo/config.toml` points the build directory at
-APFS; it is gitignored, and needed only here.
-
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
