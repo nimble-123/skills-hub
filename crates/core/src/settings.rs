@@ -129,15 +129,71 @@ pub struct AppSettings {
     pub default_sort_order: SortOrder,
     pub default_enabled_filter: EnabledFilter,
     pub theme: ThemePref,
+    pub ui_font: UiFont,
+    pub mono_font: MonoFont,
 }
 
+/// The theme, or the wish to be told one by the system.
+///
+/// Every variant but `System` names a palette the frontend defines; the
+/// backend only remembers which was chosen. `kebab-case` rather than
+/// `lowercase` so the multi-word ones round-trip readably — the three that
+/// existed before serialise the same under either.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "kebab-case")]
 pub enum ThemePref {
     #[default]
     System,
     Light,
     Dark,
+    SolarizedLight,
+    SolarizedDark,
+    Monokai,
+    QuietLight,
+    Abyss,
+    KimbieDark,
+    TomorrowNightBlue,
+    Red,
+    HighContrast,
+    TokyoNight,
+    Aura,
+    #[serde(rename = "synthwave-84")]
+    Synthwave84,
+    Panda,
+    Overnight,
+    HorizonMorning,
+    HorizonEvening,
+}
+
+/// The typeface for the interface.
+///
+/// `System` is whatever the platform uses, and the tail of every other stack:
+/// only the Latin cuts are bundled, so anything outside them falls back to it
+/// a glyph at a time.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "kebab-case")]
+pub enum UiFont {
+    #[default]
+    System,
+    Inter,
+    Geist,
+    Figtree,
+    IbmPlexSans,
+    Roboto,
+}
+
+/// The typeface for code, paths and anything else set monospaced.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "kebab-case")]
+pub enum MonoFont {
+    #[default]
+    System,
+    // Not `jet-brains-mono`, which is what kebab-case makes of it.
+    #[serde(rename = "jetbrains-mono")]
+    JetBrainsMono,
+    FiraCode,
+    GeistMono,
+    IbmPlexMono,
 }
 
 impl Default for AppSettings {
@@ -154,6 +210,8 @@ impl Default for AppSettings {
             default_sort_order: SortOrder::default(),
             default_enabled_filter: EnabledFilter::default(),
             theme: ThemePref::default(),
+            ui_font: UiFont::default(),
+            mono_font: MonoFont::default(),
         }
     }
 }

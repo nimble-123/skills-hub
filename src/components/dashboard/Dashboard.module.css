@@ -314,7 +314,7 @@
 }
 
 .masked {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-family: var(--font-mono);
   color: var(--text-faint);
 }
 
@@ -327,5 +327,5 @@
 
 .envKey {
   color: var(--interactive-accent);
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-family: var(--font-mono);
 }
