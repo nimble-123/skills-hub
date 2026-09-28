@@ -107,6 +107,8 @@
 }
 
 .pathValue {
+  -webkit-user-select: text;
+  user-select: text;
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
@@ -245,8 +247,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Rendered markdown. Kept close to the tools' own reading views. */
+/* Rendered markdown. Kept close to the tools' own reading views. Content, so
+   it can be selected and copied, unlike the interface around it. */
 .body {
+  -webkit-user-select: text;
+  user-select: text;
   color: var(--text-normal);
   font-size: var(--font-ui-small);
   line-height: 1.6;
@@ -545,9 +550,13 @@
   user-select: none;
 }
 
+/* The changed lines themselves are content; their numbers and markers above
+   are not, so a selection across the diff copies code and nothing else. */
 .diffText {
   flex: 1;
   min-width: 0;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* The words that actually differ, so a changed line does not read as new. */
