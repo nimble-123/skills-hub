@@ -18,6 +18,10 @@ permissions:
 
 jobs:
   deploy:
+    # GitHub Pages needs a public repository on the free plan. Gating on
+    # visibility keeps a private repository from failing this workflow on every
+    # docs change, and starts publishing by itself once it is made public.
+    if: github.event.repository.visibility == 'public'
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}

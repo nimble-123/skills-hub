@@ -7,7 +7,7 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.90"
 license = "MIT"
-repository = "https://github.com/nimble/skills-hub"
+repository = "https://github.com/nimble-123/skills-hub"
 authors = ["skills-hub contributors"]
 
 [workspace.dependencies]
