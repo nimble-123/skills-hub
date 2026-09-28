@@ -47,7 +47,16 @@ const SHOTS = [
       await page.waitForSelector("text=anthropics/skills");
     },
   },
-  { file: "cost", screen: "cost", ready: "text=Always available" },
+  {
+    file: "cost",
+    screen: "cost",
+    ready: "text=Always available",
+    /** Usage is read on request, and the most-used section only exists after. */
+    async prepare(page) {
+      await page.getByRole("button", { name: "Read Claude Code history" }).click();
+      await page.waitForSelector("text=Most used");
+    },
+  },
   { file: "tools", screen: "tools", ready: "text=Found on this machine" },
   { file: "mcp", screen: "mcp", ready: "text=obsidian" },
   {

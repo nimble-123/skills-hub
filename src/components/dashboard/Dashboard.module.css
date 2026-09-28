@@ -1,34 +1,194 @@
+/* The title and the figures share a line; the figures wrap under it when the
+   window is too narrow to hold both. */
+.headRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
 .stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 22px;
+  gap: 18px;
+  padding-top: 2px;
 }
 
 .stat {
-  flex: 1 1 130px;
+  min-width: 64px;
+}
+
+.statValue {
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.statLabel {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-faint);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.statInfo {
+  color: var(--text-faint);
+  opacity: 0.7;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.legend {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.toolCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.toolCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   padding: 10px 12px;
   border: 1px solid var(--bg-modifier-border);
   border-radius: var(--radius-m);
   background: var(--bg-primary);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 100ms ease;
 }
 
-.statValue {
-  font-size: 19px;
+.toolCard:hover {
+  border-color: var(--text-faint);
+}
+
+.toolCardOn,
+.toolCardOn:hover {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.toolName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.toolTotal {
+  font-size: 17px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.statLabel {
-  color: var(--text-faint);
-  font-size: var(--font-ui-smaller);
+/* Two scales at once: the row's length is the tool's share of the largest
+   tool, and the segments within it are that tool's own composition. */
+.stack {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg-secondary-alt);
 }
 
-.statHint {
-  margin-top: 2px;
+.stackInner {
+  display: flex;
+  height: 100%;
+}
+
+.stackPart {
+  height: 100%;
+}
+
+.toolAvailable {
+  margin-top: -4px;
   color: var(--text-faint);
   font-size: 11px;
-  line-height: 1.35;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.tab {
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-faint);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
+.tabOn,
+.tabOn:hover {
+  background: var(--bg-secondary-alt);
+  color: var(--text-normal);
+}
+
+/* The swatches, the stacked segments and the usage bars all take the hue of
+   the type they stand for. */
+.swatch[data-type="skill"],
+.stackPart[data-type="skill"],
+.barFill[data-type="skill"] {
+  background: var(--type-skill-text);
+}
+
+.swatch[data-type="agent"],
+.stackPart[data-type="agent"],
+.barFill[data-type="agent"] {
+  background: var(--type-agent-text);
+}
+
+.swatch[data-type="command"],
+.stackPart[data-type="command"],
+.barFill[data-type="command"] {
+  background: var(--type-command-text);
+}
+
+.swatch[data-type="rule"],
+.stackPart[data-type="rule"],
+.barFill[data-type="rule"] {
+  background: var(--type-rule-text);
 }
 
 .accent {

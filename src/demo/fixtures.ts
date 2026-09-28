@@ -20,6 +20,7 @@ import type {
   ReviewHandle,
   SettingsView,
   ToolReport,
+  UsageStats,
 } from "../bindings";
 
 type Seed = {
@@ -484,6 +485,28 @@ export const REVIEW: ReviewHandle = {
     },
   ],
 };
+
+/**
+ * What a tool's history would say, for the screens that show usage.
+ *
+ * A handful of items only: a real history has run a few things often and most
+ * things never, which is the point the dashboard is making.
+ */
+export const USAGE: Record<string, UsageStats> = Object.fromEntries(
+  (
+    [
+      ["graphify", 34, "2026-09-27T16:20:00Z"],
+      ["pdf", 21, "2026-09-26T09:05:00Z"],
+      ["deep-research", 12, "2026-09-24T11:40:00Z"],
+      ["sap-abap-cds", 9, "2026-09-22T08:15:00Z"],
+      ["review", 6, "2026-09-19T17:30:00Z"],
+      ["obsidian", 3, "2026-09-12T20:05:00Z"],
+    ] as const
+  ).flatMap(([name, count, lastUsed]) => {
+    const item = ITEMS.find((candidate) => candidate.name === name);
+    return item ? [[item.entryId, { count, lastUsed }] as const] : [];
+  }),
+);
 
 export const DASHBOARD: DashboardReport = {
   // Sorted the way the Rust report sorts it, so "Largest items" is one.

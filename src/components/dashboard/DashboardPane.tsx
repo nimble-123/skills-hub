@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   commands,
   type DashboardReport,
+  type ItemCost,
+  type ItemType,
   type PruneCandidate,
   type UsageProgress,
   type UsageStats,
@@ -11,7 +13,8 @@ import { estimateTokens, formatDate } from "../../lib/format";
 import { reportError } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
 import { useUi } from "../../stores/ui";
-import { TOOL_META } from "../../toolMeta";
+import { TOOL_META, TYPE_META } from "../../toolMeta";
+import { Icon, ToolIcon } from "../common/Icon";
 import paneStyles from "../shell/Pane.module.css";
 import styles from "./Dashboard.module.css";
 
@@ -19,6 +22,9 @@ import styles from "./Dashboard.module.css";
 const TOOLS_WITH_HISTORY = ["claude-code", "codex"] as const;
 
 const SHOWN = 12;
+
+/** The order the type filter and the stacked bars follow. */
+const TYPES = ["skill", "agent", "command", "rule"] as const;
 
 export function DashboardPane() {
   const version = useLibrary((store) => store.snapshot?.version ?? 0);
@@ -79,9 +85,71 @@ export function DashboardPane() {
     go({ kind: "library" });
   };
 
+  /** Both narrow the ranked list; `null` means "everything". */
+  const [tool, setTool] = useState<string | null>(null);
+  const [type, setType] = useState<ItemType | null>(null);
+
+  /** One entry per tool that actually has items, largest first. */
+  const byTool = useMemo(() => {
+    type Row = {
+      chars: number;
+      available: number;
+      modelled: boolean;
+      byType: Map<ItemType, number>;
+    };
+    const totals = new Map<string, Row>();
+    for (const cost of report?.costs ?? []) {
+      const row = totals.get(cost.tool) ?? {
+        chars: 0,
+        available: 0,
+        modelled: false,
+        byType: new Map(),
+      };
+      row.chars += cost.sourceChars;
+      row.available += cost.availableChars ?? 0;
+      // A tool holding only commands and rules has nothing modelled, which is
+      // not the same as costing nothing.
+      row.modelled ||= cost.availableChars !== null;
+      row.byType.set(cost.type, (row.byType.get(cost.type) ?? 0) + cost.sourceChars);
+      totals.set(cost.tool, row);
+    }
+    return [...totals.entries()]
+      .map(([id, row]) => ({ id, ...row }))
+      .sort((a, b) => b.chars - a.chars);
+  }, [report]);
+
+  /** The biggest tool sets the scale, so a bar's length is its share. */
+  const maxTool = byTool[0]?.chars ?? 1;
+
+  const ranked = useMemo(() => {
+    const all = report?.costs ?? [];
+    return all.filter((cost) => (!tool || cost.tool === tool) && (!type || cost.type === type));
+  }, [report, tool, type]);
+
+  /** Scaled within what is shown, so filtering does not leave the bars stunted. */
   const maxCost = useMemo(
-    () => report?.costs.reduce((most, cost) => Math.max(most, cost.sourceChars), 1) ?? 1,
-    [report],
+    () => ranked.reduce((most, cost) => Math.max(most, cost.sourceChars), 1),
+    [ranked],
+  );
+
+  /**
+   * Items a tool's history says were actually run, busiest first.
+   *
+   * Empty until a history has been read, which is also when the section is
+   * worth showing at all.
+   */
+  const topUsed = useMemo(() => {
+    const costs = new Map((report?.costs ?? []).map((cost) => [cost.entryId, cost]));
+    return Object.entries(usage)
+      .filter(([entryId, stats]) => stats.count > 0 && costs.has(entryId))
+      .map(([entryId, stats]) => ({ cost: costs.get(entryId) as ItemCost, stats }))
+      .sort((a, b) => b.stats.count - a.stats.count)
+      .slice(0, SHOWN);
+  }, [report, usage]);
+
+  const maxRuns = useMemo(
+    () => topUsed.reduce((most, row) => Math.max(most, row.stats.count), 1),
+    [topUsed],
   );
 
   if (!report) {
@@ -98,52 +166,134 @@ export function DashboardPane() {
   return (
     <div className={paneStyles.pane}>
       <div className={paneStyles.header}>
-        <h1 className={paneStyles.title}>Cost</h1>
-        <p className={paneStyles.subtitle}>
-          Roughly four characters to a token. Not a tokeniser — the figures are here to compare
-          items against each other, not to predict a bill.
-        </p>
+        <div className={styles.headRow}>
+          <div>
+            <h1 className={paneStyles.title}>Cost</h1>
+            <p className={paneStyles.subtitle}>
+              Roughly four characters to a token. Not a tokeniser — the figures are here to compare
+              items against each other, not to predict a bill.
+            </p>
+          </div>
+          <div className={styles.stats}>
+            <Stat label="Enabled" value={String(report.costs.length)} />
+            <Stat
+              label="Always available"
+              value={estimateTokens(report.totalAvailableChars)}
+              accent
+              hint="Names and descriptions, carried every turn so the model knows these exist."
+            />
+            <Stat
+              label="On invocation"
+              value={estimateTokens(report.totalInvocationChars)}
+              hint="The instructions loaded once something is actually used."
+            />
+            <Stat
+              label="On disk"
+              value={estimateTokens(report.totalSourceChars)}
+              hint="Every file in full, whether it is ever loaded or not."
+            />
+            <Stat
+              label="Worth a look"
+              value={String(report.prune.length)}
+              warn={report.prune.length > 0}
+            />
+            <Stat
+              label="Overlaps"
+              value={String(report.overlaps.length)}
+              warn={report.overlaps.length > 0}
+            />
+          </div>
+        </div>
       </div>
 
       <div className={paneStyles.scroll}>
-        <div className={styles.stats}>
-          <Stat
-            label="Enabled"
-            value={String(report.costs.length)}
-            hint="Disabled items cost nothing, which is the point of disabling them."
-          />
-          <Stat
-            label="Always available"
-            value={estimateTokens(report.totalAvailableChars)}
-            accent
-            hint="Names and descriptions, carried every turn so the model knows these exist."
-          />
-          <Stat
-            label="On invocation"
-            value={estimateTokens(report.totalInvocationChars)}
-            hint="The instructions loaded once something is actually used."
-          />
-          <Stat
-            label="Total on disk"
-            value={estimateTokens(report.totalSourceChars)}
-            hint="Every file in full, whether it is ever loaded or not."
-          />
-          <Stat
-            label="Worth a look"
-            value={String(report.prune.length)}
-            warn={report.prune.length > 0}
-          />
-          <Stat
-            label="Possible overlaps"
-            value={String(report.overlaps.length)}
-            warn={report.overlaps.length > 0}
-          />
-        </div>
+        <section className={paneStyles.section} style={{ maxWidth: "none" }}>
+          <div className={styles.sectionHead}>
+            <h2 className={paneStyles.sectionTitle}>Source size by tool</h2>
+            <div className={styles.legend}>
+              {TYPES.map((t) => (
+                <span key={t} className={styles.legendItem}>
+                  <span className={styles.swatch} data-type={t} />
+                  {TYPE_META[t].label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className={styles.toolCards}>
+            {byTool.map((row) => (
+              <button
+                key={row.id}
+                type="button"
+                className={
+                  tool === row.id ? `${styles.toolCard} ${styles.toolCardOn}` : styles.toolCard
+                }
+                aria-pressed={tool === row.id}
+                title={
+                  tool === row.id
+                    ? "Show every tool again"
+                    : `Show only ${TOOL_META[row.id]?.label ?? row.id}`
+                }
+                onClick={() => setTool(tool === row.id ? null : row.id)}
+              >
+                <span className={styles.toolName}>
+                  <ToolIcon toolId={row.id} size={13} />
+                  {TOOL_META[row.id]?.label ?? row.id}
+                </span>
+                <span className={styles.toolTotal}>{estimateTokens(row.chars)}</span>
+                <span className={styles.toolAvailable}>
+                  {row.modelled
+                    ? `${estimateTokens(row.available)} every turn`
+                    : "carried-cost not modelled"}
+                </span>
+                <span className={styles.stack}>
+                  <span
+                    className={styles.stackInner}
+                    style={{ width: `${(row.chars / maxTool) * 100}%` }}
+                  >
+                    {TYPES.filter((t) => row.byType.has(t)).map((t) => (
+                      <span
+                        key={t}
+                        className={styles.stackPart}
+                        data-type={t}
+                        style={{ width: `${((row.byType.get(t) ?? 0) / row.chars) * 100}%` }}
+                        title={`${TYPE_META[t].plural}: ${estimateTokens(row.byType.get(t) ?? 0)}`}
+                      />
+                    ))}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
 
         <section className={paneStyles.section} style={{ maxWidth: "none" }}>
-          <h2 className={paneStyles.sectionTitle}>Largest items</h2>
+          <div className={styles.sectionHead}>
+            <h2 className={paneStyles.sectionTitle}>
+              Largest items
+              {tool && ` · ${TOOL_META[tool]?.label ?? tool}`}
+            </h2>
+            <div className={styles.tabs}>
+              <button
+                type="button"
+                className={type === null ? `${styles.tab} ${styles.tabOn}` : styles.tab}
+                onClick={() => setType(null)}
+              >
+                All
+              </button>
+              {TYPES.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={type === t ? `${styles.tab} ${styles.tabOn}` : styles.tab}
+                  onClick={() => setType(type === t ? null : t)}
+                >
+                  {TYPE_META[t].plural}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className={styles.bars}>
-            {report.costs.slice(0, SHOWN).map((cost) => (
+            {ranked.slice(0, SHOWN).map((cost) => (
               <button
                 key={cost.entryId}
                 type="button"
@@ -161,6 +311,7 @@ export function DashboardPane() {
                 <span className={styles.barTrack}>
                   <span
                     className={styles.barFill}
+                    data-type={cost.type}
                     style={{ width: `${Math.max(2, (cost.sourceChars / maxCost) * 100)}%` }}
                   />
                 </span>
@@ -168,7 +319,48 @@ export function DashboardPane() {
               </button>
             ))}
           </div>
+          {ranked.length === 0 && (
+            <p className={paneStyles.fieldHint}>Nothing matches that combination.</p>
+          )}
         </section>
+
+        {topUsed.length > 0 && (
+          <section className={paneStyles.section} style={{ maxWidth: "none" }}>
+            <h2 className={paneStyles.sectionTitle}>Most used</h2>
+            <p className={paneStyles.fieldHint}>
+              From {TOOL_META[usageTool ?? ""]?.label ?? usageTool}'s own history. Cost buys nothing
+              until something is actually run.
+            </p>
+            <div className={styles.bars}>
+              {topUsed.map(({ cost, stats }) => (
+                <button
+                  key={cost.entryId}
+                  type="button"
+                  className={styles.bar}
+                  onClick={() => open(cost.entryId)}
+                >
+                  <span className={styles.barName}>
+                    {cost.name}
+                    <span className={styles.barMeta}>
+                      {" "}
+                      · {stats.lastUsed ? `last used ${formatDate(stats.lastUsed)}` : "never"}
+                    </span>
+                  </span>
+                  <span className={styles.barTrack}>
+                    <span
+                      className={styles.barFill}
+                      data-type={cost.type}
+                      style={{ width: `${Math.max(2, (stats.count / maxRuns) * 100)}%` }}
+                    />
+                  </span>
+                  <span className={styles.barValue}>
+                    {stats.count} {stats.count === 1 ? "run" : "runs"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className={paneStyles.section} style={{ maxWidth: "none" }}>
           <h2 className={paneStyles.sectionTitle}>Worth a second look</h2>
@@ -266,6 +458,12 @@ export function DashboardPane() {
   );
 }
 
+/**
+ * One figure in the header strip.
+ *
+ * The explanation is a `title` rather than a line of its own: six of these
+ * with a paragraph each cost a quarter of the window before any content.
+ */
 function Stat({
   label,
   value,
@@ -280,14 +478,16 @@ function Stat({
   warn?: boolean;
 }) {
   return (
-    <div className={styles.stat}>
+    <div className={styles.stat} title={hint}>
+      <div className={styles.statLabel}>
+        {label}
+        {hint && <Icon name="info" size={10} className={styles.statInfo} />}
+      </div>
       <div
         className={`${styles.statValue} ${accent ? styles.accent : ""} ${warn ? styles.warn : ""}`}
       >
         {value}
       </div>
-      <div className={styles.statLabel}>{label}</div>
-      {hint && <div className={styles.statHint}>{hint}</div>}
     </div>
   );
 }
