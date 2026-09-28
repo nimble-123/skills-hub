@@ -1,0 +1,37 @@
+name: Token probe
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      SHA: ab05778984340a4b7fe6a295081d325448690210
+    steps:
+      - name: A - plain, no target_commitish
+        run: |
+          if id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+                    -f tag_name=probe-a -F draft=true --jq '.id'); then
+            echo "A OK"; gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+          else echo "A REFUSED"; fi
+
+      - name: B - with target_commitish
+        run: |
+          if id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+                    -f tag_name=probe-b -f target_commitish="$SHA" -F draft=true --jq '.id'); then
+            echo "B OK"; gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+          else echo "B REFUSED"; fi
+
+      - name: C - everything release-please sends
+        run: |
+          if id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+                    -f tag_name=v0.2.0 -f target_commitish="$SHA" -f name=v0.2.0 \
+                    -f body="notes" -F draft=true -F prerelease=false --jq '.id'); then
+            echo "C OK"; gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+          else echo "C REFUSED"; fi
+
+      - name: D - what scopes does the token carry
+        run: |
+          curl -sS -I -H "Authorization: token $GH_TOKEN" https://api.github.com/user \
+            | grep -i "^x-oauth-scopes\|^x-accepted" || echo "no scope header (fine-grained token)"
