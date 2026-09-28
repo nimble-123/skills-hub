@@ -147,7 +147,7 @@ export function App() {
 
   return (
     <>
-      <div className={styles.dragRegion} />
+      <div className={styles.dragRegion} data-tauri-drag-region />
       <div className={styles.shell}>
         {state === "needs-folder" ? (
           <FirstRun />
