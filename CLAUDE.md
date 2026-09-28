@@ -96,6 +96,10 @@ pnpm screenshots                # docs/images/, incl. the palette gallery
   scoped per window label, so the menubar popover has `popover.json`. Leave a
   window out and it builds, starts, and then fails every API call at runtime
   with `not allowed on window "…"` — nothing catches it before you run it.
+- **`-webkit-app-region` does nothing here.** It is Chromium's; the webview
+  on macOS is WKWebView. A window drags from an element carrying
+  `data-tauri-drag-region`, and only with `core:window:allow-start-dragging`,
+  which `core:default` does not include.
 - **Skip `._*` when walking a directory.** This checkout is on exFAT, where
   macOS writes a binary AppleDouble sidecar beside every file.
 - **The pull request title becomes the commit message** on a squash merge, and

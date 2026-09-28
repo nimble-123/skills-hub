@@ -4,6 +4,11 @@
   overflow: hidden;
 }
 
+/* The strip under the overlaid title bar. What makes it drag the window is
+   `data-tauri-drag-region` on the element, which Tauri turns into a
+   `startDragging` call — `-webkit-app-region` is Chromium's and WKWebView
+   ignores it, which is why dragging used to work only when the click happened
+   to land where WebKit did not start a text selection instead. */
 .dragRegion {
   position: fixed;
   top: 0;
@@ -11,7 +16,6 @@
   right: 0;
   height: 30px;
   z-index: 10;
-  -webkit-app-region: drag;
 }
 
 .toasts {
