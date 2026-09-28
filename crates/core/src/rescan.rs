@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 
 use rayon::prelude::*;
 
-use crate::error::Result;
+use crate::error::{CoreError, Result};
 use crate::model::{
     BrokenSymlink, DiscoveredItem, ItemMetadata, PluginSource, ProjectWorkspace, ScanWarning,
     ToolConfig,
@@ -167,6 +167,12 @@ fn record(
 ) -> Result<Vec<ItemMetadata>> {
     let total = items.len();
     let done = std::sync::atomic::AtomicUsize::new(0);
+
+    // One thread touches the folder before the rest fan out. On macOS a notes
+    // folder in ~/Downloads, ~/Documents or ~/Desktop sits behind a consent
+    // prompt, and every thread that reaches it before the user has answered
+    // raises a prompt of its own — ten of them, on a ten-core machine.
+    std::fs::read_dir(store.root()).map_err(|err| CoreError::io(store.root(), err))?;
 
     items
         .par_iter()
