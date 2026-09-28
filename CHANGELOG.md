@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/nimble-123/skills-hub/compare/v0.3.0...v0.3.1) (2026-09-28)
+
+
+### Fixes
+
+* **ci:** publish releases directly instead of holding them as drafts ([6c271c9](https://github.com/nimble-123/skills-hub/commit/6c271c9df889e109e8545ba17001a4432b75bff3))
+* **ci:** push the Cargo.lock sync under the release token too ([a048f6c](https://github.com/nimble-123/skills-hub/commit/a048f6c789e2c77654391435a8bb80ccb9e9dbaf))
+
 ## [0.3.0](https://github.com/nimble-123/skills-hub/compare/v0.2.0...v0.3.0) (2026-09-28)
 
 
