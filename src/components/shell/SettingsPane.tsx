@@ -5,9 +5,13 @@ import {
   type Capabilities,
   commands,
   type EnabledFilter,
+  type MonoFont,
   type SortOrder,
   type ThemePref,
+  type UiFont,
 } from "../../bindings";
+import { MONO_FONTS, UI_FONTS } from "../../lib/fonts";
+import { THEME_GROUPS } from "../../lib/theme";
 import { reportError } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
 import { useSettings } from "../../stores/settings";
@@ -127,8 +131,50 @@ export function SettingsPane() {
               onChange={(event) => change({ theme: event.target.value as ThemePref })}
             >
               <option value="system">Follow the system</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
+              {THEME_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.themes.map((theme) => (
+                    <option key={theme.id} value={theme.id}>
+                      {theme.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldText}>
+              <span className={styles.fieldName}>Interface font</span>
+            </span>
+            <select
+              className={styles.control}
+              value={settings.uiFont ?? "system"}
+              onChange={(event) => change({ uiFont: event.target.value as UiFont })}
+            >
+              {UI_FONTS.map((font) => (
+                <option key={font.id} value={font.id}>
+                  {font.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldText}>
+              <span className={styles.fieldName}>Code font</span>
+              <p className={styles.fieldHint}>Code blocks, paths and sizes.</p>
+            </span>
+            <select
+              className={styles.control}
+              value={settings.monoFont ?? "system"}
+              onChange={(event) => change({ monoFont: event.target.value as MonoFont })}
+            >
+              {MONO_FONTS.map((font) => (
+                <option key={font.id} value={font.id}>
+                  {font.label}
+                </option>
+              ))}
             </select>
           </label>
         </section>

@@ -13,14 +13,18 @@ import { App } from "../App";
 import { applyTheme } from "../lib/theme";
 import { useFilters } from "../stores/filters";
 import { useUi } from "../stores/ui";
+import { DEMO_THEME } from "./fixtures";
 import "../styles/tokens.css";
+import "../styles/themes.css";
+import "../styles/fonts.css";
 import "../styles/base.css";
 
 type Screen = "library" | "types" | "discover" | "cost" | "tools" | "mcp" | "diff";
 
 const params = new URLSearchParams(window.location.search);
 const screen = (params.get("screen") ?? "library") as Screen;
-applyTheme(params.get("theme") === "dark" ? "dark" : "light");
+// Before the first render, so a screenshot is never of a half-painted page.
+applyTheme(DEMO_THEME ?? "light");
 
 /** Everything the chosen screen needs to be showing when it is captured. */
 function seed(): void {

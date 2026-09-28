@@ -20,7 +20,10 @@ import type {
   ReviewHandle,
   SettingsView,
   ToolReport,
+  UsageStats,
 } from "../bindings";
+import { isMonoFont, isUiFont } from "../lib/fonts";
+import { isThemeId } from "../lib/theme";
 
 type Seed = {
   name: string;
@@ -320,6 +323,20 @@ export const SNAPSHOT: LibrarySnapshot = {
   orphanCount: 0,
 };
 
+/**
+ * The palette the screenshot harness asked for with `?theme=…`, if it named
+ * one it knows.
+ *
+ * It belongs in the settings rather than in a call of its own: that way the
+ * demo picks a theme the same way the application does, and a break in that
+ * path shows up in a screenshot instead of hiding behind a second one.
+ */
+const asked = new URLSearchParams(window.location.search).get("theme");
+export const DEMO_THEME = isThemeId(asked) ? asked : null;
+
+const askedUi = new URLSearchParams(window.location.search).get("font");
+const askedMono = new URLSearchParams(window.location.search).get("mono");
+
 export const SETTINGS: SettingsView = {
   settings: {
     schemaVersion: 1,
@@ -332,7 +349,9 @@ export const SETTINGS: SettingsView = {
     showEmptySidebarRows: false,
     defaultSortOrder: "name-asc",
     defaultEnabledFilter: "all",
-    theme: "system",
+    theme: DEMO_THEME ?? "system",
+    uiFont: isUiFont(askedUi) ? askedUi : "system",
+    monoFont: isMonoFont(askedMono) ? askedMono : "system",
   },
   tools: ["claude-code", "codex", "cursor", "opencode", "global"].map((id) => ({
     id,
@@ -485,21 +504,46 @@ export const REVIEW: ReviewHandle = {
   ],
 };
 
-export const DASHBOARD: DashboardReport = {
-  costs: ITEMS.filter((item) => item.enabled).map((item, index) => {
-    const chars = SEEDS[index]?.chars ?? 4_000;
-    const modelled = item.type === "skill" || item.type === "agent";
-    return {
-      entryId: item.entryId,
-      name: item.name,
-      tool: item.tool,
-      type: item.type,
-      sourceChars: chars,
-      availableChars: modelled ? item.name.length + item.description.length + 1 : null,
-      invocationChars: modelled ? Math.round(chars * 0.94) : null,
-      modified: item.modified,
-    };
+/**
+ * What a tool's history would say, for the screens that show usage.
+ *
+ * A handful of items only: a real history has run a few things often and most
+ * things never, which is the point the dashboard is making.
+ */
+export const USAGE: Record<string, UsageStats> = Object.fromEntries(
+  (
+    [
+      ["graphify", 34, "2026-09-27T16:20:00Z"],
+      ["pdf", 21, "2026-09-26T09:05:00Z"],
+      ["deep-research", 12, "2026-09-24T11:40:00Z"],
+      ["sap-abap-cds", 9, "2026-09-22T08:15:00Z"],
+      ["review", 6, "2026-09-19T17:30:00Z"],
+      ["obsidian", 3, "2026-09-12T20:05:00Z"],
+    ] as const
+  ).flatMap(([name, count, lastUsed]) => {
+    const item = ITEMS.find((candidate) => candidate.name === name);
+    return item ? [[item.entryId, { count, lastUsed }] as const] : [];
   }),
+);
+
+export const DASHBOARD: DashboardReport = {
+  // Sorted the way the Rust report sorts it, so "Ranked by cost" is one.
+  costs: ITEMS.filter((item) => item.enabled)
+    .map((item, index) => {
+      const chars = SEEDS[index]?.chars ?? 4_000;
+      const modelled = item.type === "skill" || item.type === "agent";
+      return {
+        entryId: item.entryId,
+        name: item.name,
+        tool: item.tool,
+        type: item.type,
+        sourceChars: chars,
+        availableChars: modelled ? item.name.length + item.description.length + 1 : null,
+        invocationChars: modelled ? Math.round(chars * 0.94) : null,
+        modified: item.modified,
+      };
+    })
+    .sort((a, b) => b.sourceChars - a.sourceChars),
   prune: [
     {
       entryId: ITEMS[5]?.entryId ?? "",

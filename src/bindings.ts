@@ -200,6 +200,8 @@ export type AppSettings = {
 	defaultSortOrder?: SortOrder,
 	defaultEnabledFilter?: EnabledFilter,
 	theme?: ThemePref,
+	uiFont?: UiFont,
+	monoFont?: MonoFont,
 };
 
 /**  A symlink whose target no longer resolves. */
@@ -484,6 +486,9 @@ export type McpServerConfig = {
 	type?: string | null,
 };
 
+/**  The typeface for code, paths and anything else set monospaced. */
+export type MonoFont = "system" | "jetbrains-mono" | "fira-code" | "geist-mono" | "ibm-plex-mono";
+
 /**  A note whose item is no longer on disk. */
 export type Orphan = {
 	entryId: string,
@@ -710,7 +715,15 @@ export type SiblingFile = {
 
 export type SortOrder = "name-asc" | "name-desc" | "modified-desc" | "modified-asc";
 
-export type ThemePref = "system" | "light" | "dark";
+/**
+ *  The theme, or the wish to be told one by the system.
+ * 
+ *  Every variant but `System` names a palette the frontend defines; the
+ *  backend only remembers which was chosen. `kebab-case` rather than
+ *  `lowercase` so the multi-word ones round-trip readably — the three that
+ *  existed before serialise the same under either.
+ */
+export type ThemePref = "system" | "light" | "dark" | "solarized-light" | "solarized-dark" | "monokai" | "quiet-light" | "abyss" | "kimbie-dark" | "tomorrow-night-blue" | "red" | "high-contrast" | "tokyo-night" | "aura" | "synthwave-84" | "panda" | "overnight" | "horizon-morning" | "horizon-evening";
 
 /**  One AI coding tool and where it keeps things. */
 export type ToolConfig = {
@@ -803,6 +816,15 @@ export type ToolReport = {
 	/**  Whether any of its folders is actually on this machine. */
 	detected: boolean,
 };
+
+/**
+ *  The typeface for the interface.
+ * 
+ *  `System` is whatever the platform uses, and the tail of every other stack:
+ *  only the Latin cuts are bundled, so anything outside them falls back to it
+ *  a glyph at a time.
+ */
+export type UiFont = "system" | "inter" | "geist" | "figtree" | "ibm-plex-sans" | "roboto";
 
 /**  What a check found out about one item. */
 export type UpdateCheck = {

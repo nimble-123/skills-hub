@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 use skills_core::model::{ItemType, RulePathEntry};
 use skills_core::settings::{
-    AppSettings, SettingsFile, ToolOverride, effective_tools, reconcile_section_order,
+    AppSettings, SettingsFile, ThemePref, ToolOverride, effective_tools, reconcile_section_order,
 };
 use skills_core::tools;
 
@@ -271,6 +271,37 @@ fn settings_round_trip_through_the_file() {
     );
 
     file.save(&settings).expect("save");
+    assert_eq!(file.load().expect("load").settings, settings);
+}
+
+#[test]
+fn a_theme_written_before_the_palettes_grew_still_loads() {
+    // The list went from three variants to fourteen, and with it the naming
+    // from `lowercase` to `kebab-case`. The three that already existed spell
+    // the same either way, and a settings file already on disk says so.
+    let dir = config_dir();
+    let file = SettingsFile::new(dir.path());
+    std::fs::write(file.path(), r#"{"schemaVersion": 1, "theme": "dark"}"#).expect("write");
+
+    assert_eq!(file.load().expect("load").settings.theme, ThemePref::Dark);
+}
+
+#[test]
+fn a_multi_word_theme_round_trips_through_the_file() {
+    let dir = config_dir();
+    let file = SettingsFile::new(dir.path());
+    let settings = AppSettings {
+        theme: ThemePref::HorizonEvening,
+        ..AppSettings::default()
+    };
+
+    file.save(&settings).expect("save");
+
+    let raw = std::fs::read_to_string(file.path()).expect("read");
+    assert!(
+        raw.contains("\"theme\": \"horizon-evening\""),
+        "readable: {raw}"
+    );
     assert_eq!(file.load().expect("load").settings, settings);
 }
 

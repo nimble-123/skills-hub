@@ -12,6 +12,7 @@ import styles from "./components/shell/Shell.module.css";
 import { Toasts } from "./components/shell/Toasts";
 import { ToolsPane } from "./components/shell/ToolsPane";
 import { Sidebar } from "./components/sidebar/Sidebar";
+import { applyFonts, resolveFonts } from "./lib/fonts";
 import { moveWithin, shortcutFor } from "./lib/keyboard";
 import { deriveLibrary } from "./lib/library";
 import { applyTheme, resolveTheme } from "./lib/theme";
@@ -28,6 +29,8 @@ export function App() {
   const items = useItems();
 
   const themePreference = useSettings((store) => store.settings?.theme);
+  const uiFont = useSettings((store) => store.settings?.uiFont);
+  const monoFont = useSettings((store) => store.settings?.monoFont);
   const route = useUi((ui) => ui.route);
   const selectedId = useUi((ui) => ui.selected);
   const select = useUi((ui) => ui.select);
@@ -58,6 +61,11 @@ export function App() {
     query.addEventListener("change", apply);
     return () => query.removeEventListener("change", apply);
   }, [themePreference]);
+
+  useEffect(() => {
+    const fonts = resolveFonts(uiFont, monoFont);
+    applyFonts(fonts.ui, fonts.mono);
+  }, [uiFont, monoFont]);
 
   /**
    * One pass for the list and the counts, because they answer the same
