@@ -442,6 +442,36 @@
         word-break: break-all;
       }
 
+      .faces {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+        margin: 0 0 6px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .faces li {
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-soft);
+      }
+
+      .faces b {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14.5px;
+        font-weight: 620;
+      }
+
+      .faces code {
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
       pre {
         margin: 0;
         padding: 15px 17px;
@@ -889,12 +919,35 @@
           </li>
         </ul>
 
+        <figure style="margin-top: 26px">
+          <div class="window">
+            <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Settings</span></div>
+            <picture>
+              <source srcset="images/settings-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="images/settings.png" alt="The settings page with three dropdowns: theme, interface font and code font" />
+            </picture>
+          </div>
+          <figcaption>Three dropdowns, and one of them follows the system until you say otherwise.</figcaption>
+        </figure>
+
+        <p class="section-lede" style="margin-top: 30px">
+          The typefaces are their own two settings, because they are their own two decisions: a
+          sans face for the interface, a monospaced one for code, paths and sizes. Nine families
+          ship with the application, so a choice looks the same on every machine and needs no
+          network.
+        </p>
+
+        <ul class="faces">
+          <li><b>Interface</b><code>System · Inter · Geist · Figtree · IBM Plex Sans · Roboto</code></li>
+          <li><b>Code</b><code>System · JetBrains Mono · Fira Code · Geist Mono · IBM Plex Mono</code></li>
+        </ul>
+
         <div class="note">
-          The typefaces are their own two settings, because they are their own two decisions:
-          Inter, Geist, Figtree, IBM Plex Sans or Roboto for the interface, and JetBrains Mono,
-          Fira Code, Geist Mono or IBM Plex Mono for code, paths and sizes. All nine ship with
-          the application — 547 KB, Latin cuts only — so a choice looks the same on every machine
-          and needs no network.
+          All of it is tokens. A palette is a block of colours and a typeface is a stack — no
+          component in the interface knows the name of either, and there is not one hard-coded
+          colour outside the token files. That is why adding a palette is a block of CSS rather
+          than a patch, and why 547 KB covers nine fonts: only the Latin cuts are bundled, and a
+          glyph outside them falls back to the system face.
         </div>
       </section>
 

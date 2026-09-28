@@ -19,7 +19,7 @@ import "../styles/themes.css";
 import "../styles/fonts.css";
 import "../styles/base.css";
 
-type Screen = "library" | "types" | "discover" | "cost" | "tools" | "mcp" | "diff";
+type Screen = "library" | "types" | "discover" | "cost" | "tools" | "mcp" | "diff" | "settings";
 
 const params = new URLSearchParams(window.location.search);
 const screen = (params.get("screen") ?? "library") as Screen;
@@ -59,6 +59,9 @@ function seed(): void {
       break;
     case "mcp":
       ui.go({ kind: "mcp" });
+      break;
+    case "settings":
+      ui.go({ kind: "settings" });
       break;
   }
 

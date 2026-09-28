@@ -58,6 +58,8 @@ const SHOTS = [
     },
   },
   { file: "tools", screen: "tools", ready: "text=Found on this machine" },
+  /** The palette and the two typefaces are chosen here; the page shows that. */
+  { file: "settings", screen: "settings", ready: "text=Interface font" },
   { file: "mcp", screen: "mcp", ready: "text=obsidian" },
   {
     file: "diff",
