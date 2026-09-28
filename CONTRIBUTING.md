@@ -30,7 +30,8 @@ don't push to it by hand.
 3. Open a pull request. **Its title is also a Conventional Commit**, because a
    squash merge turns the title into the commit message on `main`, and that
    message is what release-please reads. A workflow checks it.
-4. Squash merge. The branch is deleted.
+4. Squash merge — or rebase, when every commit message on the branch earns
+   its own line in the changelog. The branch is deleted either way.
 5. release-please keeps one pull request open, titled `chore(main): release
    x.y.z`, with the changelog and every version bump in it. It updates itself
    on every merge to `main`. Ignore it until you want to ship.
@@ -85,11 +86,14 @@ These are not in the repository, so they have to be set once on GitHub. They
 are what makes the model above hold rather than merely describe it.
 
 ```sh
-# Squash merges only, and the squash commit takes the PR title and body —
-# not the list of work-in-progress commits, which would end up in the changelog.
+# Squash and rebase, no merge commits. A squash takes the PR title and body
+# rather than the list of work-in-progress commits — which is why the title is
+# what has to be conventional. A rebase puts each commit on main as it stands,
+# so take that route only when every message is one you would want in the
+# changelog.
 gh repo edit --enable-squash-merge \
+             --enable-rebase-merge \
              --enable-merge-commit=false \
-             --enable-rebase-merge=false \
              --delete-branch-on-merge
 gh api -X PATCH "repos/$REPO" \
   -f squash_merge_commit_title=PR_TITLE \
