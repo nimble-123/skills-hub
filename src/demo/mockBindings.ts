@@ -18,6 +18,7 @@ import {
   SETTINGS,
   SNAPSHOT,
   TOOL_REPORTS,
+  USAGE,
 } from "./fixtures";
 
 const ok = <T>(data: T) => Promise.resolve({ status: "ok" as const, data });
@@ -85,7 +86,7 @@ export const commands: typeof real = {
   applyReview: (_reviewId) => ok(byId(REVIEW.entryId)),
   cancelReview: nothing,
 
-  loadUsage: () => ok({}),
+  loadUsage: () => ok(USAGE),
   computeDashboard: () => ok(DASHBOARD),
   disregard: nothing,
   undisregard: nothing,

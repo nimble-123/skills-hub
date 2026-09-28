@@ -1,5 +1,6 @@
 # Build output
 /dist/
+/dist-demo/
 /target/
 /src-tauri/target/
 /src-tauri/gen/
