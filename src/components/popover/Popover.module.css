@@ -1,0 +1,187 @@
+/* The popover fills its panel exactly: the panel is the window, and there is
+   nothing behind it to scroll. `100%` rather than `100vh`, so the footer stays
+   at the bottom of the container it is actually in. */
+.popover {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-normal);
+  font-family: var(--font-ui);
+  font-size: var(--font-ui-small);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+}
+
+/* The field is inset rather than flush with the panel. It holds focus for as
+   long as the popover is open, and the shared focus ring around something
+   edge-to-edge reads as a warning stripe rather than as a focused field. */
+.header {
+  flex-shrink: 0;
+  padding: 8px;
+  border-bottom: 1px solid var(--bg-modifier-border);
+}
+
+.search {
+  width: 100%;
+  margin: 0;
+  padding: 6px 9px;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--bg-secondary);
+  color: inherit;
+  font: inherit;
+}
+
+.search::placeholder {
+  color: var(--text-faint);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-s);
+}
+
+.row:hover {
+  background: var(--bg-modifier-hover);
+}
+
+.off {
+  opacity: 0.55;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.typePill {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+}
+
+.typePill[data-type="skill"] {
+  background: var(--type-skill-bg);
+  color: var(--type-skill-text);
+}
+
+.typePill[data-type="agent"] {
+  background: var(--type-agent-bg);
+  color: var(--type-agent-text);
+}
+
+.typePill[data-type="command"] {
+  background: var(--type-command-bg);
+  color: var(--type-command-text);
+}
+
+.typePill[data-type="rule"] {
+  background: var(--type-rule-bg);
+  color: var(--type-rule-text);
+}
+
+.tool {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  width: 92px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Deliberately the same switch as the card in the window: the same gesture
+   moves the same file, so it should not look like a different control. */
+.switch {
+  flex-shrink: 0;
+  position: relative;
+  width: 30px;
+  height: 17px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-secondary-alt);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-s);
+  transition: transform 120ms ease;
+}
+
+.switchOn {
+  background: var(--interactive-accent);
+}
+
+.switchOn::after {
+  transform: translateX(13px);
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.note {
+  margin: 0;
+  padding: 12px 8px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.footer {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px;
+  border-top: 1px solid var(--bg-modifier-border);
+}
+
+.action {
+  padding: 5px 10px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch::after {
+    transition: none;
+  }
+}

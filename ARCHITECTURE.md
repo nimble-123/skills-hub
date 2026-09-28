@@ -224,6 +224,7 @@ sequenceDiagram
     participant Cmd as set_item_enabled command
     participant Core as skills_core toggle and MetaStore
     participant State as AppState, Mutex-guarded
+    participant Other as the other webview, window or popover
 
     UI->>B: commands.setItemEnabled(entryId, enabled)
     B->>Cmd: IPC call, typed by the generated bindings
@@ -233,6 +234,7 @@ sequenceDiagram
     Cmd->>Core: store.ensure(item.discovered)
     Core-->>Cmd: ItemMetadata
     Cmd->>State: replace_in_snapshot(updated)
+    Cmd->>Other: emit item:changed with the updated ItemMetadata
     Cmd-->>B: CommandResult, CoreError mapped to CommandError code and message
     B-->>UI: result with status ok or error
     UI->>Store: patchItem(updated) on ok, reportError(error) on error
@@ -250,6 +252,14 @@ the command itself (`replace_in_snapshot`) so a second command reading it
 straight after sees the change; the frontend's own `patchItem` is a second,
 independent update of the same fact on the other side of the IPC boundary, not
 a re-fetch of it.
+
+The `item:changed` emit is there because the caller is not the only webview.
+On macOS the menubar popover toggles the same items, and a card left open in
+the window would otherwise go on showing the state it had before. Both sides
+listen and patch one item (`commands::items::ITEM_CHANGED`,
+`src/App.tsx`, `src/components/popover/Popover.tsx`); the caller does not
+depend on hearing its own event, because the command already returned the item
+to it.
 
 ## Where state is held
 
@@ -303,6 +313,45 @@ failure is never silently swallowed). `src/stores/selectors.ts` exists purely
 to give zustand selectors a stable empty-array reference (`NO_ITEMS` etc.), so
 an empty library does not re-render on every store update — worth knowing
 before adding a new derived selector that returns `[]` inline.
+
+## The second webview: the menubar companion
+
+macOS only, and structurally the only place where the adapter layer does
+something the window never asked for. `src-tauri/src/menubar/` builds a status
+item and a hidden `popover` window, then hands that window to `tauri-nspanel`
+so AppKit treats it as an `NSPanel` rather than an ordinary window. An
+`NSPanel` carrying `NonactivatingPanel` can take the keyboard without
+activating the application, which is the whole reason a webview can serve as a
+menu bar item at all: typing in its search field does not pull the user out of
+whatever they were in.
+
+Four things about it are not obvious from the code:
+
+- **`add_style_mask`, never `set_style_mask`.** Replacing the mask drops the
+  structural flags Tauri already put on the window and AppKit rejects the
+  result. That is what the upstream macOS 27 focus report turned out to be
+  ([tauri-nspanel#123](https://github.com/ahkohd/tauri-nspanel/issues/123)).
+- **The macro lives alone in `menubar/panel.rs`.** `panel_event!` requires a
+  return type on every delegate method, so a callback returning nothing has to
+  write `-> ()`, which clippy rejects. The file exists so that one `allow`
+  covers the macro and nothing else.
+- **Closing the window does not quit.** `CloseRequested` is prevented and the
+  window hidden, and the activation policy drops to `Accessory` so the Dock
+  icon goes with it — `Regular` again when the window comes back. A fixed
+  `LSUIElement` in `Info.plist` would hide the Dock icon even while the window
+  is open, which is not the same thing.
+- **The popover has its own capability.** `src-tauri/capabilities/` is scoped
+  by window label, so `popover.json` grants `core:default` and nothing else —
+  no network, no file dialog, no opener, all of which the window has and the
+  popover has no use for. A window missing from every capability builds and
+  starts and then fails each API call at runtime.
+
+The popover is a second Vite entry point (`popover.html`, `src/popover.tsx`)
+rather than a route inside the window, so it loads its own small bundle
+instead of the whole shell. It holds no state the window also holds: it calls
+`ensure_snapshot` when it opens — which scans only if this session has not
+scanned yet, since the popover has nowhere to show progress — and patches
+single items from `item:changed` after that.
 
 ## Generated versus hand-written, and the seams that have to agree
 
@@ -468,10 +517,14 @@ tools,dashboard,discover}.rs`, `crates/core/src/scan/{mod,plugins,broken}.rs`,
 `crates/core/Cargo.toml`, `crates/cli/Cargo.toml`, `crates/cli/src/main.rs`,
 `src-tauri/Cargo.toml`, `src-tauri/src/{lib,state,error}.rs`,
 `src-tauri/src/commands/{mod,library,items,settings,discover,updates,
-insights}.rs`, `src-tauri/tauri.conf.json`,
-`src-tauri/capabilities/default.json`, `src/App.tsx`,
+insights,menubar}.rs`, `src-tauri/src/menubar/{mod,panel}.rs`,
+`src-tauri/tauri.conf.json`,
+`src-tauri/capabilities/{default,popover}.json`, `src/App.tsx`,
+`src/popover.tsx`, `src/components/popover/Popover.tsx`,
 `src/stores/{library,filters,ui,settings,errors,discover,selectors}.ts`,
 `src/lib/{library,theme,fonts}.ts`, `src/lib/theme.test.ts`,
+`vite.config.ts`, the `tauri-nspanel` 2.1.0 sources for `Panel`,
+`panel!`/`panel_event!` and `PanelBuilder`,
 `src/toolMeta.ts`, `src/toolMeta.test.ts`, `src/demo/{tauriStubs,
 mockBindings,fixtures}.ts` (heads), `vite.demo.config.ts`,
 `scripts/{generate-icons,sync-fonts}.mjs` (heads), `package.json`,
@@ -491,7 +544,10 @@ names suggest they exercise `discover`, `git`, `install`, `phase3`,
 `plugins_and_broken`, `projectlink`, `registry`, `scan`, `settings`, `store`,
 `toggle`, one file per domain module, but this was not confirmed against their
 contents); the exact behaviour of `src-tauri/build.rs` and
-`src-tauri/gen/schemas/`; whether `skills.sh`'s API has changed since the
+`src-tauri/gen/schemas/`; **whether the popover's `NSPanel` really avoids
+activating the application on macOS 27** — the style mask is applied without
+error and the maintainer reports it fixed in 2.1.0, but the behaviour itself
+was not observed here, and `plan.md` carries the test for it; whether `skills.sh`'s API has changed since the
 description in `discover.rs`'s module doc (the doc itself flags this as
 unconfirmed — see `plan.md`'s "Unresolved" section). Anything above framed as
 fact about these areas should be treated as resting only on the citations

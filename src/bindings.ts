@@ -51,6 +51,32 @@ export const commands = {
 	 *  deliberately synchronous so that it stays testable.
 	 */
 	rescan: (options: RescanOptions, onProgress: Channel<Progress>) => typedError<LibrarySnapshot, CommandError>(__TAURI_INVOKE("rescan", { options, onProgress })),
+	/**
+	 *  The last scan, scanning first if this session has not scanned yet.
+	 * 
+	 *  What the menubar popover asks for. The window drives its own scan because
+	 *  it shows the progress; the popover has nowhere to put it and would rather
+	 *  wait than open onto nothing. `None` means no notes folder has been chosen,
+	 *  which only the window can put right.
+	 */
+	ensureSnapshot: () => typedError<{
+	items: ItemMetadata[],
+	plugins: PluginSource[],
+	brokenSymlinks: BrokenSymlink[],
+	warnings: ScanWarning[],
+	/**  When the scan ran, as RFC 3339 — the same form the notes use. */
+	scannedAt: string,
+	/**
+	 *  Increments with every scan.
+	 * 
+	 *  The frontend keys its derived state on this, so "a scan happened"
+	 *  invalidates everything at once rather than through a dozen
+	 *  hand-maintained call sites.
+	 */
+	version: number,
+	/**  Notes kept for items that are no longer on disk. */
+	orphanCount: number,
+} | null, CommandError>(__TAURI_INVOKE("ensure_snapshot")),
 	/**  Notes kept for items that are no longer on disk. */
 	listOrphanedMetadata: () => typedError<Orphan[], CommandError>(__TAURI_INVOKE("list_orphaned_metadata")),
 	/**  Removes orphaned notes the user has decided to let go of. */
@@ -177,6 +203,22 @@ export const commands = {
 	revealInFileManager: (path: string, resolveSymlink: boolean) => typedError<null, CommandError>(__TAURI_INVOKE("reveal_in_file_manager", { path, resolveSymlink })),
 	/**  Opens a path with whatever the operating system uses for it. */
 	openPath: (path: string) => typedError<null, CommandError>(__TAURI_INVOKE("open_path", { path })),
+	/**
+	 *  Closes the popover.
+	 * 
+	 *  Clicking elsewhere already closes it; this is for the paths inside it that
+	 *  end the interaction — Escape, and leaving for the window.
+	 */
+	closePopover: () => __TAURI_INVOKE<void>("close_popover"),
+	/**  Brings the main window up, closing the popover behind it. */
+	showMainWindow: () => typedError<null, CommandError>(__TAURI_INVOKE("show_main_window")),
+	/**
+	 *  Quits.
+	 * 
+	 *  The menubar keeps the application running with every window closed, so this
+	 *  is the only way out that does not go through the Dock.
+	 */
+	quit: () => __TAURI_INVOKE<void>("quit"),
 };
 
 /* Types */

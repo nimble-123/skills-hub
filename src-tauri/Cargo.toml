@@ -29,12 +29,17 @@ jiff = { workspace = true }
 walkdir = { workspace = true }
 specta = { workspace = true }
 
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-http = "2"
 tauri-plugin-opener = "2"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
 specta-typescript = "0.0.12"
+
+# The menubar companion is macOS-only: NSPanel is what gives a webview real
+# menubar behaviour, and there is no equivalent to port.
+[target.'cfg(target_os = "macos")'.dependencies]
+tauri-nspanel = "2.1"
 
 [lints]
 workspace = true

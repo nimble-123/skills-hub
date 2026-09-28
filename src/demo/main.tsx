@@ -10,6 +10,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "../App";
+import { Popover } from "../components/popover/Popover";
 import { applyTheme } from "../lib/theme";
 import { useFilters } from "../stores/filters";
 import { useUi } from "../stores/ui";
@@ -19,7 +20,16 @@ import "../styles/themes.css";
 import "../styles/fonts.css";
 import "../styles/base.css";
 
-type Screen = "library" | "types" | "discover" | "cost" | "tools" | "mcp" | "diff" | "settings";
+type Screen =
+  | "library"
+  | "types"
+  | "discover"
+  | "cost"
+  | "tools"
+  | "mcp"
+  | "diff"
+  | "settings"
+  | "popover";
 
 const params = new URLSearchParams(window.location.search);
 const screen = (params.get("screen") ?? "library") as Screen;
@@ -78,9 +88,20 @@ function seed(): void {
 const root = document.getElementById("root");
 if (!root) throw new Error("#root is missing");
 
-seed();
-createRoot(root).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+// The menubar popover is its own webview at its own size, so it is rendered
+// in a frame of that size rather than filling the page.
+if (screen === "popover") {
+  root.style.cssText = "width:360px;height:480px;overflow:hidden";
+  createRoot(root).render(
+    <StrictMode>
+      <Popover />
+    </StrictMode>,
+  );
+} else {
+  seed();
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}

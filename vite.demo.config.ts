@@ -4,15 +4,17 @@ import { defineConfig, type Plugin } from "vite";
 /**
  * The build the screenshots are taken from.
  *
- * The same components, the same stylesheet — only the three modules that
- * talk to the host are swapped, so what is captured is the real interface
- * rather than a mock-up of it.
+ * The same components, the same stylesheet — only the modules that talk to
+ * the host are swapped, so what is captured is the real interface rather than
+ * a mock-up of it.
  */
 function swapHostModules(): Plugin {
   const swaps: Array<[RegExp, string]> = [
     [/\/src\/bindings\.ts$/, "/src/demo/mockBindings.ts"],
     [/^@tauri-apps\/api\/core$/, "/src/demo/tauriStubs.ts"],
     [/^@tauri-apps\/plugin-dialog$/, "/src/demo/tauriStubs.ts"],
+    [/^@tauri-apps\/api\/event$/, "/src/demo/tauriStubs.ts"],
+    [/^@tauri-apps\/api\/window$/, "/src/demo/tauriStubs.ts"],
   ];
 
   return {

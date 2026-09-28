@@ -1,4 +1,6 @@
+import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import type { ItemMetadata } from "./bindings";
 import { DashboardPane } from "./components/dashboard/DashboardPane";
 import { McpPane } from "./components/dashboard/McpPane";
 import { DiscoverPane } from "./components/discover/DiscoverPane";
@@ -21,10 +23,14 @@ import { useItems, useLibrary } from "./stores/library";
 import { useSettings } from "./stores/settings";
 import { useUi } from "./stores/ui";
 
+/** Event name, matching `ITEM_CHANGED` in `src-tauri/src/commands/items.rs`. */
+const ITEM_CHANGED = "item:changed";
+
 export function App() {
   const loadSettings = useSettings((store) => store.load);
   const loadLibrary = useLibrary((store) => store.load);
   const rescan = useLibrary((store) => store.rescan);
+  const patchItem = useLibrary((store) => store.patchItem);
   const state = useLibrary((store) => store.state);
   const items = useItems();
 
@@ -52,6 +58,13 @@ export function App() {
       await loadLibrary();
     })();
   }, [loadSettings, loadLibrary]);
+
+  // The menubar popover toggles the same files. Without this, a card left open
+  // here would go on showing the state it had before the popover changed it.
+  useEffect(() => {
+    const unlisten = listen<ItemMetadata>(ITEM_CHANGED, ({ payload }) => patchItem(payload));
+    return () => void unlisten.then((off) => off());
+  }, [patchItem]);
 
   // The system can change its mind while the window is open.
   useEffect(() => {

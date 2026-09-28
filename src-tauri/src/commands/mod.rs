@@ -11,6 +11,7 @@ pub mod discover;
 pub mod insights;
 pub mod items;
 pub mod library;
+pub mod menubar;
 pub mod settings;
 pub mod shell;
 pub mod tools;

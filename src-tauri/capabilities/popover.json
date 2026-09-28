@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "popover",
+  "description": "What the menubar popover needs, which is less than the window: it listens for items the window changed and calls commands. No network, no file dialog, no opener.",
+  "windows": ["popover"],
+  "permissions": ["core:default"]
+}
