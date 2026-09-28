@@ -45,9 +45,19 @@ export function Popover() {
     setPhase("ready");
   }, []);
 
+  // The popover's webview loads when the application starts, hidden, at the
+  // same moment the window starts its own scan. Scanning here as well would
+  // race it for the scan lock, and whichever lost would be refused — so this
+  // only reads what is cached. Opening the popover is what may scan.
   useEffect(() => {
-    void load();
-  }, [load]);
+    void (async () => {
+      const result = await commands.getSnapshot();
+      if (result.status === "ok" && result.data !== null) {
+        setItems(result.data.items);
+        setPhase("ready");
+      }
+    })();
+  }, []);
 
   // The panel is shown and hidden natively, so the webview is never torn down.
   // Opening it again should feel like opening a menu: caret in the field, last
