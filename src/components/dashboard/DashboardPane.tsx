@@ -269,7 +269,7 @@ export function DashboardPane() {
         <section className={paneStyles.section} style={{ maxWidth: "none" }}>
           <div className={styles.sectionHead}>
             <h2 className={paneStyles.sectionTitle}>
-              Largest items
+              Ranked by cost
               {tool && ` · ${TOOL_META[tool]?.label ?? tool}`}
             </h2>
             <div className={styles.tabs}>
@@ -326,7 +326,7 @@ export function DashboardPane() {
 
         {topUsed.length > 0 && (
           <section className={paneStyles.section} style={{ maxWidth: "none" }}>
-            <h2 className={paneStyles.sectionTitle}>Most used</h2>
+            <h2 className={paneStyles.sectionTitle}>Top skills &amp; agents</h2>
             <p className={paneStyles.fieldHint}>
               From {TOOL_META[usageTool ?? ""]?.label ?? usageTool}'s own history. Cost buys nothing
               until something is actually run.

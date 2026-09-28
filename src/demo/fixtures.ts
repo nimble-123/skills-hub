@@ -509,7 +509,7 @@ export const USAGE: Record<string, UsageStats> = Object.fromEntries(
 );
 
 export const DASHBOARD: DashboardReport = {
-  // Sorted the way the Rust report sorts it, so "Largest items" is one.
+  // Sorted the way the Rust report sorts it, so "Ranked by cost" is one.
   costs: ITEMS.filter((item) => item.enabled)
     .map((item, index) => {
       const chars = SEEDS[index]?.chars ?? 4_000;

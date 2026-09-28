@@ -54,7 +54,7 @@ const SHOTS = [
     /** Usage is read on request, and the most-used section only exists after. */
     async prepare(page) {
       await page.getByRole("button", { name: "Read Claude Code history" }).click();
-      await page.waitForSelector("text=Most used");
+      await page.waitForSelector("text=Top skills & agents");
     },
   },
   { file: "tools", screen: "tools", ready: "text=Found on this machine" },

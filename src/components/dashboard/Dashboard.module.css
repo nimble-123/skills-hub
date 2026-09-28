@@ -205,12 +205,16 @@
   gap: 3px;
 }
 
+/* The track is the wide column, so a bar reads as a bar rather than as a
+   gauge tucked against the edge. Both side columns are sized rather than
+   `auto`: every row is its own grid, so an `auto` column is measured per row
+   and a two-digit figure would start the bars a few pixels off the rest. */
 .bar {
   display: grid;
-  grid-template-columns: 1fr 120px auto;
+  grid-template-columns: min(20rem, 28%) minmax(0, 1fr) 5rem;
   align-items: center;
-  gap: 10px;
-  padding: 3px 0;
+  gap: 12px;
+  padding: 4px 0;
   font-size: var(--font-ui-smaller);
   background: none;
   border: 0;
@@ -256,6 +260,7 @@
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  text-align: right;
 }
 
 .toolbar {
