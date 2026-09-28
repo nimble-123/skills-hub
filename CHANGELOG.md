@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.4.0](https://github.com/nimble-123/skills-hub/compare/v0.3.1...v0.4.0) (2026-09-28)
+
+
+### Features
+
+* **ui:** eighteen palettes and nine typefaces to choose between ([#17](https://github.com/nimble-123/skills-hub/issues/17)) ([314b1bc](https://github.com/nimble-123/skills-hub/commit/314b1bc38b4b17bba91b2ced2b6d5be0d422dbf8))
+* **ui:** give each item type its own muted colour ([#12](https://github.com/nimble-123/skills-hub/issues/12)) ([9c2626c](https://github.com/nimble-123/skills-hub/commit/9c2626c44ce367eda5f4e3fc02ccc43a574be498))
+* **ui:** rebuild the cost page against the plugin's dashboard ([#16](https://github.com/nimble-123/skills-hub/issues/16)) ([9259044](https://github.com/nimble-123/skills-hub/commit/92590441298188b97063da81845e4df2c8150571))
+
+
+### Fixes
+
+* **ui:** one corner radius for the tag chips ([#19](https://github.com/nimble-123/skills-hub/issues/19)) ([71618cf](https://github.com/nimble-123/skills-hub/commit/71618cf7d7863b5316674053e245e486cb6cb20a))
+* **ui:** use the real Claude and Gemini marks ([#15](https://github.com/nimble-123/skills-hub/issues/15)) ([e9c3440](https://github.com/nimble-123/skills-hub/commit/e9c34409c5d74fbbfd5fa4761d8ab95cd3463e3c))
+
+
+### Documentation
+
+* add CLAUDE.md ([#21](https://github.com/nimble-123/skills-hub/issues/21)) ([d1fbef6](https://github.com/nimble-123/skills-hub/commit/d1fbef6967b56480c12360f155a6d444d9bb5fd9))
+* bring plan.md and CONTRIBUTING.md up to date with the repository ([#20](https://github.com/nimble-123/skills-hub/issues/20)) ([0a06df4](https://github.com/nimble-123/skills-hub/commit/0a06df4bc0b5f12f6f0d86e90453b4ba03715647))
+* correct the macOS Gatekeeper advice ([#13](https://github.com/nimble-123/skills-hub/issues/13)) ([8ceb759](https://github.com/nimble-123/skills-hub/commit/8ceb759e9c7bd7c9dd36ecbdf541d58dab7ab643))
+* drop the UI5 Web Components idea ([#23](https://github.com/nimble-123/skills-hub/issues/23)) ([2bc2962](https://github.com/nimble-123/skills-hub/commit/2bc2962c878f1c9e8fa375f1d8fd074eb3ffc1a5))
+* rebuild the product page around the screenshots ([#18](https://github.com/nimble-123/skills-hub/issues/18)) ([c287e05](https://github.com/nimble-123/skills-hub/commit/c287e05ffb4e7fbafccdf0e650ff7a4a54c78770))
+* write down the architecture, the guarantees, and the procedures ([#22](https://github.com/nimble-123/skills-hub/issues/22)) ([f2255e2](https://github.com/nimble-123/skills-hub/commit/f2255e228688fdb8fea4270b330939ff2235f968))
+
 ## [0.3.1](https://github.com/nimble-123/skills-hub/compare/v0.3.0...v0.3.1) (2026-09-28)
 
 
