@@ -62,23 +62,34 @@ opening the window, and the four items above are needed either way.
 `tauri-nspanel` is the one dependency here whose maintenance state should be
 checked before it goes in.
 
-### Homebrew tap
+### Two secrets, and a pull request in someone else's queue
 
-Both preconditions are met: the repository is public, and v0.3.1 ships a
-universal DMG. Nothing else has happened — `nimble-123/homebrew-tap` does not
-exist yet. Own tap, not homebrew-cask: the official repo has a notability
-threshold a new project will not meet.
+The tap and the winget manifest are built and submitted; what is left is not
+work here.
 
-The cask's `zap` block must **not** list the metadata notes folder. That folder
-is the user's own, deliberately inside their vault; `brew uninstall --zap`
-would delete hand-written, tagged markdown.
+- **`HOMEBREW_TAP_TOKEN`** — a PAT with Contents write on
+  `nimble-123/homebrew-tap`. Without it the `Homebrew tap` job warns and stops,
+  and the cask stays on whatever release it last saw.
+- **`WINGET_TOKEN`** — a classic PAT with `public_repo` and `workflow`. Same
+  shape of failure, no manifest pull request.
+- **[winget-pkgs#442854](https://github.com/microsoft/winget-pkgs/pull/442854)**
+  is open. Microsoft's bot wants the CLA accepted by a comment from the account
+  that opened it, and their moderators review after that. `winget-releaser` can
+  only bump a package the repository already knows, so nothing is automatic
+  until this one is merged.
 
-### winget
+Two things the submitted manifest records that are worth revisiting:
 
-Manifest in `microsoft/winget-pkgs`, submitted automatically by the
-`winget-releaser` action. One change first: `"nsis": { "installMode": "both" }`
-in `tauri.conf.json` — `nsis` is still only named as a bundle target, so it
-installs for the current user and `Scope` cannot be stated honestly.
+- The v0.4.0 installer is per-user, so it went in as `Scope: user`. From the
+  next release the NSIS bundle is `installMode: "both"`, which lets the user
+  pick per-user or system-wide and asks for elevation to offer the choice.
+  `komac`, inside `winget-releaser`, re-reads the installer on every bump, so
+  the manifest should follow on its own — worth checking on the first bump
+  rather than assuming.
+- Add/Remove Programs shows the publisher as **nimble**, which is Tauri's
+  default: the second element of `dev.nimble.skills-hub`. Setting
+  `bundle.publisher` would fix it, and would then disagree with the 0.4.0 entry
+  already submitted.
 
 ---
 

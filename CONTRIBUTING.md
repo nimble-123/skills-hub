@@ -163,6 +163,55 @@ There is no repository-level API for the approval policy itself —
 review count is zero because there is no second reviewer on a solo project —
 the gate here is CI, not a human. Raise it when there is someone to do them.
 
+## Package managers
+
+A release ends in two places besides the GitHub release: a Homebrew cask and a
+winget manifest. Both are jobs in `release.yml` that run after `bundle`, and
+both need a token this repository does not have by default. Until the secret
+exists the job writes a warning and stops, so a release still succeeds — it
+just publishes nowhere.
+
+| Secret | What it is | Used by |
+|---|---|---|
+| `HOMEBREW_TAP_TOKEN` | a PAT with Contents write on `nimble-123/homebrew-tap` | the `Homebrew tap` job, to push the bumped cask |
+| `WINGET_TOKEN` | a **classic** PAT with `public_repo` and `workflow` | `winget-releaser`, to open the manifest PR |
+
+`WINGET_TOKEN` has to be classic: `winget-releaser` syncs the fork of
+`microsoft/winget-pkgs` before it writes, and a fine-grained token cannot do
+that across a repository it does not own.
+
+The cask itself lives in [`nimble-123/homebrew-tap`](https://github.com/nimble-123/homebrew-tap),
+because that is where Homebrew looks for it. The release job rewrites only its
+`version` and `sha256` and reads both back before committing, so a `sed` that
+matched nothing fails the job rather than leaving a cask pointing at the
+previous build. **Its `zap` block must never list the metadata notes folder** —
+that folder is the user's own, deliberately inside their vault, and
+`brew uninstall --zap` would delete hand-written, tagged markdown.
+
+The winget manifests live in `microsoft/winget-pkgs` and nowhere else. No copy
+is kept here: `winget-releaser` reads the published installer and rewrites the
+manifest from what it finds, so a template in this repository would only drift
+from the real one. The first submission was made by hand —
+[winget-pkgs#442854](https://github.com/microsoft/winget-pkgs/pull/442854) —
+because the action can only bump a package the repository already knows.
+
+Submitting a manifest by hand again, should it ever be needed:
+
+```sh
+# Fork microsoft/winget-pkgs once, then, per version, three files under
+# manifests/n/nimble-123/skills-hub/<version>/ on a branch of the fork:
+#   nimble-123.skills-hub.yaml             (version)
+#   nimble-123.skills-hub.installer.yaml   (installer, sha256 of the .exe)
+#   nimble-123.skills-hub.locale.en-US.yaml
+gh pr create --repo microsoft/winget-pkgs --base master \
+  --head nimble-123:<branch> \
+  --title "New package: nimble-123.skills-hub version <version>"
+```
+
+Their moderators expect `winget validate` and `winget install` to have been run
+on Windows. Say so plainly in the PR body when they have not been, rather than
+ticking the boxes.
+
 ## Local setup
 
 ```sh

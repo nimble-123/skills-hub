@@ -134,3 +134,92 @@ jobs:
         with:
           releaseId: ${{ needs.prepare.outputs.release_id }}
           args: ${{ matrix.args }}
+
+  # The two package managers read what `bundle` just attached to the release,
+  # so neither can start before it has. Both want a token this repository does
+  # not have by default; until the secret is set they warn and stop rather than
+  # fail, because a secret that has not been created yet is a setting, not a
+  # broken release. CONTRIBUTING.md says which token each one wants.
+  homebrew:
+    name: Homebrew tap
+    needs: [prepare, bundle]
+    if: needs.prepare.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Is the tap token there?
+        id: token
+        env:
+          TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::HOMEBREW_TAP_TOKEN is unset - the cask in nimble-123/homebrew-tap still points at the previous release."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      # The cask lives in the tap, which is where Homebrew looks for it. Only
+      # the two lines that move on a release are rewritten here.
+      - uses: actions/checkout@v5
+        if: steps.token.outputs.present == 'true'
+        with:
+          repository: nimble-123/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - name: Point the cask at the released DMG
+        if: steps.token.outputs.present == 'true'
+        env:
+          TAG: ${{ needs.prepare.outputs.tag_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          version="${TAG#v}"
+          dmg="skills-hub_${version}_universal.dmg"
+          # The asset appears when the macOS bundle job uploads it. The retries
+          # cover the seconds in which the release exists and the file does not.
+          curl -fsSL --retry 5 --retry-delay 10 --retry-all-errors \
+            -o "$dmg" "https://github.com/${REPO}/releases/download/${TAG}/${dmg}"
+          sha="$(sha256sum "$dmg" | cut -d' ' -f1)"
+          rm "$dmg"
+          sed -i "s|^  version \".*\"$|  version \"${version}\"|" Casks/skills-hub.rb
+          sed -i "s|^  sha256 \".*\"$|  sha256 \"${sha}\"|" Casks/skills-hub.rb
+          # A sed that matched nothing leaves the cask on the old build and
+          # says nothing about it, so read back what was meant to be written.
+          grep -qxF "  version \"${version}\"" Casks/skills-hub.rb
+          grep -qxF "  sha256 \"${sha}\"" Casks/skills-hub.rb
+      - name: Commit if it moved
+        if: steps.token.outputs.present == 'true'
+        run: |
+          git diff --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: skills-hub ${TAG}" Casks/skills-hub.rb
+          git push
+        env:
+          TAG: ${{ needs.prepare.outputs.tag_name }}
+
+  winget:
+    name: winget manifest
+    needs: [prepare, bundle]
+    if: needs.prepare.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Is the winget token there?
+        id: token
+        env:
+          TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::WINGET_TOKEN is unset - no manifest pull request was opened against microsoft/winget-pkgs."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      # This only bumps a package winget-pkgs already knows; the first manifest
+      # was submitted by hand. No copy of it is kept here on purpose - the
+      # action reads the installer itself and rewrites the manifest from what
+      # it finds, so a template in this repository would only go stale.
+      - uses: vedantmgoyal9/winget-releaser@v2
+        if: steps.token.outputs.present == 'true'
+        with:
+          identifier: nimble-123.skills-hub
+          release-tag: ${{ needs.prepare.outputs.tag_name }}
+          installers-regex: '_x64-setup\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}

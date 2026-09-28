@@ -44,6 +44,11 @@
     "macOS": {
       "minimumSystemVersion": "11.0"
     },
+    "windows": {
+      "nsis": {
+        "installMode": "both"
+      }
+    },
     "category": "DeveloperTool",
     "shortDescription": "One library for every AI coding tool's skills.",
     "longDescription": "Browse, tag and toggle skills, agents, commands and rules across every AI coding tool you use, working directly on the folders those tools actually read."
