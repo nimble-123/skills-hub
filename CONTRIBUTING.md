@@ -95,13 +95,12 @@ gh api -X PATCH "repos/$REPO" \
   -f squash_merge_commit_title=PR_TITLE \
   -f squash_merge_commit_message=PR_BODY
 
-# main takes changes through pull requests that CI has passed.
+# Step one, the moment the repository is public: stop main being rewritten or
+# deleted. This is what clears GitHub's "your main branch isn't protected"
+# banner, and it costs nothing — direct pushes still work.
 gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
 {
-  "required_status_checks": {
-    "strict": true,
-    "contexts": ["Rust", "Frontend", "Conventional Commit"]
-  },
+  "required_status_checks": null,
   "enforce_admins": false,
   "required_pull_request_reviews": null,
   "restrictions": null,
@@ -110,13 +109,41 @@ gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
   "allow_deletions": false
 }
 JSON
+
+# Step two, only once release-please runs under a personal access token
+# (see below): require a pull request, and require CI to have passed.
+gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["Rust", "Frontend", "Conventional Commit"]
+  },
+  "enforce_admins": false,
+  "required_pull_request_reviews": { "required_approving_review_count": 0 },
+  "restrictions": null,
+  "required_linear_history": true,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+JSON
 ```
 
-`enforce_admins` stays off so release-please can push its own branch, and
-`required_pull_request_reviews` is null because there is no second reviewer on
-a solo project — the gate here is CI, not a human. Add reviews when there is
-someone to do them. Branch protection needs a public repository or a paid plan
-on a private one.
+Both calls answer `403 Upgrade to GitHub Pro or make this repository public`
+while the repository is private on the free plan. Branch protection and the
+newer rulesets are gated the same way; there is no CLI route around it.
+
+**Do not skip to step two.** GitHub holds workflow runs on a pull request
+opened by `app/github-actions` at `action_required` until someone approves
+them, so the checks on the release pull request never report — and a rule that
+requires them would leave that pull request permanently unmergeable. Either
+give release-please a personal access token (`token:` on the action, a
+fine-grained PAT with Contents and Pull requests write), so the pull request is
+authored by a real account and its checks run on their own, or leave step two
+off.
+
+`enforce_admins` stays off so release-please can push its own branch, and the
+review count is zero because there is no second reviewer on a solo project —
+the gate here is CI, not a human. Raise it when there is someone to do them.
 
 ## Local setup
 
