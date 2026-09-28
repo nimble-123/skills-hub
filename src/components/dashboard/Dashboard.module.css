@@ -85,6 +85,9 @@
 }
 
 .barFill {
+  /* Blockified: width and height do not apply to an inline box, and the track
+     only escapes that itself by being a grid item. */
+  display: block;
   height: 100%;
   background: var(--interactive-accent);
 }

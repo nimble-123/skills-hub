@@ -486,20 +486,23 @@ export const REVIEW: ReviewHandle = {
 };
 
 export const DASHBOARD: DashboardReport = {
-  costs: ITEMS.filter((item) => item.enabled).map((item, index) => {
-    const chars = SEEDS[index]?.chars ?? 4_000;
-    const modelled = item.type === "skill" || item.type === "agent";
-    return {
-      entryId: item.entryId,
-      name: item.name,
-      tool: item.tool,
-      type: item.type,
-      sourceChars: chars,
-      availableChars: modelled ? item.name.length + item.description.length + 1 : null,
-      invocationChars: modelled ? Math.round(chars * 0.94) : null,
-      modified: item.modified,
-    };
-  }),
+  // Sorted the way the Rust report sorts it, so "Largest items" is one.
+  costs: ITEMS.filter((item) => item.enabled)
+    .map((item, index) => {
+      const chars = SEEDS[index]?.chars ?? 4_000;
+      const modelled = item.type === "skill" || item.type === "agent";
+      return {
+        entryId: item.entryId,
+        name: item.name,
+        tool: item.tool,
+        type: item.type,
+        sourceChars: chars,
+        availableChars: modelled ? item.name.length + item.description.length + 1 : null,
+        invocationChars: modelled ? Math.round(chars * 0.94) : null,
+        modified: item.modified,
+      };
+    })
+    .sort((a, b) => b.sourceChars - a.sourceChars),
   prune: [
     {
       entryId: ITEMS[5]?.entryId ?? "",
