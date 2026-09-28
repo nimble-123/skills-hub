@@ -16,7 +16,7 @@ import { useUi } from "../stores/ui";
 import "../styles/tokens.css";
 import "../styles/base.css";
 
-type Screen = "library" | "discover" | "cost" | "tools" | "mcp" | "diff";
+type Screen = "library" | "types" | "discover" | "cost" | "tools" | "mcp" | "diff";
 
 const params = new URLSearchParams(window.location.search);
 const screen = (params.get("screen") ?? "library") as Screen;
@@ -32,6 +32,11 @@ function seed(): void {
       // The rail is open on a skill with a code block, so the screenshot
       // shows the markdown and the highlighting doing their job.
       ui.select("sap-abap-cds-000000");
+      break;
+    case "types":
+      // Everything, unscoped and unsearched, with the rail closed: the one
+      // view where all four type chips sit next to each other.
+      ui.go({ kind: "library" });
       break;
     case "diff":
       ui.go({ kind: "library" });
