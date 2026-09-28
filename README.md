@@ -1,52 +1,94 @@
 # skills-hub
 
-One library for the skills, agents, commands and rules scattered across every AI
-coding tool you use — Claude Code, Cursor, Codex, Gemini CLI and a dozen more.
-It works directly on the folders those tools actually read, so enabling,
+One library for the skills, agents, commands and rules scattered across every
+AI coding tool you use — Claude Code, Cursor, Codex, Gemini CLI and a dozen
+more. It works on the folders those tools actually read, so enabling,
 disabling and organising act on the real files rather than on a copy.
 
-A standalone desktop application. Derived from the Obsidian plugin
-[AI Skills Manager](https://github.com/notenerdofficial/ai-skills-manager);
+<p align="center">
+  <img src="docs/images/library.png" alt="The library: sidebar, card grid and the detail panel for a skill" width="900">
+</p>
+
+A standalone desktop application, built with Tauri and Rust. Derived from the
+Obsidian plugin [AI Skills Manager](https://github.com/notenerdofficial/ai-skills-manager);
 see [NOTICE.md](NOTICE.md).
 
-## What works today
+## Why
 
-The library: every configured folder is scanned, items are listed and
-filtered, tags and favourites are yours to set, enabling and disabling moves
-the real file, and a global item can be linked into a project.
+Every tool invents its own convention for where these things live — some
+global, some per project, most both. Nothing shows you all of it at once, the
+same prompt ends up pasted into three folders and drifting apart, and a
+checkbox in a manager that never touches the file the tool reads has not
+disabled anything.
 
-Discover: point it at a repository and it is cloned, walked for skills,
-agents, commands and rules, and thrown away again. No account and no token —
-and any host git can reach, not only GitHub. Anything installed this way
-records the commit it came from, so it can be checked for updates, shown as a
-diff before anything is overwritten, and put back the way it was.
+So: one library over the real folders, and every action a real one.
 
-Cost: what the library is worth in tokens, separating what a tool carries
-every turn from what it loads when something is actually used. Where a tool
-keeps a history — Claude Code and Codex do — that history says which items
-have really been used, rather than guessing from how old a file is. It also
-points out pairs of items that look like they are after the same request.
+## What it does
 
-Tools: every tool, every path it reads, and whether that path is on this
-machine — all of it editable. Only the difference from the shipped default is
-stored, per path, so everything you leave alone stays free to be corrected by
-an update, and any field can be put back.
+**Enabling and disabling moves the file.** Into a `.skillmanager-disabled`
+folder beside where it was, and back. Symlink-aware — a relative link is
+recomputed for its new depth rather than replaced with an absolute path, so a
+shared skills folder keeps working after a round trip. The tool genuinely
+stops seeing the item.
 
-MCP servers: every one every tool is configured with, global and per project,
-read straight from each tool's own file. Read-only, with anything that looks
-like a secret covered until you ask.
+**Your tags live in your vault.** One small markdown file per item, with
+frontmatter, in a folder you choose. Put it in an Obsidian vault and they sync
+with everything else you have and stay queryable from Dataview. A note is only
+rewritten when something actually changed, and a note carrying your own tags
+is never removed automatically.
 
-## Keyboard
+**Install from a repository, and see the diff first.**
 
-| | |
-|---|---|
-| `↑ ↓ ← →` | move through the grid |
-| `Enter` | open the selected item |
-| `Esc` | close the details, or leave a field |
-| `/` | focus the search |
-| `⌘K` / `Ctrl-K` | find an item by name |
-| `⌘R` / `Ctrl-R` | rescan |
-| `⌘S` / `Ctrl-S` | save, while editing a file |
+<p align="center">
+  <img src="docs/images/discover.png" alt="Discover: a watched repository and the skills found in it" width="450">
+  <img src="docs/images/diff.png" alt="An update, shown as a diff before anything is overwritten" width="450">
+</p>
+
+Point it at any repository git can reach — no account, no token, no rate
+limit. Anything installed that way records the commit it came from, so it can
+be checked for updates, shown as a diff before anything is overwritten, and
+put back the way it was.
+
+**See what it all costs.**
+
+<p align="center">
+  <img src="docs/images/cost.png" alt="The cost page: totals, largest items, and what stands out" width="900">
+</p>
+
+What a tool carries every turn — an item's name and description, so the model
+knows it exists — separated from what it loads once the item is invoked. Where
+a tool keeps a history, that history says which items have actually been used
+rather than guessing from how old a file is.
+
+**Everything else it reads, read-only.** Every MCP server every tool is
+configured with, global and per project. Plugin bundles from Claude Code and
+Codex, with their items in the library and the bundle switchable as a whole.
+
+## Supported tools
+
+Claude Code · Cursor · Codex · OpenCode · Antigravity · GitHub Copilot ·
+Cline · Trae · Windsurf · Goose · Hermes · Pi · Gemini CLI · Roo Code ·
+Continue · and the shared `~/.agents/skills` convention.
+
+Every path is editable, so a tool that moves its folders — or a setup that was
+never standard — does not have to wait for a release.
+
+<p align="center">
+  <img src="docs/images/tools.png" alt="The tools page, with one tool expanded and its paths editable" width="900">
+</p>
+
+## Installing
+
+Builds are not signed yet, so macOS will object the first time: right-click
+the app and choose Open, or `xattr -dr com.apple.quarantine skills-hub.app`.
+
+```bash
+pnpm install
+pnpm tauri build     # → .app and .dmg
+```
+
+On first launch it asks where to keep its notes. Your skills are never moved
+or copied — only those notes live there.
 
 ## Architecture
 
@@ -71,25 +113,33 @@ pnpm install
 pnpm tauri dev          # run the app
 cargo test --workspace  # domain tests + regenerate src/bindings.ts
 cargo clippy --workspace --all-targets -- -D warnings
-cargo fmt
 pnpm check              # Biome: format + lint
 pnpm typecheck
+pnpm test               # vitest, including a headless render of the window
+pnpm icons              # regenerate the icon registry
+pnpm screenshots        # regenerate the pictures above
 ```
 
 `src/bindings.ts` is generated by `tauri-specta` and committed. Regenerate it
 with `cargo test -p skills-hub`; CI fails if doing so produces a diff.
 
-### A note on this checkout's filesystem
-
-This working copy sits on an exFAT volume, which has no hard links and no
-symlinks. Cargo therefore copies instead of linking its incremental cache
-(slower builds), and Finder scatters `._*` sidecar files. Neither affects the
-application, whose tests create their symlinks under `$TMPDIR`. To speed builds
-up, point Cargo at a local target directory without committing anything:
+The screenshots come from a demo build that swaps only the three modules
+talking to the host, so they are the real components and the real stylesheet
+against fixtures. What they cannot show is the native window frame.
 
 ```bash
-export CARGO_TARGET_DIR="$HOME/.cache/cargo-target/skills-hub"
+cargo run -p skills-cli -- scan            # the real scanner, real folders
+cargo run -p skills-cli -- usage codex     # what a tool's history says
+cargo run -p skills-cli -- mcp             # every configured MCP server
 ```
+
+### A note on this checkout's filesystem
+
+This working copy sits on an exFAT volume, which has no hard links. Cargo
+therefore copies instead of linking its incremental cache, and Finder scatters
+`._*` sidecar files. Neither affects the application, whose tests create their
+symlinks under `$TMPDIR`. `.cargo/config.toml` points the build directory at
+APFS; it is gitignored, and needed only here.
 
 ## Licence
 
