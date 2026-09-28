@@ -1,0 +1,44 @@
+# Temporary. Asks the release token what it is and what it may do, so the next
+# step is not another guess. Delete once the release pipeline runs clean.
+name: Token probe
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+    steps:
+      - name: Who is the token
+        run: gh api user --jq '"login: \(.login)  type: \(.type)"' || echo "  gh api user failed"
+
+      - name: What does the repository look like to it
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY" \
+            --jq '"visibility: \(.visibility)  admin: \(.permissions.admin)  push: \(.permissions.push)"' \
+            || echo "  cannot even read the repository"
+
+      - name: May it create a release
+        run: |
+          if id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+                    -f tag_name=v0.0.0-probe -F draft=true -f name=probe --jq '.id'); then
+            echo "  CREATE OK (id $id) — cleaning up"
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+          else
+            echo "  CREATE REFUSED — this is the failing call"
+          fi
+
+      - name: May it write a ref
+        run: |
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq '.sha')
+          if gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+               -f ref=refs/tags/v0.0.0-probe-ref -f sha="$sha" --jq '.ref'; then
+            echo "  REF OK — cleaning up"
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/v0.0.0-probe-ref"
+          else
+            echo "  REF REFUSED — the token cannot write refs, which is what a release needs"
+          fi
