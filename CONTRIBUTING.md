@@ -95,9 +95,9 @@ gh api -X PATCH "repos/$REPO" \
   -f squash_merge_commit_title=PR_TITLE \
   -f squash_merge_commit_message=PR_BODY
 
-# Step one, the moment the repository is public: stop main being rewritten or
-# deleted. This is what clears GitHub's "your main branch isn't protected"
-# banner, and it costs nothing — direct pushes still work.
+# Step one: stop main being rewritten or deleted. This is what clears
+# GitHub's "your main branch isn't protected" banner, and it costs
+# nothing — direct pushes still work.
 gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
 {
   "required_status_checks": null,
@@ -110,7 +110,7 @@ gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
 }
 JSON
 
-# Step two, only once release-please runs under a personal access token
+# Step two, now that release-please runs under a personal access token
 # (see below): require a pull request, and require CI to have passed.
 gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
 {
@@ -128,17 +128,23 @@ gh api -X PUT "repos/$REPO/branches/main/protection" --input - <<'JSON'
 JSON
 ```
 
-Both calls answer `403 Upgrade to GitHub Pro or make this repository public`
-while the repository is private on the free plan. Branch protection and the
-newer rulesets are gated the same way; there is no CLI route around it.
+Neither call has been made yet — `main` answers `404 Branch not protected` and
+there is no ruleset either. Nothing stands in the way any more: both used to
+answer `403 Upgrade to GitHub Pro or make this repository public`, and the
+repository is public.
 
-**One caveat for step two.** GitHub holds workflow runs on a pull request
-authored by `app/github-actions` at `action_required` until someone with write
-access approves them, and release-please force-pushes its branch on every merge
-to main — so a fresh pair of held runs appears each time. They pile up: six were
-waiting on release PR #1 before they were approved.
+**Step two's precondition is already met.** GitHub holds workflow runs on a
+pull request authored by `app/github-actions` at `action_required` until
+someone with write access approves them, and release-please force-pushes its
+branch on every merge to main, so held runs pile up — six were waiting on
+release PR #1. The action now runs under `RELEASE_PLEASE_TOKEN`, a fine-grained
+PAT with Contents and Pull requests write, so the release pull request is
+authored by a real account, the gate does not apply, and the required checks
+report without anyone watching for them.
 
-Approve them by hand with
+That secret is therefore load-bearing. If it expires the action falls back to
+`github.token`, the held runs come back, and required checks would block a
+release nobody can approve without noticing why. Clearing them by hand:
 
 ```sh
 gh run list --json databaseId,conclusion \
@@ -146,12 +152,8 @@ gh run list --json databaseId,conclusion \
   | xargs -I{} gh api -X POST "repos/$REPO/actions/runs/{}/approve"
 ```
 
-or remove the cause: give release-please a token of its own (`token:` on the
-action, a fine-grained PAT with Contents and Pull requests write). The pull
-request is then authored by a real account, the approval gate does not apply,
-and step two's required checks report without anyone watching for them. There
-is no repository-level API for the approval policy itself — `actions/permissions
-/fork-pr-workflows` answers 404.
+There is no repository-level API for the approval policy itself —
+`actions/permissions/fork-pr-workflows` answers 404.
 
 `enforce_admins` stays off so release-please can push its own branch, and the
 review count is zero because there is no second reviewer on a solo project —

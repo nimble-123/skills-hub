@@ -22,13 +22,11 @@ roadmap with dates. Closed items move out, not down — the history is in git.
 
 ### Branch protection
 
-Still nothing: no ruleset, no classic protection. Both things that blocked it
-are gone — the repository is public, and the release pull request is authored
-by a real account, so its checks report and can be required. The staged
-commands are in `CONTRIBUTING.md`.
-
-`CONTRIBUTING.md` still explains the block as the free plan on a private
-repository. That is no longer the reason it has not happened.
+Still nothing: `main` answers `404 Branch not protected` and there is no
+ruleset either. Both things that blocked it are gone — the repository is
+public, and the release pull request is authored by a real account, so its
+checks report and can be required. The two calls, in the order they should be
+made, are in `CONTRIBUTING.md`.
 
 ---
 
