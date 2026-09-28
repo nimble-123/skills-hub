@@ -128,6 +128,27 @@
   font-size: var(--font-ui-smaller);
 }
 
+/* Coloured per type; a pill without a type ("installed", a count) stays neutral. */
+.typePill[data-type="skill"] {
+  background: var(--type-skill-bg);
+  color: var(--type-skill-text);
+}
+
+.typePill[data-type="agent"] {
+  background: var(--type-agent-bg);
+  color: var(--type-agent-text);
+}
+
+.typePill[data-type="command"] {
+  background: var(--type-command-bg);
+  color: var(--type-command-text);
+}
+
+.typePill[data-type="rule"] {
+  background: var(--type-rule-bg);
+  color: var(--type-rule-text);
+}
+
 .description {
   flex: 1;
   margin: 0;

@@ -77,6 +77,35 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Same chip as the card's, so the type reads the same wherever it is shown. */
+.typePill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: var(--radius-s);
+  background: var(--bg-secondary-alt);
+  color: var(--text-muted);
+}
+
+.typePill[data-type="skill"] {
+  background: var(--type-skill-bg);
+  color: var(--type-skill-text);
+}
+
+.typePill[data-type="agent"] {
+  background: var(--type-agent-bg);
+  color: var(--type-agent-text);
+}
+
+.typePill[data-type="command"] {
+  background: var(--type-command-bg);
+  color: var(--type-command-text);
+}
+
+.typePill[data-type="rule"] {
+  background: var(--type-rule-bg);
+  color: var(--type-rule-text);
+}
+
 .pathValue {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
   font-size: 11px;

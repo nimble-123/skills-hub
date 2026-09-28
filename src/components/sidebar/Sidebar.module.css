@@ -141,6 +141,28 @@
   display: inline-flex;
 }
 
+/* A type row carries its chip's hue on the icon alone — a tinted background
+   here would compete with the accent an active row is painted in. */
+.rowIcon[data-type="skill"] {
+  color: var(--type-skill-text);
+}
+
+.rowIcon[data-type="agent"] {
+  color: var(--type-agent-text);
+}
+
+.rowIcon[data-type="command"] {
+  color: var(--type-command-text);
+}
+
+.rowIcon[data-type="rule"] {
+  color: var(--type-rule-text);
+}
+
+.rowActive .rowIcon[data-type] {
+  color: inherit;
+}
+
 .rowLabel {
   flex: 1;
   overflow: hidden;

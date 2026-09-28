@@ -66,7 +66,11 @@ export function DetailRail({ item }: DetailRailProps) {
       <div className={styles.scroll}>
         <dl className={styles.band}>
           <dt className={styles.bandKey}>Type</dt>
-          <dd className={styles.bandValue}>{TYPE_META[item.type].label}</dd>
+          <dd className={styles.bandValue}>
+            <span className={styles.typePill} data-type={item.type}>
+              {TYPE_META[item.type].label}
+            </span>
+          </dd>
 
           <dt className={styles.bandKey}>Tool</dt>
           <dd className={styles.bandValue}>{TOOL_META[item.tool]?.label ?? item.tool}</dd>
