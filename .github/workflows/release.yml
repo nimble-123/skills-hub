@@ -2,9 +2,15 @@
 #
 # release-please keeps one open PR that accumulates every Conventional Commit
 # landed on main, writes the changelog and bumps the version everywhere it is
-# recorded. Merging that PR tags the commit and creates a *draft* release; the
-# bundles are built and attached to it, and only then is it published — so a
-# release is never visible without the downloads it promises.
+# recorded. Merging that PR tags the commit and publishes the release; the
+# bundles are built and attached to it straight after.
+#
+# The release is deliberately not held back as a draft until its bundles are
+# there. A draft creates no git tag, and release-please reads the tags to know
+# what has been released — so the window between creating and publishing left
+# it computing the next version against a tag that did not exist yet, and the
+# same changelog came out twice. A few minutes of a release without downloads
+# is the cheaper problem.
 name: Release
 
 on:
@@ -39,6 +45,10 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
+          # Release pull requests are then authored by a real account, and
+          # their workflow runs are not held at action_required. Falls back to
+          # GITHUB_TOKEN when the secret is absent.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
@@ -87,9 +97,7 @@ jobs:
             args: ""
     runs-on: ${{ matrix.os }}
     steps:
-      # No ref: a draft release does not create the git tag — GitHub only
-      # writes it when the release is published, which is the last thing this
-      # workflow does. On a push event the default checkout is already the
+      # No ref needed: on a push event the default checkout is already the
       # commit release-please just released.
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -120,18 +128,3 @@ jobs:
         with:
           releaseId: ${{ needs.prepare.outputs.release_id }}
           args: ${{ matrix.args }}
-
-  publish:
-    name: Publish the release
-    needs: [prepare, bundle]
-    if: needs.prepare.outputs.release_created == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      # By id, not by tag: a draft release has no tag until this call succeeds.
-      - name: Take the release out of draft
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh api -X PATCH \
-            "repos/$GITHUB_REPOSITORY/releases/${{ needs.prepare.outputs.release_id }}" \
-            -F draft=false --jq '"published \(.tag_name) at \(.html_url)"'
