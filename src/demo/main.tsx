@@ -16,6 +16,7 @@ import { useUi } from "../stores/ui";
 import { DEMO_THEME } from "./fixtures";
 import "../styles/tokens.css";
 import "../styles/themes.css";
+import "../styles/fonts.css";
 import "../styles/base.css";
 
 type Screen = "library" | "types" | "discover" | "cost" | "tools" | "mcp" | "diff";

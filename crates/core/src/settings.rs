@@ -129,6 +129,8 @@ pub struct AppSettings {
     pub default_sort_order: SortOrder,
     pub default_enabled_filter: EnabledFilter,
     pub theme: ThemePref,
+    pub ui_font: UiFont,
+    pub mono_font: MonoFont,
 }
 
 /// The theme, or the wish to be told one by the system.
@@ -163,6 +165,37 @@ pub enum ThemePref {
     HorizonEvening,
 }
 
+/// The typeface for the interface.
+///
+/// `System` is whatever the platform uses, and the tail of every other stack:
+/// only the Latin cuts are bundled, so anything outside them falls back to it
+/// a glyph at a time.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "kebab-case")]
+pub enum UiFont {
+    #[default]
+    System,
+    Inter,
+    Geist,
+    Figtree,
+    IbmPlexSans,
+    Roboto,
+}
+
+/// The typeface for code, paths and anything else set monospaced.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "kebab-case")]
+pub enum MonoFont {
+    #[default]
+    System,
+    // Not `jet-brains-mono`, which is what kebab-case makes of it.
+    #[serde(rename = "jetbrains-mono")]
+    JetBrainsMono,
+    FiraCode,
+    GeistMono,
+    IbmPlexMono,
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
@@ -177,6 +210,8 @@ impl Default for AppSettings {
             default_sort_order: SortOrder::default(),
             default_enabled_filter: EnabledFilter::default(),
             theme: ThemePref::default(),
+            ui_font: UiFont::default(),
+            mono_font: MonoFont::default(),
         }
     }
 }

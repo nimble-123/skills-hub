@@ -21,6 +21,7 @@ import type {
   SettingsView,
   ToolReport,
 } from "../bindings";
+import { isMonoFont, isUiFont } from "../lib/fonts";
 import { isThemeId } from "../lib/theme";
 
 type Seed = {
@@ -332,6 +333,9 @@ export const SNAPSHOT: LibrarySnapshot = {
 const asked = new URLSearchParams(window.location.search).get("theme");
 export const DEMO_THEME = isThemeId(asked) ? asked : null;
 
+const askedUi = new URLSearchParams(window.location.search).get("font");
+const askedMono = new URLSearchParams(window.location.search).get("mono");
+
 export const SETTINGS: SettingsView = {
   settings: {
     schemaVersion: 1,
@@ -345,6 +349,8 @@ export const SETTINGS: SettingsView = {
     defaultSortOrder: "name-asc",
     defaultEnabledFilter: "all",
     theme: DEMO_THEME ?? "system",
+    uiFont: isUiFont(askedUi) ? askedUi : "system",
+    monoFont: isMonoFont(askedMono) ? askedMono : "system",
   },
   tools: ["claude-code", "codex", "cursor", "opencode", "global"].map((id) => ({
     id,

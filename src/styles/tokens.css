@@ -43,6 +43,10 @@
   --radius-m: 8px;
   --radius-l: 12px;
 
+  /* The families are the user's to change; `fonts.css` holds the rest. */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
   --font-ui-smaller: 12px;
   --font-ui-small: 13px;
   --font-ui-medium: 15px;

@@ -200,6 +200,8 @@ export type AppSettings = {
 	defaultSortOrder?: SortOrder,
 	defaultEnabledFilter?: EnabledFilter,
 	theme?: ThemePref,
+	uiFont?: UiFont,
+	monoFont?: MonoFont,
 };
 
 /**  A symlink whose target no longer resolves. */
@@ -483,6 +485,9 @@ export type McpServerConfig = {
 	url?: string | null,
 	type?: string | null,
 };
+
+/**  The typeface for code, paths and anything else set monospaced. */
+export type MonoFont = "system" | "jetbrains-mono" | "fira-code" | "geist-mono" | "ibm-plex-mono";
 
 /**  A note whose item is no longer on disk. */
 export type Orphan = {
@@ -811,6 +816,15 @@ export type ToolReport = {
 	/**  Whether any of its folders is actually on this machine. */
 	detected: boolean,
 };
+
+/**
+ *  The typeface for the interface.
+ * 
+ *  `System` is whatever the platform uses, and the tail of every other stack:
+ *  only the Latin cuts are bundled, so anything outside them falls back to it
+ *  a glyph at a time.
+ */
+export type UiFont = "system" | "inter" | "geist" | "figtree" | "ibm-plex-sans" | "roboto";
 
 /**  What a check found out about one item. */
 export type UpdateCheck = {

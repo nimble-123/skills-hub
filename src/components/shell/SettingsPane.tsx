@@ -5,9 +5,12 @@ import {
   type Capabilities,
   commands,
   type EnabledFilter,
+  type MonoFont,
   type SortOrder,
   type ThemePref,
+  type UiFont,
 } from "../../bindings";
+import { MONO_FONTS, UI_FONTS } from "../../lib/fonts";
 import { THEME_GROUPS } from "../../lib/theme";
 import { reportError } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
@@ -136,6 +139,41 @@ export function SettingsPane() {
                     </option>
                   ))}
                 </optgroup>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldText}>
+              <span className={styles.fieldName}>Interface font</span>
+            </span>
+            <select
+              className={styles.control}
+              value={settings.uiFont ?? "system"}
+              onChange={(event) => change({ uiFont: event.target.value as UiFont })}
+            >
+              {UI_FONTS.map((font) => (
+                <option key={font.id} value={font.id}>
+                  {font.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldText}>
+              <span className={styles.fieldName}>Code font</span>
+              <p className={styles.fieldHint}>Code blocks, paths and sizes.</p>
+            </span>
+            <select
+              className={styles.control}
+              value={settings.monoFont ?? "system"}
+              onChange={(event) => change({ monoFont: event.target.value as MonoFont })}
+            >
+              {MONO_FONTS.map((font) => (
+                <option key={font.id} value={font.id}>
+                  {font.label}
+                </option>
               ))}
             </select>
           </label>
