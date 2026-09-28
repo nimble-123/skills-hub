@@ -321,6 +321,38 @@
         text-align: center;
       }
 
+      /* --------------------------------------------------------- gallery */
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 16px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .gallery img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+      }
+
+      .gallery figcaption {
+        margin-top: 7px;
+        font-size: 13.5px;
+        color: var(--muted);
+        text-align: left;
+      }
+
+      .gallery .from {
+        display: block;
+        color: var(--faint);
+        font-size: 12.5px;
+      }
+
       /* --------------------------------------------------------- content */
 
       section { padding: 72px 0; }
@@ -556,6 +588,7 @@
           <a href="#install">Install</a>
           <a href="#cost">Cost</a>
           <a href="#tools">Tools</a>
+          <a href="#appearance">Themes</a>
           <a href="#build">Build</a>
         </div>
         <a class="nav-cta" href="https://github.com/nimble-123/skills-hub">GitHub</a>
@@ -734,6 +767,135 @@
             </picture>
           </div>
         </figure>
+      </section>
+
+      <section id="appearance">
+        <p class="eyebrow">Appearance</p>
+        <h2>Eighteen palettes, and the type to go with them</h2>
+        <p class="section-lede">
+          The nine VS Code ships with, five you would otherwise install, both SAP Fiori Horizon
+          themes, and the two it started with. A palette is a set of colours and nothing else —
+          it never changes a size, a spacing or a typeface.
+        </p>
+
+        <ul class="gallery">
+          <li>
+            <figure>
+              <img src="images/themes/light.png" width="760" height="480" loading="lazy" alt="The library in the Light palette" />
+              <figcaption>Light<span class="from">Default</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/dark.png" width="760" height="480" loading="lazy" alt="The library in the Dark palette" />
+              <figcaption>Dark<span class="from">Default</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/quiet-light.png" width="760" height="480" loading="lazy" alt="The library in the Quiet Light palette" />
+              <figcaption>Quiet Light<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/solarized-light.png" width="760" height="480" loading="lazy" alt="The library in the Solarized Light palette" />
+              <figcaption>Solarized Light<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/solarized-dark.png" width="760" height="480" loading="lazy" alt="The library in the Solarized Dark palette" />
+              <figcaption>Solarized Dark<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/monokai.png" width="760" height="480" loading="lazy" alt="The library in the Monokai palette" />
+              <figcaption>Monokai<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/abyss.png" width="760" height="480" loading="lazy" alt="The library in the Abyss palette" />
+              <figcaption>Abyss<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/kimbie-dark.png" width="760" height="480" loading="lazy" alt="The library in the Kimbie Dark palette" />
+              <figcaption>Kimbie Dark<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/tomorrow-night-blue.png" width="760" height="480" loading="lazy" alt="The library in the Tomorrow Night Blue palette" />
+              <figcaption>Tomorrow Night Blue<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/red.png" width="760" height="480" loading="lazy" alt="The library in the Red palette" />
+              <figcaption>Red<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/high-contrast.png" width="760" height="480" loading="lazy" alt="The library in the High Contrast palette" />
+              <figcaption>High Contrast<span class="from">VS Code</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/tokyo-night.png" width="760" height="480" loading="lazy" alt="The library in the Tokyo Night palette" />
+              <figcaption>Tokyo Night<span class="from">Community</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/aura.png" width="760" height="480" loading="lazy" alt="The library in the Aura palette" />
+              <figcaption>Aura<span class="from">Community</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/synthwave-84.png" width="760" height="480" loading="lazy" alt="The library in the SynthWave '84 palette" />
+              <figcaption>SynthWave '84<span class="from">Community</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/panda.png" width="760" height="480" loading="lazy" alt="The library in the Panda palette" />
+              <figcaption>Panda<span class="from">Community</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/overnight.png" width="760" height="480" loading="lazy" alt="The library in the Overnight palette" />
+              <figcaption>Overnight<span class="from">Community</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/horizon-morning.png" width="760" height="480" loading="lazy" alt="The library in the Morning Horizon palette" />
+              <figcaption>Morning Horizon<span class="from">SAP Fiori Horizon</span></figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <img src="images/themes/horizon-evening.png" width="760" height="480" loading="lazy" alt="The library in the Evening Horizon palette" />
+              <figcaption>Evening Horizon<span class="from">SAP Fiori Horizon</span></figcaption>
+            </figure>
+          </li>
+        </ul>
+
+        <div class="note">
+          The typefaces are their own two settings, because they are their own two decisions:
+          Inter, Geist, Figtree, IBM Plex Sans or Roboto for the interface, and JetBrains Mono,
+          Fira Code, Geist Mono or IBM Plex Mono for code, paths and sizes. All nine ship with
+          the application — 547 KB, Latin cuts only — so a choice looks the same on every machine
+          and needs no network.
+        </div>
       </section>
 
       <section id="architecture">
