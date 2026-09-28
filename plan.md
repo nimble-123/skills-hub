@@ -7,38 +7,28 @@ roadmap with dates. Closed items move out, not down — the history is in git.
 
 ## Waiting on a decision
 
-### Release PR #1 — merge it, and at what version?
-
-`chore(main): release 0.2.0` is open and mergeable; all six checks pass,
-including the bundle on all three platforms. Merging tags the commit, builds
-macOS (universal), Windows and Linux, attaches the bundles to a draft release
-and publishes it.
-
-The version is still open. `0.2.0` is what release-please computed from the
-history. If the first release should instead be `v0.1.0` — "everything built so
-far, release one" — set `.release-please-manifest.json` to `0.0.0` and it
-recalculates.
-
-### Make the repository public
-
-Unlocks three things at once: GitHub Pages starts deploying the product page by
-itself (the workflow is already gated on visibility), branch protection becomes
-available, and a Homebrew cask can fetch the DMG at all.
-
-Classic protection *and* rulesets both answer `403 Upgrade to GitHub Pro or
-make this repository public` while it is private on the free plan. The staged
-commands are in `CONTRIBUTING.md`.
-
 ### Code signing
 
 - **macOS** — Apple Developer Program, 99 USD/year. Without it, macOS 15 no
   longer offers the right-click-Open bypass; the user has to go into System
   Settings. The secret names are already wired into `release.yml`, and
-  `Info.plist` already carries the four usage-description strings.
+  `Info.plist` already carries the four usage-description strings. Two releases
+  have shipped unsigned, so this is a question of how much friction the first
+  launch should have, not a blocker.
 - **Windows** — optional. winget accepts unsigned installers; SmartScreen will
   warn. Since 2023 certificates must live on hardware or in an HSM, so CI
   signing means a cloud service — Azure Trusted Signing, ~10 USD/month, is
   currently the cheapest. Check the eligibility rules before committing.
+
+### Branch protection
+
+Still nothing: no ruleset, no classic protection. Both things that blocked it
+are gone — the repository is public, and the release pull request is authored
+by a real account, so its checks report and can be required. The staged
+commands are in `CONTRIBUTING.md`.
+
+`CONTRIBUTING.md` still explains the block as the free plan on a private
+repository. That is no longer the reason it has not happened.
 
 ---
 
@@ -76,9 +66,10 @@ checked before it goes in.
 
 ### Homebrew tap
 
-Needs the repository public and at least one release. Own tap
-(`nimble-123/homebrew-tap`), not homebrew-cask — the official repo has a
-notability threshold a new project will not meet.
+Both preconditions are met: the repository is public, and v0.3.1 ships a
+universal DMG. Nothing else has happened — `nimble-123/homebrew-tap` does not
+exist yet. Own tap, not homebrew-cask: the official repo has a notability
+threshold a new project will not meet.
 
 The cask's `zap` block must **not** list the metadata notes folder. That folder
 is the user's own, deliberately inside their vault; `brew uninstall --zap`
@@ -88,28 +79,8 @@ would delete hand-written, tagged markdown.
 
 Manifest in `microsoft/winget-pkgs`, submitted automatically by the
 `winget-releaser` action. One change first: `"nsis": { "installMode": "both" }`
-in `tauri.conf.json`, otherwise it only ever installs for the current user and
-`Scope` cannot be stated honestly.
-
-### Universal binary has never actually been built
-
-`release.yml` passes `--target universal-apple-darwin`, but CI only ever builds
-host-native. The first release run is also the first test of that line.
-
-### Stop the release PR collecting held workflow runs
-
-GitHub holds runs on a pull request authored by `app/github-actions` at
-`action_required`, and release-please force-pushes its branch on every merge to
-main, so a new pair appears each time — six had accumulated on PR #1, showing as
-"2 workflows awaiting approval" on the pull request.
-
-The real fix is a fine-grained PAT (Contents and Pull requests: write) passed to
-the action as `token:`, so the pull request is authored by a real account and
-the gate does not apply. There is no repository-level API for the approval
-policy — `actions/permissions/fork-pr-workflows` answers 404.
-
-This also unblocks step two of branch protection, which cannot require checks
-that may never report. The by-hand approval command is in `CONTRIBUTING.md`.
+in `tauri.conf.json` — `nsis` is still only named as a bundle target, so it
+installs for the current user and `Scope` cannot be stated honestly.
 
 ---
 
@@ -117,13 +88,11 @@ that may never report. The by-hand approval command is in `CONTRIBUTING.md`.
 
 ### Make the build faster
 
-**Done, and measured in CI.** `[profile.release]` is tuned for a shipped binary
-— fat LTO, one codegen unit, optimised for size — and the bundle job paid for
-that on every run although it only exists to prove packaging works. It now
-overrides the three settings through `CARGO_PROFILE_RELEASE_*`; the release
-workflow keeps the shipping profile.
-
-Same commit, warm cache, before and after:
+**Done for the expensive part.** `[profile.release]` is tuned for a shipped
+binary — fat LTO, one codegen unit, optimised for size — and the bundle job
+paid for that on every run although it only exists to prove packaging works. It
+now overrides the three settings through `CARGO_PROFILE_RELEASE_*`; the release
+workflow keeps the shipping profile. Same commit, warm cache:
 
 | | shipping | CI profile | |
 |---|---|---|---|
@@ -132,27 +101,15 @@ Same commit, warm cache, before and after:
 | Bundle (macos) | 155s | 79s | −49% |
 | Wall clock (they run in parallel) | 366s | 269s | −97s |
 
-Weighted the way Actions bills a private repository — Linux 1×, Windows 2×,
-macOS 10× — that is 2577 → 1546, a 40% cut, because the most expensive leg is
-the one that halved.
-
-Turning LTO off makes a *cold* build worse: every dependency does full codegen
-instead of emitting bitcode for one link-time pass, and Ubuntu went from ~283s
-to 604s. It does not matter. Cold, Windows is the critical path at 971s (against
-~1020s before), and Ubuntu runs alongside it. `lto = "thin"` was held in reserve
-for the case where the warm numbers disappointed; they did not.
-
-**Measurement discipline, learned the hard way:** the first local A/B compared
-incremental rebuilds after touching `skills-core` and reported 71.7s → 14.9s.
-That isolated exactly the case LTO-off wins — dependencies already built — and
-said nothing about the cold build it made three times slower. Measure the
-scenario you are actually changing.
+Weighted the way Actions bills a private repository, that was a 40% cut. The
+repository is public now, so the billing argument is gone and only the wall
+clock still counts.
 
 **Still open, in order of expected payoff:**
 
 1. `Swatinem/rust-cache` restore is 10–35s per job, and its save cost grows with
    the target directory. Two profile variants now compete for the repository's
-   10 GB cache allowance, which shortens how long either survives.
+   cache allowance, which shortens how long either survives.
 2. A faster linker — `lld` on Windows and Linux, `mold` on Linux. Less
    interesting now that LTO is off for CI, which was most of the link cost.
 3. The `Rust` job spends 67s of 128s on cache restore and `apt-get`, and the
@@ -168,19 +125,29 @@ all.
 
 What has to be thought through before writing any code:
 
-- **It collides with the existing design language.** `tokens.css` is a port of
-  Obsidian's token set and every component is styled through it; UI5 brings
-  Fiori theming (`sap_horizon`) and its own CSS custom properties. These are
-  two theming systems, and the three-state light/dark handling in `theme.ts`
-  is written against ours.
-- **Size.** The dist is currently 12 MB after the shiki and lucide work.
-  `@ui5/webcomponents` unpacks to 23 MB and the React wrapper to 5.6 MB before
-  `-base`, `-fiori` and `-icons`. Tree-shaking decides whether that matters,
-  but it has to be measured, not assumed.
+- **It collides with the existing design language, harder than it used to.**
+  `tokens.css` is a port of Obsidian's token set and every component is styled
+  through it. There are now eighteen palettes and two typeface settings on top
+  of that, including a Morning and an Evening Horizon transcribed from SAP's
+  own colours — so the Fiori look is already available without the dependency,
+  and adopting UI5 would mean running two theming systems or retiring ours.
+- **Size.** The bundle is 2.5 MB: 1.9 MB of JavaScript, most of it shiki
+  grammars that load only when a code fence asks for them, and 546 KB of
+  bundled fonts. `@ui5/webcomponents` unpacks to 23 MB and the React wrapper to
+  5.6 MB before `-base`, `-fiori` and `-icons`. Tree-shaking decides whether
+  that matters, but it has to be measured, not assumed.
 - **Scope.** Whole-app replacement, or one screen as a spike on a branch?
-- **What it would actually buy.** Worth naming before starting.
+- **What it would actually buy.** Worth naming before starting, and harder to
+  answer now that the Horizon palettes exist.
 
 To be planned properly.
+
+### One shape for the chips
+
+The tag chips on the cards and in the detail rail share `var(--radius-s)` since
+#19. The filter chips above the grid and the count pills beside the headings
+are still `999px`. They are controls rather than tags and nothing sits beside
+them contradicting their shape, so this is a question rather than a bug.
 
 ---
 
