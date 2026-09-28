@@ -58,6 +58,8 @@ const SHOTS = [
     },
   },
   { file: "tools", screen: "tools", ready: "text=Found on this machine" },
+  /** The palette and the two typefaces are chosen here; the page shows that. */
+  { file: "settings", screen: "settings", ready: "text=Interface font" },
   { file: "mcp", screen: "mcp", ready: "text=obsidian" },
   {
     file: "diff",
@@ -71,6 +73,17 @@ const SHOTS = [
   },
 ];
 
+/**
+ * The palette gallery, one tile each.
+ *
+ * Small and at one device pixel per CSS pixel: eighteen of these sit on one
+ * page, and what a tile has to show is the colour, not the type. The list is
+ * the application's own, read out of the bundle rather than repeated here, so
+ * a palette added to the product cannot be missing from the gallery.
+ */
+const TILE = { width: 900, height: 620 };
+const TILE_CLIP = { x: 0, y: 0, width: 760, height: 480 };
+
 const server = await createServer({
   // fileURLToPath, not `.pathname`: this checkout's path has a space in it.
   configFile: fileURLToPath(new URL("../vite.demo.config.ts", import.meta.url)),
@@ -79,6 +92,11 @@ const server = await createServer({
 });
 await server.listen();
 const base = server.resolvedUrls?.local?.[0] ?? "http://localhost:1421/";
+
+// The application's own list, loaded through the dev server rather than
+// copied: a palette it offers and the gallery does not would be a lie.
+const { THEME_GROUPS } = await server.ssrLoadModule("/src/lib/theme.ts");
+const THEMES = THEME_GROUPS.flatMap((group) => group.themes);
 
 await mkdir(OUT, { recursive: true });
 const browser = await chromium.launch();
@@ -117,9 +135,31 @@ try {
     }
     await context.close();
   }
+  // One context, because a tile is the same page with a different palette.
+  const gallery = await browser.newContext({
+    viewport: TILE,
+    deviceScaleFactor: 1,
+    reducedMotion: "reduce",
+  });
+  await mkdir(new URL("themes/", OUT), { recursive: true });
+
+  for (const theme of THEMES) {
+    const page = await gallery.newPage();
+    await page.goto(`${base}demo.html?screen=library&theme=${theme.id}`);
+    await page.waitForSelector("text=When to use this", { timeout: 15_000 });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(300);
+    await page.screenshot({
+      path: fileURLToPath(new URL(`themes/${theme.id}.png`, OUT)),
+      clip: TILE_CLIP,
+    });
+    console.log(`  themes/${theme.id}.png`);
+    await page.close();
+  }
+  await gallery.close();
 } finally {
   await browser.close();
   await server.close();
 }
 
-console.log(`\nwrote ${SHOTS.length * 2} screenshots to docs/images/`);
+console.log(`\nwrote ${SHOTS.length * 2 + THEMES.length} screenshots to docs/images/`);
