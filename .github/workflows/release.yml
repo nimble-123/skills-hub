@@ -10,6 +10,9 @@ name: Release
 on:
   push:
     branches: [main]
+  # So a release that got stuck can be driven again by hand, without an empty
+  # commit to main just to produce a push event.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -84,9 +87,11 @@ jobs:
             args: ""
     runs-on: ${{ matrix.os }}
     steps:
+      # No ref: a draft release does not create the git tag — GitHub only
+      # writes it when the release is published, which is the last thing this
+      # workflow does. On a push event the default checkout is already the
+      # commit release-please just released.
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.prepare.outputs.tag_name }}
       - uses: dtolnay/rust-toolchain@stable
       - name: Add the Apple silicon and Intel targets
         if: matrix.os == 'macos-latest'
@@ -125,7 +130,11 @@ jobs:
     if: needs.prepare.outputs.release_created == 'true'
     runs-on: ubuntu-latest
     steps:
+      # By id, not by tag: the tag does not exist until this call succeeds.
       - name: Take the release out of draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ needs.prepare.outputs.tag_name }}" --draft=false --repo "$GITHUB_REPOSITORY"
+        run: |
+          gh api -X PATCH \
+            "repos/$GITHUB_REPOSITORY/releases/${{ needs.prepare.outputs.release_id }}" \
+            -F draft=false --jq '"published \(.tag_name) at \(.html_url)"'
