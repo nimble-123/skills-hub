@@ -1,0 +1,70 @@
+# Temporary. Runs the release jobs' real steps against the release that is
+# already out, so the tokens and the logic are exercised without cutting one.
+# Deleted again once it has reported.
+name: Packaging smoke
+
+on:
+  push:
+    branches: [feat/homebrew-and-winget]
+
+jobs:
+  homebrew:
+    name: Homebrew tap (dry)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: nimble-123/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - name: Point the cask at the released DMG
+        env:
+          TAG: v0.4.0
+          REPO: ${{ github.repository }}
+        run: |
+          version="${TAG#v}"
+          dmg="skills-hub_${version}_universal.dmg"
+          curl -fsSL --retry 5 --retry-delay 10 --retry-all-errors \
+            -o "$dmg" "https://github.com/${REPO}/releases/download/${TAG}/${dmg}"
+          sha="$(sha256sum "$dmg" | cut -d' ' -f1)"
+          echo "sha256 of the published DMG: $sha"
+          rm "$dmg"
+          sed -i "s|^  version \".*\"$|  version \"${version}\"|" Casks/skills-hub.rb
+          sed -i "s|^  sha256 \".*\"$|  sha256 \"${sha}\"|" Casks/skills-hub.rb
+          grep -qxF "  version \"${version}\"" Casks/skills-hub.rb
+          grep -qxF "  sha256 \"${sha}\"" Casks/skills-hub.rb
+      - name: The cask must already say exactly this
+        run: |
+          if git diff --quiet; then
+            echo "unchanged - the tap already matches the published v0.4.0 DMG"
+          else
+            echo "::error::rewriting the cask for the release it already carries changed it"
+            git --no-pager diff
+            exit 1
+          fi
+      - name: Can this token push?
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore: smoke test, not pushed"
+          git push --dry-run origin HEAD:main
+          echo "push accepted (dry run)"
+
+  winget:
+    name: winget token
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scopes and reach
+        env:
+          TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          scopes="$(curl -sSI -H "Authorization: token $TOKEN" https://api.github.com/user \
+            | tr -d '\r' | grep -i '^x-oauth-scopes:' | cut -d' ' -f2-)"
+          echo "scopes: ${scopes:-<none - this is not a classic token>}"
+          case ",$scopes," in *,public_repo,*|*,repo,*) ;; *) echo "::error::no public_repo"; exit 1;; esac
+          case ",$scopes," in *,workflow,*) ;; *) echo "::error::no workflow"; exit 1;; esac
+          for r in nimble-123/winget-pkgs microsoft/winget-pkgs; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' \
+              -H "Authorization: token $TOKEN" "https://api.github.com/repos/$r")"
+            echo "$r -> $code"
+            [ "$code" = "200" ] || exit 1
+          done
