@@ -37,17 +37,20 @@ with everything else you have and stay queryable from Dataview. A note is only
 rewritten when something actually changed, and a note carrying your own tags
 is never removed automatically.
 
-**Install from a repository, and see the diff first.**
+**Find it, install it, and see the diff first.**
 
 <p align="center">
-  <img src="docs/images/discover.png" alt="Discover: a watched repository and the skills found in it" width="450">
+  <img src="docs/images/discover.png" alt="Discover: a registry search, a watched repository, and the skills found in it" width="450">
   <img src="docs/images/diff.png" alt="An update, shown as a diff before anything is overwritten" width="450">
 </p>
 
-Point it at any repository git can reach — no account, no token, no rate
-limit. Anything installed that way records the commit it came from, so it can
-be checked for updates, shown as a diff before anything is overwritten, and
-put back the way it was.
+Search the [skills.sh](https://skills.sh) registry by name, or point it at any
+repository git can reach — no account and no token either way. A search result
+names a repository, and watching one clones it, walks it, and lists everything
+installable in it, so the registry is a way to *find* repositories rather than
+a second install path that could go stale on its own. Anything installed
+records the commit it came from, so it can be checked for updates, shown as a
+diff before anything is overwritten, and put back the way it was.
 
 **See what it all costs.**
 

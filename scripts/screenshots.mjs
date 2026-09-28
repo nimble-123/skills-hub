@@ -30,7 +30,17 @@ const SHOTS = [
     /** Waited for before the picture is taken, so nothing is mid-render. */
     ready: "text=When to use this",
   },
-  { file: "discover", screen: "discover", ready: "text=mcp-builder" },
+  {
+    file: "discover",
+    screen: "discover",
+    ready: "text=mcp-builder",
+    /** The registry search is the point of the page; show it having run. */
+    async prepare(page) {
+      await page.getByRole("textbox", { name: /search the skills.sh registry/i }).fill("pdf");
+      await page.getByRole("button", { name: "Search" }).click();
+      await page.waitForSelector("text=anthropics/skills");
+    },
+  },
   { file: "cost", screen: "cost", ready: "text=Always available" },
   { file: "tools", screen: "tools", ready: "text=Found on this machine" },
   { file: "mcp", screen: "mcp", ready: "text=obsidian" },

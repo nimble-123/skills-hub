@@ -42,6 +42,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::tools::add_custom_tool,
         commands::tools::remove_custom_tool,
         commands::discover::get_discover_catalog,
+        commands::discover::search_registry,
         commands::discover::discover_add_source,
         commands::discover::discover_refresh_source,
         commands::discover::discover_remove_source,

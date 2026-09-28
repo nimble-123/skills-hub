@@ -13,6 +13,7 @@ import {
   ITEM_CONTENT,
   ITEMS,
   MCP_SERVERS,
+  REGISTRY_HITS,
   REVIEW,
   SETTINGS,
   SNAPSHOT,
@@ -64,6 +65,7 @@ export const commands: typeof real = {
   revealInFileManager: nothing,
   openPath: nothing,
 
+  searchRegistry: () => ok(REGISTRY_HITS),
   getDiscoverCatalog: () => ok(CATALOG),
   discoverAddSource: () => ok(CATALOG),
   discoverRefreshSource: () => ok(CATALOG),

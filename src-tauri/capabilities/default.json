@@ -9,7 +9,7 @@
     "dialog:allow-open",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://api.github.com/*" }]
+      "allow": [{ "url": "https://api.github.com/*" }, { "url": "https://skills.sh/*" }]
     }
   ]
 }

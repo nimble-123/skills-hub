@@ -8,6 +8,7 @@ import { Icon } from "../common/Icon";
 import paneStyles from "../shell/Pane.module.css";
 import styles from "./Discover.module.css";
 import { InstallDialog } from "./InstallDialog";
+import { RegistrySearch } from "./RegistrySearch";
 
 /** Somewhere to start, for an empty library of sources. */
 const STARTERS = [
@@ -48,8 +49,9 @@ export function DiscoverPane() {
           )}
         </h1>
         <p className={paneStyles.subtitle}>
-          Point this at a repository and it is cloned, walked for skills, agents, commands and
-          rules, and thrown away again. No account, no token, and any host git can reach.
+          Search the registry, or point this straight at a repository. Either way it is cloned,
+          walked for skills, agents, commands and rules, and thrown away again — no account, no
+          token, and any host git can reach.
         </p>
       </div>
 
@@ -75,11 +77,13 @@ export function DiscoverPane() {
       </div>
 
       <div className={paneStyles.scroll}>
+        <RegistrySearch />
+
         {catalog.sources.length === 0 ? (
           <div>
             <p className={paneStyles.fieldHint}>
-              Nothing watched yet. A link to a subfolder works too — the branch and the path are
-              read out of it.
+              Nothing watched yet. Search above, paste a repository, or start from one of these. A
+              link to a subfolder works too — the branch and the path are read out of it.
             </p>
             <div className={styles.starters}>
               {STARTERS.map((starter) => (

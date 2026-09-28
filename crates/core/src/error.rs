@@ -62,6 +62,9 @@ pub enum CoreError {
 
     #[error("this item was not installed through skills-hub, so there is nothing to update")]
     NotTracked,
+
+    #[error("{reason}")]
+    Registry { reason: String },
 }
 
 impl CoreError {
@@ -85,6 +88,7 @@ impl CoreError {
             Self::CommitUnavailable { .. } => "commit-unavailable",
             Self::SubpathMissing { .. } => "subpath-missing",
             Self::NotTracked => "not-tracked",
+            Self::Registry { .. } => "registry",
         }
     }
 

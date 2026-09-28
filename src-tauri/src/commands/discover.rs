@@ -9,6 +9,7 @@ use skills_core::discover::{self, DiscoverCatalog};
 use skills_core::git::SystemGit;
 use skills_core::install::{self, InstallRequest};
 use skills_core::model::{ItemMetadata, ItemType};
+use skills_core::registry::{self, RegistryHit};
 use skills_core::settings::effective_tools;
 use skills_core::store::{MetaPatch, now_rfc3339};
 use tauri::State;
@@ -92,6 +93,47 @@ pub fn discover_remove_source(
     state: State<'_, AppState>,
 ) -> CommandResult<DiscoverCatalog> {
     save_catalog(&state, |catalog| catalog.remove_source(&source_id))
+}
+
+/// Asks a registry which repositories hold a skill by this name.
+///
+/// skills.sh indexes skills across GitHub and counts how often each is
+/// installed, which is the one ranking signal on offer and the reason to ask
+/// it rather than search GitHub directly. What comes back names a repository,
+/// so a hit becomes an ordinary watched source — and everything downstream,
+/// including updating and restoring, is unaffected.
+///
+/// A registry being unreachable is reported rather than swallowed: unlike the
+/// star count, this is the whole answer to what the user asked.
+#[tauri::command]
+#[specta::specta]
+pub async fn search_registry(query: String) -> CommandResult<Vec<RegistryHit>> {
+    if query.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let response = tauri_plugin_http::reqwest::Client::new()
+        .get(registry::search_url(&query))
+        .header("User-Agent", "skills-hub")
+        .header("Accept", "application/json")
+        .timeout(std::time::Duration::from_secs(15))
+        .send()
+        .await
+        .map_err(|err| CommandError::new("registry-unreachable", err.to_string()))?;
+
+    if !response.status().is_success() {
+        return Err(CommandError::new(
+            "registry-unreachable",
+            format!("skills.sh answered {}.", response.status()),
+        ));
+    }
+
+    let body = response
+        .text()
+        .await
+        .map_err(|err| CommandError::new("registry-unreachable", err.to_string()))?;
+
+    Ok(registry::parse_search(&body)?)
 }
 
 /// Where an item from a repository should be installed.

@@ -16,6 +16,7 @@ import type {
   LibrarySnapshot,
   McpServer,
   PluginSource,
+  RegistryHit,
   ReviewHandle,
   SettingsView,
   ToolReport,
@@ -392,6 +393,26 @@ export const CATALOG: DiscoverCatalog = {
     discoveredAt: "2026-09-27T12:00:00Z",
   })),
 };
+
+/** What a search of the registry comes back with. */
+export const REGISTRY_HITS: RegistryHit[] = (
+  [
+    ["anthropics/skills", "pdf", 201_991],
+    ["anthropics/skills", "xlsx", 154_220],
+    ["anthropics/skills", "docx", 141_006],
+    ["anthropics/skills", "pptx", 98_430],
+    ["obra/superpowers", "document-review", 44_118],
+    ["obra/superpowers", "pdf-forms", 21_775],
+    ["vercel-labs/agent-skills", "pdf-extract", 12_904],
+    ["kepano/obsidian-skills", "pdf-annotate", 3_112],
+  ] as Array<[string, string, number]>
+).map(([source, name, installs]) => ({
+  id: `${source}/${name}`,
+  source,
+  name,
+  installs,
+  repoUrl: `https://github.com/${source}`,
+}));
 
 export const REVIEW: ReviewHandle = {
   reviewId: "rev-demo",

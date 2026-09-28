@@ -19,6 +19,7 @@ pub mod model;
 pub mod paths;
 pub mod platform;
 pub mod projectlink;
+pub mod registry;
 pub mod rescan;
 pub mod scan;
 pub mod settings;

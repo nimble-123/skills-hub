@@ -87,6 +87,19 @@ export const commands = {
 	removeCustomTool: (toolId: string) => typedError<null, CommandError>(__TAURI_INVOKE("remove_custom_tool", { toolId })),
 	getDiscoverCatalog: () => typedError<DiscoverCatalog, CommandError>(__TAURI_INVOKE("get_discover_catalog")),
 	/**
+	 *  Asks a registry which repositories hold a skill by this name.
+	 * 
+	 *  skills.sh indexes skills across GitHub and counts how often each is
+	 *  installed, which is the one ranking signal on offer and the reason to ask
+	 *  it rather than search GitHub directly. What comes back names a repository,
+	 *  so a hit becomes an ordinary watched source — and everything downstream,
+	 *  including updating and restoring, is unaffected.
+	 * 
+	 *  A registry being unreachable is reported rather than swallowed: unlike the
+	 *  star count, this is the whole answer to what the user asked.
+	 */
+	searchRegistry: (query: string) => typedError<RegistryHit[], CommandError>(__TAURI_INVOKE("search_registry", { query })),
+	/**
 	 *  Clones a repository, records everything installable in it, and asks GitHub
 	 *  how many stars it has.
 	 */
@@ -565,6 +578,27 @@ export type PruneReason =
 "not-used-lately" | 
 /**  No usage to go on, so: large and long untouched. */
 "large-and-old";
+
+/**  What the registry knows about one skill. */
+export type RegistryHit = {
+	/**  `owner/repo/skill`, as the registry identifies it. */
+	id: string,
+	/**  The GitHub repository it lives in, as `owner/repo`. */
+	source: string,
+	/**  Its name within that repository. */
+	name: string,
+	/**
+	 *  How many times it has been installed through the registry.
+	 * 
+	 *  The only ranking signal on offer, and the reason to consult a registry
+	 *  rather than search GitHub directly. A `u32` because this crosses into
+	 *  JavaScript, which has no wider integer — and the busiest skill on the
+	 *  registry is six figures.
+	 */
+	installs: number,
+	/**  The repository, as something git can clone. */
+	repoUrl: string,
+};
 
 /**  What to scan. */
 export type RescanOptions = {
