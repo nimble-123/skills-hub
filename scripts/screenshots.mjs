@@ -84,6 +84,14 @@ const SHOTS = [
 const TILE = { width: 900, height: 620 };
 const TILE_CLIP = { x: 0, y: 0, width: 760, height: 480 };
 
+/**
+ * The menubar popover, at the size of the panel it lives in.
+ *
+ * Its own viewport, because the panel is 360×480 and a picture of it inside a
+ * 1440-wide page would be a picture of mostly nothing.
+ */
+const PANEL = { width: 360, height: 480 };
+
 const server = await createServer({
   // fileURLToPath, not `.pathname`: this checkout's path has a space in it.
   configFile: fileURLToPath(new URL("../vite.demo.config.ts", import.meta.url)),
@@ -157,9 +165,38 @@ try {
     await page.close();
   }
   await gallery.close();
+
+  for (const theme of ["light", "dark"]) {
+    const context = await browser.newContext({
+      viewport: PANEL,
+      deviceScaleFactor: SCALE,
+      colorScheme: theme,
+      reducedMotion: "reduce",
+    });
+    const page = await context.newPage();
+    const failures = [];
+    page.on("pageerror", (error) => failures.push(error.message));
+
+    await page.goto(`${base}demo.html?screen=popover&theme=${theme}`);
+    // Typed into, because an empty popover shows only favourites and the
+    // point of the picture is the search.
+    await page.getByRole("searchbox", { name: /search the library/i }).fill("a");
+    await page.waitForSelector("text=abap-repo-assessment", { timeout: 15_000 });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(300);
+
+    if (failures.length > 0) {
+      throw new Error(`popover (${theme}): ${failures.join("; ")}`);
+    }
+
+    const name = theme === "light" ? "popover.png" : "popover-dark.png";
+    await page.screenshot({ path: fileURLToPath(new URL(name, OUT)) });
+    console.log(`  ${name}`);
+    await context.close();
+  }
 } finally {
   await browser.close();
   await server.close();
 }
 
-console.log(`\nwrote ${SHOTS.length * 2 + THEMES.length} screenshots to docs/images/`);
+console.log(`\nwrote ${SHOTS.length * 2 + THEMES.length + 2} screenshots to docs/images/`);

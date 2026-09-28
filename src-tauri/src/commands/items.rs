@@ -14,7 +14,7 @@ use skills_core::frontmatter::{self, Field};
 use skills_core::model::ItemMetadata;
 use skills_core::store::{MetaPatch, MetaStore};
 use skills_core::{fsunit, toggle};
-use tauri::State;
+use tauri::{Emitter as _, State};
 
 use crate::commands::lock;
 use crate::error::{CommandError, CommandResult};
@@ -99,11 +99,19 @@ pub fn write_item_content(
     with_store(&state, |store| Ok(store.ensure(&item.discovered)?.metadata))
 }
 
+/// The event carrying an item that changed under somebody else's hands.
+///
+/// Both webviews can toggle the same item, so whichever did it says so and the
+/// other patches its one card. The caller gets the item back as well, so it
+/// does not depend on hearing its own event.
+pub const ITEM_CHANGED: &str = "item:changed";
+
 #[tauri::command]
 #[specta::specta]
 pub fn set_item_enabled(
     entry_id: String,
     enabled: bool,
+    app: tauri::AppHandle,
     state: State<'_, AppState>,
 ) -> CommandResult<ItemMetadata> {
     let mut item = find(&state, &entry_id)?;
@@ -114,6 +122,12 @@ pub fn set_item_enabled(
 
     let updated = with_store(&state, |store| Ok(store.ensure(&item.discovered)?.metadata))?;
     replace_in_snapshot(&state, &updated)?;
+
+    // Nobody listening is the normal case — one webview, or the window shut.
+    if let Err(err) = app.emit(ITEM_CHANGED, &updated) {
+        tracing::warn!(%err, "an open view may now be showing a stale card");
+    }
+
     Ok(updated)
 }
 

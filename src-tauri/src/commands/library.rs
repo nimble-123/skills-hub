@@ -36,6 +36,44 @@ pub async fn rescan(
     on_progress: Channel<Progress>,
     state: State<'_, AppState>,
 ) -> CommandResult<LibrarySnapshot> {
+    scan(&state, options, &|progress| {
+        // A dropped channel means the window has gone; the scan finishing is
+        // still worth doing, so the send is not checked.
+        let _ = on_progress.send(progress);
+    })
+}
+
+/// The last scan, scanning first if this session has not scanned yet.
+///
+/// What the menubar popover asks for. The window drives its own scan because
+/// it shows the progress; the popover has nowhere to put it and would rather
+/// wait than open onto nothing. `None` means no notes folder has been chosen,
+/// which only the window can put right.
+#[tauri::command]
+#[specta::specta]
+pub async fn ensure_snapshot(state: State<'_, AppState>) -> CommandResult<Option<LibrarySnapshot>> {
+    if let Some(snapshot) = lock(&state.snapshot)?.clone() {
+        return Ok(Some(snapshot));
+    }
+    if lock(&state.store)?.is_none() {
+        return Ok(None);
+    }
+    scan(
+        &state,
+        RescanOptions {
+            skip_plugins: false,
+        },
+        &|_| {},
+    )
+    .map(Some)
+}
+
+/// The scan itself, with whatever wants to hear about its progress.
+fn scan(
+    state: &AppState,
+    options: RescanOptions,
+    on_progress: &(dyn Fn(Progress) + Sync),
+) -> CommandResult<LibrarySnapshot> {
     // Refused rather than queued: whoever asked second would be waiting twice
     // over for a result they are going to throw away.
     let _scanning = state
@@ -65,11 +103,7 @@ pub async fn rescan(
         },
         options,
         version,
-        &|progress| {
-            // A dropped channel means the window has gone; the scan finishing
-            // is still worth doing, so the send is not checked.
-            let _ = on_progress.send(progress);
-        },
+        on_progress,
     )?;
 
     *lock(&state.snapshot)? = Some(snapshot.clone());

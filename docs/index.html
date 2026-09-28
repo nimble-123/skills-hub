@@ -615,6 +615,7 @@
         </a>
         <div class="nav-links">
           <a href="#library">Library</a>
+          <a href="#menubar">Menubar</a>
           <a href="#install">Install</a>
           <a href="#cost">Cost</a>
           <a href="#tools">Tools</a>
@@ -694,6 +695,34 @@
             </p>
           </li>
         </ul>
+      </section>
+
+      <section id="menubar">
+        <p class="eyebrow">Menubar</p>
+        <h2>Without opening the window at all</h2>
+        <p class="section-lede">
+          On macOS there is a status item with a popover behind it: search the whole library,
+          switch something on or off, and carry on. It is an <code>NSPanel</code>, so it takes the
+          keyboard without activating the application — typing in it does not pull you out of your
+          editor. Close the window and the application stays, in the menu bar.
+        </p>
+
+        <figure style="max-width: 380px; margin-inline: auto">
+          <div class="window">
+            <picture>
+              <source srcset="images/popover-dark.png" media="(prefers-color-scheme: dark)" />
+              <img
+                src="images/popover.png"
+                alt="The menubar popover: a search field, matching items with their type, tool and a switch each, and Open the window and Quit along the bottom"
+              />
+            </picture>
+          </div>
+        </figure>
+
+        <div class="note">
+          The popover and the window switch the same files, and each tells the other what changed,
+          so a card left open in the window does not go on showing the state it had before.
+        </div>
       </section>
 
       <section id="install">

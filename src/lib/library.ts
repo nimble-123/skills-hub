@@ -93,6 +93,18 @@ export function deriveLibrary(
   return { visible, facets };
 }
 
+/**
+ * Whether an item matches a search term, which is already lowercased and
+ * trimmed. An empty term matches everything.
+ *
+ * Exported because the menubar popover searches the same library and must
+ * agree with the window about what "matching" means.
+ */
+export function matchesSearch(item: ItemMetadata, needle: string): boolean {
+  if (needle === "") return true;
+  return `${item.name}\n${item.description}`.toLowerCase().includes(needle);
+}
+
 /** Whether an item survives the compounding filters. */
 function passesFilters(item: ItemMetadata, filters: Filters, needle: string): boolean {
   if (filters.enabled === "enabled" && !item.enabled) return false;
@@ -103,10 +115,7 @@ function passesFilters(item: ItemMetadata, filters: Filters, needle: string): bo
 
   if (!matchesSource(item, filters.source)) return false;
 
-  if (needle !== "") {
-    const haystack = `${item.name}\n${item.description}`.toLowerCase();
-    if (!haystack.includes(needle)) return false;
-  }
+  if (!matchesSearch(item, needle)) return false;
 
   return true;
 }

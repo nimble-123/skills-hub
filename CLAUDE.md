@@ -92,6 +92,10 @@ pnpm screenshots                # docs/images/, incl. the palette gallery
   only needs "is this dark" reads `data-appearance`.
 - **`unwrap`, `expect` and `panic` are `deny`** workspace-wide. Test files opt
   out with `#![allow(clippy::expect_used, clippy::panic)]`.
+- **A second window needs its own capability.** `src-tauri/capabilities/` is
+  scoped per window label, so the menubar popover has `popover.json`. Leave a
+  window out and it builds, starts, and then fails every API call at runtime
+  with `not allowed on window "…"` — nothing catches it before you run it.
 - **Skip `._*` when walking a directory.** This checkout is on exFAT, where
   macOS writes a binary AppleDouble sidecar beside every file.
 - **The pull request title becomes the commit message** on a squash merge, and

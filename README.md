@@ -71,6 +71,17 @@ rather than guessing from how old a file is.
 configured with, global and per project. Plugin bundles from Claude Code and
 Codex, with their items in the library and the bundle switchable as a whole.
 
+**A menubar companion, on macOS.** A status item with a popover: search the
+whole library, switch an item on or off, and go back to what you were doing —
+the panel takes the keyboard without activating the application, so typing in
+it does not pull you out of your editor. Closing the window leaves it running;
+the popover and the window switch the same files and each tells the other what
+changed, so neither goes stale.
+
+<p align="center">
+  <img src="docs/images/popover.png" alt="The menubar popover: a search field, matching items with their type, tool and a switch each" width="360">
+</p>
+
 ## Supported tools
 
 Claude Code · Cursor · Codex · OpenCode · Antigravity · GitHub Copilot ·

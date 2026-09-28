@@ -6,6 +6,8 @@
 
 mod commands;
 mod error;
+#[cfg(target_os = "macos")]
+mod menubar;
 mod state;
 
 pub use error::CommandError;
@@ -26,6 +28,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::settings::remove_project_workspace,
         commands::library::get_snapshot,
         commands::library::rescan,
+        commands::library::ensure_snapshot,
         commands::library::list_orphaned_metadata,
         commands::library::forget_orphaned_metadata,
         commands::items::read_item_content,
@@ -63,6 +66,9 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::collections::set_item_in_collection,
         commands::shell::reveal_in_file_manager,
         commands::shell::open_path,
+        commands::menubar::close_popover,
+        commands::menubar::show_main_window,
+        commands::menubar::quit,
     ])
 }
 
@@ -77,15 +83,45 @@ pub fn run() {
 
     let builder = specta_builder();
 
-    let run = tauri::Builder::default()
+    let tauri_builder = tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_dialog::init());
+
+    #[cfg(target_os = "macos")]
+    let tauri_builder = tauri_builder.plugin(tauri_nspanel::init());
+
+    let run = tauri_builder
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
             app.manage(load_state(app.handle())?);
+
+            // The menubar is a companion, not a requirement: if the status
+            // item cannot be created the window is still a whole application,
+            // so this is logged rather than returned.
+            #[cfg(target_os = "macos")]
+            if let Err(err) = menubar::install(app.handle()) {
+                tracing::error!(%err, "no menubar companion this session");
+            }
+
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            // Closing the window leaves the menubar behind. Without this the
+            // status item would die with the first close.
+            #[cfg(target_os = "macos")]
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event
+                && window.label() == menubar::MAIN
+            {
+                api.prevent_close();
+                menubar::on_main_close(window);
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                let _ = (window, event);
+            }
         })
         .run(tauri::generate_context!());
 

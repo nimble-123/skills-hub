@@ -1,0 +1,10 @@
+<!-- The menubar mark: the app icon's three bars, without its rounded square.
+     Black on transparent, because macOS template images are read as a mask —
+     the system inverts them for dark menu bars and for the selected state. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g fill="#000">
+    <rect x="5" y="8"  width="22" height="4" rx="2"/>
+    <rect x="5" y="14" width="18" height="4" rx="2"/>
+    <rect x="5" y="20" width="13" height="4" rx="2"/>
+  </g>
+</svg>

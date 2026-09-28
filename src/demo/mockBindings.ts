@@ -42,6 +42,7 @@ export const commands: typeof real = {
 
   getSnapshot: () => ok(SNAPSHOT),
   rescan: () => ok(SNAPSHOT),
+  ensureSnapshot: () => ok(SNAPSHOT),
   listOrphanedMetadata: () => ok([]),
   forgetOrphanedMetadata: () => ok(0),
 
@@ -65,6 +66,10 @@ export const commands: typeof real = {
 
   revealInFileManager: nothing,
   openPath: nothing,
+  // The menubar has no host to talk to in the demo build.
+  closePopover: () => Promise.resolve(),
+  showMainWindow: nothing,
+  quit: () => Promise.resolve(),
 
   searchRegistry: () => ok(REGISTRY_HITS),
   getDiscoverCatalog: () => ok(CATALOG),

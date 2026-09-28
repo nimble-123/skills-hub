@@ -32,46 +32,47 @@ made, are in `CONTRIBUTING.md`.
 
 ## Queued
 
-### Menubar companion (macOS)
+### Menubar companion — what is left
 
-Fully designed, nothing built. `tray-icon 0.25.1` is already in `Cargo.lock`;
-only `features = ["tray-icon", "image-png"]` on the `tauri` dependency is
-missing. Five pieces of work, three of them not obvious:
+Built, with a webview popover rather than a native menu: a status item, an
+`NSPanel` holding a second webview, search over the whole library, and a switch
+per row that moves the same file the window's card does. Either side emits
+`item:changed` and the other patches one card, so the two cannot drift apart.
 
-1. A monochrome template icon (16×16, 32×32) — the existing icons are colour
-   app icons and will not do.
-2. `ActivationPolicy::Accessory` when no window is open, `Regular` when one
-   is. A fixed `LSUIElement` would hide the Dock icon even with a window open.
-3. `CloseRequested` → `prevent_close()` + `hide()`, or the tray dies with the
-   first window close.
-4. **A headless scan.** `AppState.snapshot` is only ever filled by the
-   frontend calling `rescan`, so a tray-only launch would have no data. Needs
-   an `ensure_snapshot()`. `store` is also `None` until a notes folder is
-   chosen, which the tray has to represent.
-5. **An event back to the window.** `set_item_enabled` returns the updated item
-   so the UI can patch one card. A tray toggling independently leaves an open
-   window stale — needs `app.emit("item:changed", …)` and a listener in the
-   store. The only part that touches the frontend.
+**Unverified: the focus behaviour on macOS 27.** `tauri-nspanel` has an open
+report ([#123](https://github.com/ahkohd/tauri-nspanel/issues/123)) that a panel
+takes focus like an ordinary window there. The maintainer says 2.1.0 with
+`add_style_mask` fixes it; the reporter says it does not. This uses exactly that
+call and it returned without error, which is the part that can be checked from a
+terminal — the rest has to be looked at:
 
-Two shapes to choose between: a native `Menu` (no webview, text and checkmarks
-only) or a popover with a webview (search and cards, ~50–80 MB RSS, and
-`tauri-nspanel` + `tauri-plugin-positioner` for real menubar behaviour).
-Native menu first — it covers the most valuable action, toggling without
-opening the window, and the four items above are needed either way.
+1. Open the popover from the menu bar while another application is in front.
+2. Type in the search field.
+3. `lsappinfo info -only name $(lsappinfo front)` — that other application
+   should still be frontmost. If it says `skills-hub`, the panel is activating
+   and the popover is pulling the user out of what they were doing.
 
-`tauri-nspanel` is the one dependency here whose maintenance state should be
-checked before it goes in.
+If it does activate, the fallback is the native `Menu` the popover replaced:
+fewer features, no focus to steal.
+
+**Also not done:**
+
+- Right-clicking the status item does nothing. The menu is deliberately not
+  attached (`show_menu_on_left_click(false)` with no menu at all), because the
+  popover carries the two actions a menu would have. Worth revisiting only if
+  the popover turns out to be the slower path to Quit.
+- No status item on Windows or Linux. `NSPanel` is what makes a webview behave
+  like a menu bar item and there is nothing to port it to.
+- The popover's empty state shows favourites. It was going to show recently
+  changed items as well, and does not: `ItemMetadata` carries no timestamp for
+  when an item last changed, and inventing one for this would be a change to
+  the store rather than to the menubar.
 
 ### Two secrets, and a pull request in someone else's queue
 
 The tap and the winget manifest are built and submitted; what is left is not
 work here.
 
-- **`HOMEBREW_TAP_TOKEN`** — a PAT with Contents write on
-  `nimble-123/homebrew-tap`. Without it the `Homebrew tap` job warns and stops,
-  and the cask stays on whatever release it last saw.
-- **`WINGET_TOKEN`** — a classic PAT with `public_repo` and `workflow`. Same
-  shape of failure, no manifest pull request.
 - **[winget-pkgs#442854](https://github.com/microsoft/winget-pkgs/pull/442854)**
   is open. Microsoft's bot wants the CLA accepted by a comment from the account
   that opened it, and their moderators review after that. `winget-releaser` can
