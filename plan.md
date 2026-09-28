@@ -114,32 +114,6 @@ clock still counts.
    rest doing work. Little left to win, but the most lopsided job.
 4. `sccache` — marginal while `rust-cache` already covers the dependencies.
 
-### UI5 Web Components with React
-
-An experiment, not a decision. `@ui5/webcomponents-react` 2.27.1 lists
-`react: ^18 || ^19` as a peer dependency, so React 19 is supported — and React
-19's custom-element handling is what makes wrapping web components workable at
-all.
-
-What has to be thought through before writing any code:
-
-- **It collides with the existing design language, harder than it used to.**
-  `tokens.css` is a port of Obsidian's token set and every component is styled
-  through it. There are now eighteen palettes and two typeface settings on top
-  of that, including a Morning and an Evening Horizon transcribed from SAP's
-  own colours — so the Fiori look is already available without the dependency,
-  and adopting UI5 would mean running two theming systems or retiring ours.
-- **Size.** The bundle is 2.5 MB: 1.9 MB of JavaScript, most of it shiki
-  grammars that load only when a code fence asks for them, and 546 KB of
-  bundled fonts. `@ui5/webcomponents` unpacks to 23 MB and the React wrapper to
-  5.6 MB before `-base`, `-fiori` and `-icons`. Tree-shaking decides whether
-  that matters, but it has to be measured, not assumed.
-- **Scope.** Whole-app replacement, or one screen as a spike on a branch?
-- **What it would actually buy.** Worth naming before starting, and harder to
-  answer now that the Horizon palettes exist.
-
-To be planned properly.
-
 ### One shape for the chips
 
 The tag chips on the cards and in the detail rail share `var(--radius-s)` since
