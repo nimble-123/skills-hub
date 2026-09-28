@@ -4,6 +4,22 @@ import { MONO_FONTS, resolveFonts, UI_FONTS } from "./fonts";
 
 const css = readFileSync(new URL("../styles/fonts.css", import.meta.url), "utf8");
 
+/**
+ * Every id the backend can hold, read from the generated bindings.
+ *
+ * The other direction: `themes.css` is checked against what the picker offers,
+ * but nothing checked that the picker offers everything the enum can be. A
+ * variant added in Rust and forgotten here compiles, passes the bindings-drift
+ * check, and is simply unreachable. The generated union is the honest source —
+ * it is written from the Rust, and it carries the serialised spelling.
+ */
+function idsInBindings(union: string): string[] {
+  const source = readFileSync(new URL("../bindings.ts", import.meta.url), "utf8");
+  const line = source.match(new RegExp(`export type ${union} = ([^;]+);`))?.[1];
+  if (!line) throw new Error(`no ${union} in bindings.ts`);
+  return [...line.matchAll(/"([^"]+)"/g)].map((match) => match[1] as string);
+}
+
 describe("the fonts on offer", () => {
   it("each have a stack to fall back through", () => {
     // `pnpm fonts` writes the blocks; a font added to the list without one
@@ -30,6 +46,20 @@ describe("the fonts on offer", () => {
     const ranges = css.match(/unicode-range:/g)?.length ?? 0;
     expect(faces).toBeGreaterThan(0);
     expect(ranges).toBe(faces);
+  });
+
+  it("offer every face the backend can hold", () => {
+    for (const [union, offered] of [
+      ["UiFont", UI_FONTS],
+      ["MonoFont", MONO_FONTS],
+    ] as const) {
+      for (const id of idsInBindings(union)) {
+        expect(
+          offered.map((font) => font.id),
+          `${id} is a ${union} but not on offer`,
+        ).toContain(id);
+      }
+    }
   });
 });
 
