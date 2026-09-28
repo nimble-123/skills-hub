@@ -113,6 +113,7 @@ export function Sidebar({ facets }: SidebarProps) {
               <NavRow
                 key={type}
                 icon={<Icon name={meta.icon} />}
+                type={type as keyof typeof TYPE_META}
                 label={meta.plural}
                 count={count}
                 active={inLibrary && scope.kind === "type" && scope.type === type}

@@ -31,6 +31,12 @@ const SHOTS = [
     ready: "text=When to use this",
   },
   {
+    file: "types",
+    screen: "types",
+    /** The four type chips only appear together in the unfiltered library. */
+    ready: "text=Every skill, agent, command and rule",
+  },
+  {
     file: "discover",
     screen: "discover",
     ready: "text=mcp-builder",

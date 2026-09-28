@@ -66,7 +66,9 @@ export function Card({ item, selected, projectName, onSelect, onTogglePlugin }: 
     >
       <div className={styles.head}>
         <span className={styles.name}>{item.name}</span>
-        <span className={styles.typePill}>{TYPE_META[item.type].label}</span>
+        <span className={styles.typePill} data-type={item.type}>
+          {TYPE_META[item.type].label}
+        </span>
         <button
           type="button"
           className={`${styles.switch} ${item.enabled ? styles.switchOn : ""}`}

@@ -68,7 +68,7 @@ export function InstallDialog({ entry, onClose }: InstallDialogProps) {
       >
         <div>
           <strong>{entry.name}</strong>
-          <span className={styles.typePill} style={{ marginLeft: 8 }}>
+          <span className={styles.typePill} data-type={entry.type} style={{ marginLeft: 8 }}>
             {TYPE_META[entry.type].label}
           </span>
         </div>

@@ -23,6 +23,10 @@ disabled anything.
 
 So: one library over the real folders, and every action a real one.
 
+<p align="center">
+  <img src="docs/images/types.png" alt="The whole library unfiltered: skills, agents, commands and rules side by side, each type a colour of its own" width="900">
+</p>
+
 ## What it does
 
 **Enabling and disabling moves the file.** Into a `.skillmanager-disabled`

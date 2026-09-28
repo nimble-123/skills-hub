@@ -146,7 +146,9 @@ export function DiscoverPane() {
                       <article key={entry.id} className={styles.card}>
                         <div className={styles.cardHead}>
                           <span className={styles.cardName}>{entry.name}</span>
-                          <span className={styles.typePill}>{TYPE_META[entry.type].label}</span>
+                          <span className={styles.typePill} data-type={entry.type}>
+                            {TYPE_META[entry.type].label}
+                          </span>
                         </div>
                         {entry.description && (
                           <p className={styles.description}>{entry.description}</p>
