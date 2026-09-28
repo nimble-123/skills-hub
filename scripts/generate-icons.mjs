@@ -20,7 +20,7 @@ const OUT = join(SRC, "components/common/icons.ts");
 
 function sourceFiles(dir) {
   return readdirSync(dir).flatMap((entry) => {
-    // This checkout sits on exFAT, where macOS writes AppleDouble sidecars.
+    // macOS writes AppleDouble sidecars on filesystems such as exFAT.
     if (entry.startsWith("._")) return [];
     const path = join(dir, entry);
     if (statSync(path).isDirectory()) return sourceFiles(path);

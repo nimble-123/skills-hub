@@ -7,8 +7,8 @@
 # Dependencies
 /node_modules/
 
-# macOS. The working volume is exFAT, so Finder scatters AppleDouble
-# sidecar files next to everything.
+# macOS writes AppleDouble sidecars next to every file on filesystems
+# without native metadata support, such as exFAT.
 .DS_Store
 ._*
 

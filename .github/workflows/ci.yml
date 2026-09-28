@@ -44,9 +44,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
 
+  # Only after merging. Packaging breaks from configuration, not from a code
+  # change — and the Rust job above already compiles src-tauri — so a pull
+  # request does not need thirteen minutes of Windows bundling to be trusted.
+  # The release workflow builds these again from the tag anyway.
   bundle:
     name: Bundle (${{ matrix.os }})
     needs: [rust, frontend]
+    if: github.event_name == 'push'
     strategy:
       fail-fast: false
       matrix:

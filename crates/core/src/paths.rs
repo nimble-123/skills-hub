@@ -123,17 +123,17 @@ mod tests {
 
     #[test]
     fn expands_a_leading_tilde() {
-        let home = Path::new("/Users/nimble");
+        let home = Path::new("/Users/n");
         assert_eq!(
             expand_home("~/.claude/skills", home),
-            PathBuf::from("/Users/nimble/.claude/skills")
+            PathBuf::from("/Users/n/.claude/skills")
         );
-        assert_eq!(expand_home("~", home), PathBuf::from("/Users/nimble"));
+        assert_eq!(expand_home("~", home), PathBuf::from("/Users/n"));
     }
 
     #[test]
     fn leaves_a_path_without_a_tilde_alone() {
-        let home = Path::new("/Users/nimble");
+        let home = Path::new("/Users/n");
         assert_eq!(
             expand_home("/etc/skills", home),
             PathBuf::from("/etc/skills")
@@ -150,7 +150,7 @@ mod tests {
             tool("cursor"),
             ItemType::Skill,
             Some(&project()),
-            Path::new("/Users/nimble"),
+            Path::new("/Users/n"),
         );
         assert_eq!(dir, Some(PathBuf::from("/work/demo/.cursor/skills")));
     }
@@ -163,7 +163,7 @@ mod tests {
             tool("claude-code"),
             ItemType::Rule,
             Some(&project()),
-            Path::new("/Users/nimble"),
+            Path::new("/Users/n"),
         );
         assert_eq!(dir, Some(PathBuf::from("/work/demo/CLAUDE.md")));
     }
@@ -175,7 +175,7 @@ mod tests {
                 tool("continue"),
                 ItemType::Rule,
                 None,
-                Path::new("/Users/nimble")
+                Path::new("/Users/n")
             ),
             None
         );
@@ -184,7 +184,7 @@ mod tests {
                 tool("continue"),
                 ItemType::Rule,
                 Some(&project()),
-                Path::new("/Users/nimble")
+                Path::new("/Users/n")
             ),
             Some(PathBuf::from("/work/demo/.continue/rules"))
         );

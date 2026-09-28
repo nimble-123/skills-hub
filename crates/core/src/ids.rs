@@ -147,7 +147,7 @@ mod tests {
     /// nothing of a long path, so these two items collided onto one metadata note.
     #[test]
     fn long_paths_sharing_an_eighty_character_prefix_do_not_collide() {
-        let shared = "/Users/nimble/.claude/skills/very-long-category-name-that-eats-the-budget";
+        let shared = "/Users/n/.claude/skills/very-long-category-name-that-eats-the-budget";
         let a = format!("{shared}/{}/alpha/SKILL.md", "x".repeat(120));
         let b = format!("{shared}/{}/beta/SKILL.md", "x".repeat(120));
 
