@@ -980,21 +980,30 @@
 
       <section id="build">
         <p class="eyebrow">Get it</p>
-        <h2>Two commands and a coffee</h2>
+        <h2>One command, or two and a coffee</h2>
         <p class="section-lede">
-          There is no installer yet. Building it yourself needs Rust, Node and pnpm, and produces
-          a <code>.app</code> and a <code>.dmg</code> — or the equivalent for your platform.
+          macOS installs from a Homebrew tap; Windows and Linux take their installer from the
+          releases page. Building it yourself needs Rust, Node and pnpm, and produces a
+          <code>.app</code> and a <code>.dmg</code> — or the equivalent for your platform.
         </p>
 
         <ul class="steps">
           <li class="step">
-            <h3>Clone it</h3>
-<pre>git clone https://github.com/<span class="comment">\</span>
-  nimble-123/skills-hub</pre>
+            <h3>Install it</h3>
+<pre>brew install --cask <span class="comment">\</span>
+  nimble-123/tap/skills-hub</pre>
+            <p>
+              On Windows, <code>winget install nimble-123.skills-hub</code> once the
+              <a href="https://github.com/microsoft/winget-pkgs/pull/442854">manifest</a> is
+              merged; until then, and on Linux, take the installer from the
+              <a href="https://github.com/nimble-123/skills-hub/releases/latest">latest release</a>.
+            </p>
           </li>
           <li class="step">
-            <h3>Build it</h3>
-<pre>pnpm install
+            <h3>Or build it</h3>
+<pre>git clone https://github.com/<span class="comment">\</span>
+  nimble-123/skills-hub
+pnpm install
 pnpm tauri build</pre>
           </li>
           <li class="step">
@@ -1010,7 +1019,7 @@ pnpm tauri build</pre>
           Builds are not signed yet, so macOS will object the first time. Open the app, let it be
           refused, then allow it under System Settings &rarr; Privacy &amp; Security, where an
           <strong>Open Anyway</strong> button now sits &mdash; or take the quarantine flag off
-          yourself with <code>xattr -dr com.apple.quarantine skills-hub.app</code>.
+          yourself with <code>xattr -dr com.apple.quarantine /Applications/skills-hub.app</code>.
           Control-clicking the app and choosing Open no longer works; macOS&nbsp;15 removed that
           bypass.
         </div>

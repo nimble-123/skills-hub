@@ -86,18 +86,39 @@ never standard — does not have to wait for a release.
 
 ## Installing
 
+**macOS** — a universal build, Apple silicon and Intel in one:
+
+```bash
+brew install --cask nimble-123/tap/skills-hub
+```
+
+**Windows**:
+
+```powershell
+winget install nimble-123.skills-hub
+```
+
+The winget manifest is [in review](https://github.com/microsoft/winget-pkgs/pull/442854);
+until it is merged, take the `-setup.exe` from the release instead.
+
+**Linux** — the `.deb` or the `.AppImage` from
+[the latest release](https://github.com/nimble-123/skills-hub/releases/latest),
+which is also where every installer above comes from.
+
+**From source**:
+
 ```bash
 pnpm install
 pnpm tauri build     # → .app and .dmg
 ```
 
-Builds are not signed yet, so macOS will object the first time. Open the app,
-let it be refused, then allow it under System Settings → Privacy & Security,
-where an **Open Anyway** button now sits. Or take the quarantine flag off
-yourself:
+Builds are not signed yet, so macOS will object the first time — Homebrew
+quarantines what it downloads like any other browser would. Open the app, let
+it be refused, then allow it under System Settings → Privacy & Security, where
+an **Open Anyway** button now sits. Or take the quarantine flag off yourself:
 
 ```bash
-xattr -dr com.apple.quarantine skills-hub.app
+xattr -dr com.apple.quarantine /Applications/skills-hub.app
 ```
 
 Control-clicking the app and choosing Open no longer works — macOS 15 removed
