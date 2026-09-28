@@ -132,14 +132,19 @@ Both calls answer `403 Upgrade to GitHub Pro or make this repository public`
 while the repository is private on the free plan. Branch protection and the
 newer rulesets are gated the same way; there is no CLI route around it.
 
-**Do not skip to step two.** GitHub holds workflow runs on a pull request
-opened by `app/github-actions` at `action_required` until someone approves
-them, so the checks on the release pull request never report — and a rule that
-requires them would leave that pull request permanently unmergeable. Either
-give release-please a personal access token (`token:` on the action, a
-fine-grained PAT with Contents and Pull requests write), so the pull request is
-authored by a real account and its checks run on their own, or leave step two
-off.
+**One caveat for step two.** GitHub holds the workflow runs triggered by the
+*opening* of a pull request authored by `app/github-actions` at
+`action_required`. Observed on release PR #1: those first runs were held, and
+the runs triggered moments later by the `lockfile` job's push to the same
+branch went through on their own and reported green. So the checks do arrive —
+but only because something pushes to the branch after the pull request is
+opened, which the `lockfile` job does whenever `Cargo.lock` moves, and a
+version bump always moves it.
+
+If that ever stops being true, the first run needs approving by hand, or
+release-please needs a token of its own (`token:` on the action, a fine-grained
+PAT with Contents and Pull requests write) so the pull request is authored by a
+real account.
 
 `enforce_admins` stays off so release-please can push its own branch, and the
 review count is zero because there is no second reviewer on a solo project —
