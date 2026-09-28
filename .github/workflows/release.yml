@@ -27,7 +27,11 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       release_id: ${{ steps.release.outputs.id }}
       tag_name: ${{ steps.release.outputs.tag_name }}
-      prs_created: ${{ steps.release.outputs.prs_created }}
+      # Asked for rather than assumed: the branch carries the package name as a
+      # component, so it is not simply "release-please--branches--main".
+      pr_branch: >-
+        ${{ steps.release.outputs.pr != ''
+            && fromJSON(steps.release.outputs.pr).headBranchName || '' }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
@@ -43,15 +47,14 @@ jobs:
   lockfile:
     name: Sync Cargo.lock
     needs: prepare
-    if: needs.prepare.outputs.prs_created == 'true'
+    if: needs.prepare.outputs.pr_branch != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
-          # release-please names its branch after the target branch, and
-          # force-pushes it on every run. A commit added here that a later run
-          # overwrites is simply made again by the next one.
-          ref: release-please--branches--main
+          # release-please force-pushes this branch on every run. A commit added
+          # here that a later run overwrites is simply made again by the next one.
+          ref: ${{ needs.prepare.outputs.pr_branch }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo update --workspace
