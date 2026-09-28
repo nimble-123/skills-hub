@@ -123,6 +123,11 @@ scanner testable against temporary directories. `crates/cli` is a developer
 harness that drives the same domain code from a terminal; that it can exist at
 all is the proof the domain really is decoupled.
 
+[ARCHITECTURE.md](ARCHITECTURE.md) has the long version: the domain model, the
+path a scan takes to become a card, where state is held, and which invariants
+must not be broken. [SPEC.md](SPEC.md) has what the application guarantees on
+disk, guarantee by guarantee, each cited to the test that holds it up.
+
 ## Development
 
 ```bash
