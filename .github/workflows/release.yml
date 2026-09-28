@@ -27,37 +27,71 @@ jobs:
     name: Release PR
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      release_id: ${{ steps.release.outputs.id }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
-      # Asked for rather than assumed: the branch carries the package name as a
-      # component, so it is not simply "release-please--branches--main".
+      release_created: ${{ steps.cut.outputs.created }}
+      release_id: ${{ steps.cut.outputs.id }}
+      tag_name: ${{ steps.cut.outputs.tag }}
       pr_branch: >-
         ${{ steps.release.outputs.pr != ''
             && fromJSON(steps.release.outputs.pr).headBranchName || '' }}
     steps:
-      # An empty secret is falsy, so the fallback below engages silently and the
-      # run fails later with GITHUB_TOKEN's error rather than saying the token
-      # is missing. `gh secret set` reads stdin when it has no TTY, which makes
-      # setting an empty value easy to do by accident.
       - name: Say which token is in use
         run: |
           if [ -z "${{ secrets.RELEASE_PLEASE_TOKEN }}" ]; then
-            echo "::warning::RELEASE_PLEASE_TOKEN is empty or unset — falling back to GITHUB_TOKEN. Creating a release will fail while main is protected."
+            echo "::warning::RELEASE_PLEASE_TOKEN is empty or unset — falling back to GITHUB_TOKEN."
           else
             echo "Using RELEASE_PLEASE_TOKEN."
           fi
+
+      # Only the pull request. Cutting the release is done below, because
+      # release-please creates it with target_commitish set to the release
+      # commit, and GitHub answers that with 404 for a classic token even
+      # though the very same token may create the tag ref and may create a
+      # release without that field. Both halves are proven; this uses them.
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          # The default GITHUB_TOKEN cannot create a release pointing at main
-          # once the branch is protected, and pull requests it opens have their
-          # workflow runs held at action_required. A token belonging to a real
-          # account fixes both. Falls back to GITHUB_TOKEN when the secret is
-          # not set, which still opens release pull requests.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          skip-github-release: true
+
+      - uses: actions/checkout@v5
+
+      # The manifest holds the version that has been released. If no tag
+      # carries it yet, this push is the one that merged the release pull
+      # request, and the release is cut here.
+      - name: Cut the release if the manifest moved ahead of the tags
+        id: cut
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+        run: |
+          version=$(jq -r '.["."]' .release-please-manifest.json)
+          tag="v$version"
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            echo "$tag is already released; nothing to cut."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          notes=$(awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md)
+
+          gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/$tag" -f sha="$GITHUB_SHA" --jq '.ref'
+
+          id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+                 -f tag_name="$tag" -f name="$tag" -f body="$notes" \
+                 -F draft=true -F prerelease=false --jq '.id')
+
+          echo "cut $tag as draft release $id"
+          {
+            echo "created=true"
+            echo "id=$id"
+            echo "tag=$tag"
+          } >> "$GITHUB_OUTPUT"
 
   # Cargo.lock records the three workspace crates' versions too, and it is a
   # generated file — it cannot carry the annotation comment release-please
