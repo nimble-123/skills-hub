@@ -36,6 +36,17 @@ jobs:
         ${{ steps.release.outputs.pr != ''
             && fromJSON(steps.release.outputs.pr).headBranchName || '' }}
     steps:
+      # An empty secret is falsy, so the fallback below engages silently and the
+      # run fails later with GITHUB_TOKEN's error rather than saying the token
+      # is missing. `gh secret set` reads stdin when it has no TTY, which makes
+      # setting an empty value easy to do by accident.
+      - name: Say which token is in use
+        run: |
+          if [ -z "${{ secrets.RELEASE_PLEASE_TOKEN }}" ]; then
+            echo "::warning::RELEASE_PLEASE_TOKEN is empty or unset — falling back to GITHUB_TOKEN. Creating a release will fail while main is protected."
+          else
+            echo "Using RELEASE_PLEASE_TOKEN."
+          fi
       - uses: googleapis/release-please-action@v4
         id: release
         with:
