@@ -21,6 +21,7 @@ import type {
   SettingsView,
   ToolReport,
 } from "../bindings";
+import { isThemeId } from "../lib/theme";
 
 type Seed = {
   name: string;
@@ -320,6 +321,17 @@ export const SNAPSHOT: LibrarySnapshot = {
   orphanCount: 0,
 };
 
+/**
+ * The palette the screenshot harness asked for with `?theme=…`, if it named
+ * one it knows.
+ *
+ * It belongs in the settings rather than in a call of its own: that way the
+ * demo picks a theme the same way the application does, and a break in that
+ * path shows up in a screenshot instead of hiding behind a second one.
+ */
+const asked = new URLSearchParams(window.location.search).get("theme");
+export const DEMO_THEME = isThemeId(asked) ? asked : null;
+
 export const SETTINGS: SettingsView = {
   settings: {
     schemaVersion: 1,
@@ -332,7 +344,7 @@ export const SETTINGS: SettingsView = {
     showEmptySidebarRows: false,
     defaultSortOrder: "name-asc",
     defaultEnabledFilter: "all",
-    theme: "system",
+    theme: DEMO_THEME ?? "system",
   },
   tools: ["claude-code", "codex", "cursor", "opencode", "global"].map((id) => ({
     id,

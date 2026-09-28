@@ -8,6 +8,7 @@ import {
   type SortOrder,
   type ThemePref,
 } from "../../bindings";
+import { THEME_GROUPS } from "../../lib/theme";
 import { reportError } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
 import { useSettings } from "../../stores/settings";
@@ -127,8 +128,15 @@ export function SettingsPane() {
               onChange={(event) => change({ theme: event.target.value as ThemePref })}
             >
               <option value="system">Follow the system</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
+              {THEME_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.themes.map((theme) => (
+                    <option key={theme.id} value={theme.id}>
+                      {theme.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </label>
         </section>

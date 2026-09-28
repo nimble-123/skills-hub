@@ -131,13 +131,30 @@ pub struct AppSettings {
     pub theme: ThemePref,
 }
 
+/// The theme, or the wish to be told one by the system.
+///
+/// Every variant but `System` names a palette the frontend defines; the
+/// backend only remembers which was chosen. `kebab-case` rather than
+/// `lowercase` so the multi-word ones round-trip readably — the three that
+/// existed before serialise the same under either.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "kebab-case")]
 pub enum ThemePref {
     #[default]
     System,
     Light,
     Dark,
+    SolarizedLight,
+    SolarizedDark,
+    Monokai,
+    QuietLight,
+    Abyss,
+    KimbieDark,
+    TomorrowNightBlue,
+    Red,
+    HighContrast,
+    HorizonMorning,
+    HorizonEvening,
 }
 
 impl Default for AppSettings {

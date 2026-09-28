@@ -456,8 +456,8 @@
   color: var(--shiki-light);
 }
 
-:global(:root[data-theme="dark"]) .highlighted :global(.shiki),
-:global(:root[data-theme="dark"]) .highlighted :global(.shiki span) {
+:global(:root[data-appearance="dark"]) .highlighted :global(.shiki),
+:global(:root[data-appearance="dark"]) .highlighted :global(.shiki span) {
   color: var(--shiki-dark);
 }
 
