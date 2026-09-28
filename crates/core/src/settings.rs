@@ -153,6 +153,12 @@ pub enum ThemePref {
     TomorrowNightBlue,
     Red,
     HighContrast,
+    TokyoNight,
+    Aura,
+    #[serde(rename = "synthwave-84")]
+    Synthwave84,
+    Panda,
+    Overnight,
     HorizonMorning,
     HorizonEvening,
 }

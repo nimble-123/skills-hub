@@ -349,6 +349,178 @@
   --shadow-m: none;
 }
 
+/* --------------------------------------------------------------- community */
+
+/* Tokyo Night [enkia] */
+:root[data-theme="tokyo-night"] {
+  --bg-primary: #1a1b26;
+  --bg-primary-alt: #24283b;
+  --bg-secondary: #16161e;
+  --bg-secondary-alt: #292e42;
+  --bg-modifier-border: #2f334d;
+  --bg-modifier-hover: rgba(169, 177, 214, 0.07);
+  --bg-modifier-active: rgba(169, 177, 214, 0.12);
+
+  --text-normal: #c0caf5;
+  --text-muted: #a9b1d6;
+  --text-faint: #565f89;
+  --text-on-accent: #1a1b26;
+  --text-error: #f7768e;
+  --text-success: #9ece6a;
+  --text-warning: #e0af68;
+
+  --interactive-accent: #7aa2f7;
+  --interactive-accent-hover: #9ab5fa;
+
+  --type-skill-bg: rgba(187, 154, 247, 0.18);
+  --type-skill-text: #bb9af7;
+  --type-agent-bg: rgba(115, 218, 202, 0.16);
+  --type-agent-text: #73daca;
+  --type-command-bg: rgba(224, 175, 104, 0.16);
+  --type-command-text: #e0af68;
+  --type-rule-bg: rgba(247, 118, 142, 0.18);
+  --type-rule-text: #f7768e;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Aura [Dalton Menezes] */
+:root[data-theme="aura"] {
+  --bg-primary: #15141b;
+  --bg-primary-alt: #1c1b23;
+  --bg-secondary: #110f18;
+  --bg-secondary-alt: #26232f;
+  --bg-modifier-border: #302d3a;
+  --bg-modifier-hover: rgba(237, 236, 238, 0.06);
+  --bg-modifier-active: rgba(237, 236, 238, 0.1);
+
+  --text-normal: #edecee;
+  --text-muted: #a5a1aa;
+  --text-faint: #6d6d6d;
+  --text-on-accent: #15141b;
+  --text-error: #ff6767;
+  --text-success: #61ffca;
+  --text-warning: #ffca85;
+
+  --interactive-accent: #a277ff;
+  --interactive-accent-hover: #bb9dff;
+
+  --type-skill-bg: rgba(162, 119, 255, 0.2);
+  --type-skill-text: #a277ff;
+  --type-agent-bg: rgba(97, 255, 202, 0.14);
+  --type-agent-text: #61ffca;
+  --type-command-bg: rgba(255, 202, 133, 0.16);
+  --type-command-text: #ffca85;
+  --type-rule-bg: rgba(246, 148, 255, 0.16);
+  --type-rule-text: #f694ff;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.55);
+}
+
+/* SynthWave '84 [Robb Owen] — the glow is the theme's; this is its palette */
+:root[data-theme="synthwave-84"] {
+  --bg-primary: #262335;
+  --bg-primary-alt: #2e2a41;
+  --bg-secondary: #241b2f;
+  --bg-secondary-alt: #34294f;
+  --bg-modifier-border: #3b3363;
+  --bg-modifier-hover: rgba(255, 126, 219, 0.1);
+  --bg-modifier-active: rgba(255, 126, 219, 0.18);
+
+  --text-normal: #ffffff;
+  --text-muted: #b6b1d4;
+  --text-faint: #848bbd;
+  --text-on-accent: #262335;
+  --text-error: #f97e72;
+  --text-success: #72f1b8;
+  --text-warning: #ff8b39;
+
+  --interactive-accent: #ff7edb;
+  --interactive-accent-hover: #ff9ce4;
+
+  --type-skill-bg: rgba(255, 126, 219, 0.18);
+  --type-skill-text: #ff7edb;
+  --type-agent-bg: rgba(54, 249, 246, 0.14);
+  --type-agent-text: #36f9f6;
+  --type-command-bg: rgba(254, 222, 93, 0.16);
+  --type-command-text: #fede5d;
+  --type-rule-bg: rgba(249, 126, 114, 0.18);
+  --type-rule-text: #f97e72;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.55);
+}
+
+/* Panda [Siamak Mokhtari] */
+:root[data-theme="panda"] {
+  --bg-primary: #292a2b;
+  --bg-primary-alt: #31353a;
+  --bg-secondary: #242526;
+  --bg-secondary-alt: #373b41;
+  --bg-modifier-border: #3e4250;
+  --bg-modifier-hover: rgba(230, 230, 230, 0.06);
+  --bg-modifier-active: rgba(230, 230, 230, 0.1);
+
+  --text-normal: #e6e6e6;
+  --text-muted: #cdcdcd;
+  --text-faint: #757575;
+  --text-on-accent: #242526;
+  --text-error: #ff2c6d;
+  --text-success: #19f9d8;
+  --text-warning: #ffb86c;
+
+  --interactive-accent: #19f9d8;
+  --interactive-accent-hover: #6fe7d2;
+
+  --type-skill-bg: rgba(176, 132, 235, 0.2);
+  --type-skill-text: #b084eb;
+  --type-agent-bg: rgba(25, 249, 216, 0.14);
+  --type-agent-text: #19f9d8;
+  --type-command-bg: rgba(255, 184, 108, 0.16);
+  --type-command-text: #ffb86c;
+  --type-rule-bg: rgba(255, 117, 181, 0.18);
+  --type-rule-text: #ff75b5;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Overnight [cevr, after Night Owl] */
+:root[data-theme="overnight"] {
+  --bg-primary: #011627;
+  --bg-primary-alt: #0b253a;
+  --bg-secondary: #00101d;
+  --bg-secondary-alt: #0e2c47;
+  --bg-modifier-border: #122d42;
+  --bg-modifier-hover: rgba(206, 210, 214, 0.07);
+  --bg-modifier-active: rgba(206, 210, 214, 0.12);
+
+  --text-normal: #ced2d6;
+  --text-muted: #b2ccd6;
+  --text-faint: #5f7e97;
+  --text-on-accent: #011627;
+  --text-error: #ff5874;
+  --text-success: #a3c76e;
+  --text-warning: #ecc48d;
+
+  --interactive-accent: #82aaff;
+  --interactive-accent-hover: #a3c0ff;
+
+  --type-skill-bg: rgba(199, 146, 234, 0.18);
+  --type-skill-text: #c792ea;
+  --type-agent-bg: rgba(128, 203, 196, 0.16);
+  --type-agent-text: #80cbc4;
+  --type-command-bg: rgba(236, 196, 141, 0.16);
+  --type-command-text: #ecc48d;
+  --type-rule-bg: rgba(255, 88, 116, 0.18);
+  --type-rule-text: #ff5874;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.55);
+}
+
 /* ------------------------------------------------------- SAP Fiori Horizon */
 
 /* Morning Horizon [SAP Horizon, sapBrandColor #0070f2 on #f5f6f7] */

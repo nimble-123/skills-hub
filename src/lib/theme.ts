@@ -35,6 +35,7 @@ export const THEME_GROUPS: { label: string; themes: ThemeChoice[] }[] = [
     ],
   },
   {
+    // What VS Code ships with.
     label: "VS Code",
     themes: [
       { id: "quiet-light", label: "Quiet Light", appearance: "light" },
@@ -46,6 +47,18 @@ export const THEME_GROUPS: { label: string; themes: ThemeChoice[] }[] = [
       { id: "tomorrow-night-blue", label: "Tomorrow Night Blue", appearance: "dark" },
       { id: "red", label: "Red", appearance: "dark" },
       { id: "high-contrast", label: "High Contrast", appearance: "dark" },
+    ],
+  },
+  {
+    // These five are installed from the marketplace rather than shipped, which
+    // is the only reason they are a group of their own.
+    label: "Community",
+    themes: [
+      { id: "tokyo-night", label: "Tokyo Night", appearance: "dark" },
+      { id: "aura", label: "Aura", appearance: "dark" },
+      { id: "synthwave-84", label: "SynthWave '84", appearance: "dark" },
+      { id: "panda", label: "Panda", appearance: "dark" },
+      { id: "overnight", label: "Overnight", appearance: "dark" },
     ],
   },
   {

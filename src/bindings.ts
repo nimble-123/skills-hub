@@ -718,7 +718,7 @@ export type SortOrder = "name-asc" | "name-desc" | "modified-desc" | "modified-a
  *  `lowercase` so the multi-word ones round-trip readably — the three that
  *  existed before serialise the same under either.
  */
-export type ThemePref = "system" | "light" | "dark" | "solarized-light" | "solarized-dark" | "monokai" | "quiet-light" | "abyss" | "kimbie-dark" | "tomorrow-night-blue" | "red" | "high-contrast" | "horizon-morning" | "horizon-evening";
+export type ThemePref = "system" | "light" | "dark" | "solarized-light" | "solarized-dark" | "monokai" | "quiet-light" | "abyss" | "kimbie-dark" | "tomorrow-night-blue" | "red" | "high-contrast" | "tokyo-night" | "aura" | "synthwave-84" | "panda" | "overnight" | "horizon-morning" | "horizon-evening";
 
 /**  One AI coding tool and where it keeps things. */
 export type ToolConfig = {
