@@ -58,7 +58,7 @@ jobs:
           TOKEN: ${{ secrets.WINGET_TOKEN }}
         run: |
           scopes="$(curl -sSI -H "Authorization: token $TOKEN" https://api.github.com/user \
-            | tr -d '\r' | grep -i '^x-oauth-scopes:' | cut -d' ' -f2-)"
+            | tr -d ' \r' | grep -i '^x-oauth-scopes:' | cut -d: -f2-)"
           echo "scopes: ${scopes:-<none - this is not a classic token>}"
           case ",$scopes," in *,public_repo,*|*,repo,*) ;; *) echo "::error::no public_repo"; exit 1;; esac
           case ",$scopes," in *,workflow,*) ;; *) echo "::error::no workflow"; exit 1;; esac
