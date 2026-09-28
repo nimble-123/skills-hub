@@ -10,6 +10,9 @@ name: Release
 on:
   push:
     branches: [main]
+  # So a release that got stuck can be driven again by hand, without an empty
+  # commit to main just to produce a push event.
+  workflow_dispatch:
 
 permissions:
   contents: write
