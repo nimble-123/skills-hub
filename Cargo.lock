@@ -3702,7 +3702,7 @@ checksum = "33f4fe9184a62d842c9ef383018f3306d8ba224fd9d836f56d7288308847c256"
 
 [[package]]
 name = "skills-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dirs",
  "serde_json",
@@ -3712,7 +3712,7 @@ dependencies = [
 
 [[package]]
 name = "skills-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "blake3",
  "dunce",
@@ -3734,7 +3734,7 @@ dependencies = [
 
 [[package]]
 name = "skills-hub"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dirs",
  "jiff",
