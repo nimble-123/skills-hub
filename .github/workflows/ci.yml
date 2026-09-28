@@ -57,6 +57,17 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    # This build exists to prove that packaging works, not to produce something
+    # anyone runs. [profile.release] is tuned for a shipped binary — fat LTO,
+    # one codegen unit, optimised for size — and pays for that on every run,
+    # because the cache only spares the dependencies while our own crates and
+    # the final LTO link are redone each time. Measured on an incremental
+    # rebuild after touching skills-core: 71.7s with the shipping profile,
+    # 14.9s with these. The release workflow keeps the real profile.
+    env:
+      CARGO_PROFILE_RELEASE_LTO: "false"
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+      CARGO_PROFILE_RELEASE_OPT_LEVEL: "1"
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable

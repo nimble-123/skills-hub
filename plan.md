@@ -96,46 +96,61 @@ in `tauri.conf.json`, otherwise it only ever installs for the current user and
 `release.yml` passes `--target universal-apple-darwin`, but CI only ever builds
 host-native. The first release run is also the first test of that line.
 
+### Stop the release PR collecting held workflow runs
+
+GitHub holds runs on a pull request authored by `app/github-actions` at
+`action_required`, and release-please force-pushes its branch on every merge to
+main, so a new pair appears each time — six had accumulated on PR #1, showing as
+"2 workflows awaiting approval" on the pull request.
+
+The real fix is a fine-grained PAT (Contents and Pull requests: write) passed to
+the action as `token:`, so the pull request is authored by a real account and
+the gate does not apply. There is no repository-level API for the approval
+policy — `actions/permissions/fork-pr-workflows` answers 404.
+
+This also unblocks step two of branch protection, which cannot require checks
+that may never report. The by-hand approval command is in `CONTRIBUTING.md`.
+
 ---
 
 ## Ideas
 
 ### Make the build faster
 
-Measured on the first cold run, and the shape is clear:
+**Done: a cheaper profile for CI verification builds.** `[profile.release]` is
+tuned for a shipped binary — fat LTO, one codegen unit, optimised for size — and
+paid for it on every run, because the cache spares only the dependencies while
+our own crates and the final LTO link are redone each time. The CI bundle job now
+overrides those three settings through `CARGO_PROFILE_RELEASE_*`. Measured
+locally on an incremental rebuild after touching `skills-core`: **71.7s → 14.9s**.
+The release workflow keeps the shipping profile.
 
-| Job | Total | of which `pnpm tauri build` |
-|---|---|---|
-| Bundle (windows) | 13m05s | **632s** |
-| Bundle (ubuntu) | 5m06s | 184s (+72s `apt-get`) |
-| Bundle (macos) | 2m48s | — |
-| Rust (fmt, clippy, test) | 2m32s | — |
+**Warm-cache measurements, which changed the picture:**
 
-Everything else — checkout, toolchain, pnpm, cache restore — is seconds.
-So it is the Rust release compile, and Windows is three times the next worst.
+| Job | cold | warm | of which `tauri build` |
+|---|---|---|---|
+| Bundle (windows) | 1019s | 366s | 278s |
+| Bundle (ubuntu) | 306s | 295s | 228s (+30s apt) |
+| Bundle (macos) | 168s | 155s | 130s |
+| Rust | 152s | 118s | — (35s cache, 32s apt, 43s work) |
 
-Candidates, roughly in order of expected payoff:
+`Swatinem/rust-cache` alone cut Windows to a third. Windows is no longer the
+outlier it looked like.
 
-1. **A cheaper profile for verification builds.** `[profile.release]` sets
-   `lto = true`, `codegen-units = 1`, `opt-level = "s"` — correct for a
-   shipped binary, expensive for a build whose only job is to prove that
-   packaging works. A `[profile.ci]` inheriting release with `lto = false` and
-   `codegen-units = 16` should cut this sharply, while the release workflow
-   keeps the real profile. Highest leverage, smallest change.
-2. **Measure a warm run first.** `Swatinem/rust-cache` is already in place but
-   every number above is from a cold cache. We have never seen a warm build.
-   Do this before optimising anything — it may move the whole table.
-3. **A prebuilt container image** helps *Linux only*. GitHub's macOS and
-   Windows runners cannot run Linux containers, so an image covers one of three
-   legs — and that leg is the 5-minute one, not the 13-minute one. It would
-   remove the 72s `apt-get` and could ship a pre-built dependency layer
-   (cargo-chef). Worth doing, but not where the time is.
-4. **sccache** with the Actions cache as its backend, shared across all three
-   legs' dependency compiles.
-5. **A faster linker** — `lld` on Windows and Linux, `mold` on Linux.
+**A prebuilt container image is not worth it.** It helps Linux only — GitHub's
+macOS and Windows runners cannot run Linux containers — and on that one leg it
+would save the 30s `apt-get` beside a 228s compile. The arithmetic does not work.
 
-Check where inside those 632 seconds the time actually goes (dependency
-compile vs. our crates vs. NSIS) before picking.
+**Still open, in order of expected payoff:**
+
+1. Re-measure CI after the profile change; the numbers above are all from the
+   shipping profile.
+2. A faster linker — `lld` on Windows and Linux, `mold` on Linux. Less
+   interesting now that LTO is off for CI, since that was most of the link cost.
+3. `sccache` with the Actions cache as its backend. Marginal while
+   `rust-cache` already covers the dependencies.
+4. The `Rust` job spends 67s of 118s on cache restore and `apt-get`, and 43s
+   doing work. Little left to win, but it is the most lopsided job.
 
 ### UI5 Web Components with React
 

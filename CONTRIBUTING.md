@@ -132,19 +132,26 @@ Both calls answer `403 Upgrade to GitHub Pro or make this repository public`
 while the repository is private on the free plan. Branch protection and the
 newer rulesets are gated the same way; there is no CLI route around it.
 
-**One caveat for step two.** GitHub holds the workflow runs triggered by the
-*opening* of a pull request authored by `app/github-actions` at
-`action_required`. Observed on release PR #1: those first runs were held, and
-the runs triggered moments later by the `lockfile` job's push to the same
-branch went through on their own and reported green. So the checks do arrive —
-but only because something pushes to the branch after the pull request is
-opened, which the `lockfile` job does whenever `Cargo.lock` moves, and a
-version bump always moves it.
+**One caveat for step two.** GitHub holds workflow runs on a pull request
+authored by `app/github-actions` at `action_required` until someone with write
+access approves them, and release-please force-pushes its branch on every merge
+to main — so a fresh pair of held runs appears each time. They pile up: six were
+waiting on release PR #1 before they were approved.
 
-If that ever stops being true, the first run needs approving by hand, or
-release-please needs a token of its own (`token:` on the action, a fine-grained
-PAT with Contents and Pull requests write) so the pull request is authored by a
-real account.
+Approve them by hand with
+
+```sh
+gh run list --json databaseId,conclusion \
+  --jq '.[] | select(.conclusion=="action_required") | .databaseId' \
+  | xargs -I{} gh api -X POST "repos/$REPO/actions/runs/{}/approve"
+```
+
+or remove the cause: give release-please a token of its own (`token:` on the
+action, a fine-grained PAT with Contents and Pull requests write). The pull
+request is then authored by a real account, the approval gate does not apply,
+and step two's required checks report without anyone watching for them. There
+is no repository-level API for the approval policy itself — `actions/permissions
+/fork-pr-workflows` answers 404.
 
 `enforce_admins` stays off so release-please can push its own branch, and the
 review count is zero because there is no second reviewer on a solo project —
