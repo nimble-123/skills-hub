@@ -68,6 +68,12 @@ jobs:
           # release-please force-pushes this branch on every run. A commit added
           # here that a later run overwrites is simply made again by the next one.
           ref: ${{ needs.prepare.outputs.pr_branch }}
+          # The same token release-please opens the pull request with. Pushing
+          # as github-actions[bot] instead would re-trigger the pull request's
+          # workflows as a bot, and those runs are held at action_required —
+          # undoing on the sync commit exactly what the token achieves for the
+          # pull request itself.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo update --workspace
