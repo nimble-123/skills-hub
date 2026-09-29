@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>skills-hub</title>
+    <title>skills-hub — one library for every AI coding tool</title>
     <meta
       name="description"
-      content="One library for the skills, agents, commands and rules scattered across every AI coding tool you use."
+      content="One library for the skills, agents, commands and rules of sixteen AI coding tools. A desktop app for macOS, Windows and Linux that acts on the real folders."
     />
     <meta property="og:title" content="skills-hub" />
     <meta
@@ -14,1075 +14,434 @@
       content="One library for the skills, agents, commands and rules scattered across every AI coding tool you use."
     />
     <meta property="og:image" content="images/library.png" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%235b6ef5'/><g fill='white'><rect x='22' y='28' width='56' height='11' rx='5'/><rect x='22' y='45' width='44' height='11' rx='5'/><rect x='22' y='62' width='32' height='11' rx='5'/></g></svg>" />
-
-    <style>
-      /*
-       * One page, no build step. The tokens mirror the application's own, so
-       * the screenshots sit in a page that looks like the thing they show.
-       */
-      :root {
-        --bg: #ffffff;
-        --bg-soft: #f5f6f8;
-        --bg-sunken: #eef0f4;
-        --bg-blur: rgba(255, 255, 255, 0.78);
-        --border: #dddde1;
-        --border-soft: #e8e8ec;
-        --text: #1f2124;
-        --muted: #5c6068;
-        --faint: #8a8f98;
-        --accent: #5b6ef5;
-        --accent-hover: #4a5de4;
-        --accent-soft: #eceefe;
-        --glow: rgba(91, 110, 245, 0.16);
-        --on-accent: #ffffff;
-        --radius: 12px;
-        --shadow: 0 8px 30px rgba(20, 24, 40, 0.1);
-        --shadow-lift: 0 18px 50px rgba(20, 24, 40, 0.16);
-        --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #16171a;
-          --bg-soft: #1e1f22;
-          --bg-sunken: #131417;
-          --bg-blur: rgba(22, 23, 26, 0.78);
-          --border: #2f3237;
-          --border-soft: #26282c;
-          --text: #e4e6ea;
-          --muted: #a0a5ae;
-          --faint: #6f757e;
-          --accent: #7c8cff;
-          --accent-hover: #8e9cff;
-          --accent-soft: rgba(124, 140, 255, 0.14);
-          --glow: rgba(124, 140, 255, 0.2);
-          --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-          --shadow-lift: 0 18px 50px rgba(0, 0, 0, 0.6);
-        }
-      }
-
-      *,
-      *::before,
-      *::after { box-sizing: border-box; }
-
-      html { scroll-behavior: smooth; scroll-padding-top: 76px; }
-
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui, sans-serif;
-        font-size: 17px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        html { scroll-behavior: auto; }
-        * { transition: none !important; }
-      }
-
-      .wrap { width: min(1080px, calc(100% - 32px)); margin-inline: auto; }
-
-      a { color: var(--accent); }
-
-      /* ------------------------------------------------------------- nav */
-
-      .nav {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        border-bottom: 1px solid var(--border-soft);
-        background: var(--bg-blur);
-        backdrop-filter: saturate(160%) blur(12px);
-        -webkit-backdrop-filter: saturate(160%) blur(12px);
-      }
-
-      .nav-inner {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        height: 56px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 650;
-        letter-spacing: -0.01em;
-        color: inherit;
-        text-decoration: none;
-        margin-right: auto;
-      }
-
-      .mark {
-        width: 26px;
-        height: 26px;
-        border-radius: 7px;
-        background: var(--accent);
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
-      }
-
-      .mark span {
-        display: block;
-        width: 13px;
-        height: 2px;
-        border-radius: 1px;
-        background: var(--on-accent);
-        box-shadow: 0 4px 0 var(--on-accent), 0 -4px 0 var(--on-accent);
-      }
-
-      .nav-links {
-        display: flex;
-        gap: 4px;
-      }
-
-      .nav-links a {
-        padding: 6px 10px;
-        border-radius: 7px;
-        color: var(--muted);
-        font-size: 14.5px;
-        text-decoration: none;
-        transition: background 120ms ease, color 120ms ease;
-      }
-
-      .nav-links a:hover { background: var(--bg-soft); color: var(--text); }
-
-      /* Six links are more than a phone can hold beside the brand. */
-      @media (max-width: 720px) {
-        .nav-links { display: none; }
-      }
-
-      .nav-cta {
-        padding: 6px 13px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--bg-soft);
-        color: var(--text);
-        font-size: 14.5px;
-        font-weight: 550;
-        text-decoration: none;
-        white-space: nowrap;
-      }
-
-      .nav-cta:hover { background: var(--bg-sunken); border-color: var(--faint); }
-
-      /* ------------------------------------------------------------ hero */
-
-      .hero {
-        position: relative;
-        padding: 76px 0 8px;
-        text-align: center;
-        overflow: hidden;
-      }
-
-      /* A single soft light behind the headline, not a gradient wash. */
-      .hero::before {
-        content: "";
-        position: absolute;
-        inset: -28% 8% auto;
-        height: 560px;
-        background: radial-gradient(ellipse at top, var(--glow), transparent 62%);
-        pointer-events: none;
-      }
-
-      .hero > * { position: relative; }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 9px;
-        margin-bottom: 22px;
-        padding: 5px 13px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: var(--bg-soft);
-        font-family: var(--mono);
-        font-size: 12.5px;
-        color: var(--muted);
-      }
-
-      .badge i {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--accent);
-        font-style: normal;
-      }
-
-      h1 {
-        margin: 0 0 16px;
-        font-size: clamp(36px, 6.4vw, 60px);
-        line-height: 1.05;
-        letter-spacing: -0.035em;
-        font-weight: 680;
-      }
-
-      .lede {
-        margin: 0 auto 28px;
-        max-width: 58ch;
-        font-size: clamp(17px, 2.2vw, 20px);
-        color: var(--muted);
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        margin-bottom: 10px;
-      }
-
-      .button {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 11px 22px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        background: var(--bg-soft);
-        color: var(--text);
-        font-size: 15px;
-        font-weight: 550;
-        text-decoration: none;
-        transition: background 120ms ease, border-color 120ms ease;
-      }
-
-      .button:hover { background: var(--bg-sunken); border-color: var(--faint); }
-
-      .button.primary {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: var(--on-accent);
-      }
-
-      .button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-
-      .small { color: var(--faint); font-size: 13.5px; }
-
-      /* --------------------------------------------------------- figures */
-
-      figure { margin: 0; }
-
-      /*
-       * A frame around the screenshots. They are taken headlessly and have no
-       * window of their own — drawing a plain one here is honest about that
-       * and keeps a picture of an interface from bleeding into the page.
-       */
-      .window {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--bg-soft);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-      }
-
-      .window.lift { box-shadow: var(--shadow-lift); }
-
-      .titlebar {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 9px 13px;
-        border-bottom: 1px solid var(--border);
-        background: var(--bg-sunken);
-      }
-
-      .titlebar i {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--border);
-      }
-
-      .titlebar span {
-        margin-left: 8px;
-        font-family: var(--mono);
-        font-size: 12px;
-        color: var(--faint);
-      }
-
-      .window img {
-        display: block;
-        width: 100%;
-        height: auto;
-      }
-
-      .hero-shot { margin-top: 38px; }
-
-      figcaption {
-        margin-top: 10px;
-        color: var(--faint);
-        font-size: 14px;
-        text-align: center;
-      }
-
-      /* --------------------------------------------------------- gallery */
-
-      .gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-        gap: 16px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .gallery img {
-        display: block;
-        width: 100%;
-        height: auto;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-      }
-
-      .gallery figcaption {
-        margin-top: 7px;
-        font-size: 13.5px;
-        color: var(--muted);
-        text-align: left;
-      }
-
-      .gallery .from {
-        display: block;
-        color: var(--faint);
-        font-size: 12.5px;
-      }
-
-      /* --------------------------------------------------------- content */
-
-      section { padding: 72px 0; }
-
-      section + section { border-top: 1px solid var(--border-soft); }
-
-      .eyebrow {
-        margin: 0 0 10px;
-        font-family: var(--mono);
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-        color: var(--accent);
-      }
-
-      h2 {
-        margin: 0 0 10px;
-        font-size: clamp(25px, 3.4vw, 34px);
-        letter-spacing: -0.025em;
-        font-weight: 650;
-      }
-
-      .section-lede { margin: 0 0 30px; max-width: 64ch; color: var(--muted); }
-
-      .points {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .point {
-        padding: 22px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--bg-soft);
-      }
-
-      .point h3 {
-        margin: 0 0 6px;
-        font-size: 16.5px;
-        font-weight: 620;
-        letter-spacing: -0.01em;
-      }
-
-      .point p { margin: 0; font-size: 15px; color: var(--muted); }
-
-      .split {
-        display: grid;
-        gap: 22px;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        align-items: start;
-      }
-
-      /* Hairline grid: the gap is the border showing through. */
-      .tool-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1px;
-        margin: 0 0 26px;
-        padding: 0;
-        list-style: none;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--border);
-        overflow: hidden;
-      }
-
-      .tool-grid li {
-        padding: 13px 16px;
-        background: var(--bg);
-      }
-
-      .tool-grid b {
-        display: block;
-        font-size: 14.5px;
-        font-weight: 600;
-      }
-
-      .tool-grid code {
-        font-family: var(--mono);
-        font-size: 12.5px;
-        color: var(--faint);
-        word-break: break-all;
-      }
-
-      .faces {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 16px;
-        margin: 0 0 6px;
-        padding: 0;
-        list-style: none;
-      }
-
-      .faces li {
-        padding: 16px 18px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--bg-soft);
-      }
-
-      .faces b {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 14.5px;
-        font-weight: 620;
-      }
-
-      .faces code {
-        font-family: var(--mono);
-        font-size: 13px;
-        line-height: 1.7;
-        color: var(--muted);
-      }
-
-      pre {
-        margin: 0;
-        padding: 15px 17px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--bg-sunken);
-        overflow-x: auto;
-        font-family: var(--mono);
-        font-size: 13.5px;
-        line-height: 1.55;
-        color: var(--text);
-      }
-
-      .comment { color: var(--faint); }
-
-      .note {
-        margin-top: 16px;
-        padding: 14px 16px;
-        border: 1px solid var(--border);
-        border-left: 3px solid var(--accent);
-        border-radius: 8px;
-        background: var(--bg-soft);
-        font-size: 14.5px;
-        color: var(--muted);
-      }
-
-      .layers {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 15px;
-      }
-
-      .layers th,
-      .layers td {
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--border);
-        text-align: left;
-      }
-
-      .layers th { color: var(--faint); font-weight: 600; font-size: 13.5px; }
-
-      .layers td:first-child { font-weight: 560; white-space: nowrap; }
-
-      .layers code { font-family: var(--mono); font-size: 13px; color: var(--muted); }
-
-      /* ----------------------------------------------------------- build */
-
-      .steps {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        margin: 0 0 20px;
-        padding: 0;
-        list-style: none;
-        counter-reset: step;
-      }
-
-      .step {
-        padding: 20px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--bg-soft);
-      }
-
-      .step h3 {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        margin: 0 0 8px;
-        font-size: 15.5px;
-        font-weight: 620;
-      }
-
-      .step h3::before {
-        counter-increment: step;
-        content: counter(step);
-        display: grid;
-        place-items: center;
-        width: 22px;
-        height: 22px;
-        border-radius: 6px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-family: var(--mono);
-        font-size: 12px;
-      }
-
-      .step p { margin: 0 0 10px; font-size: 14.5px; color: var(--muted); }
-
-      .step p:last-child { margin-bottom: 0; }
-
-      .step pre { font-size: 13px; }
-
-      /* ---------------------------------------------------------- footer */
-
-      footer {
-        padding: 44px 0 56px;
-        border-top: 1px solid var(--border);
-        color: var(--faint);
-        font-size: 14px;
-      }
-
-      .foot-grid {
-        display: grid;
-        gap: 28px;
-        grid-template-columns: minmax(260px, 2fr) repeat(auto-fit, minmax(140px, 1fr));
-        margin-bottom: 30px;
-      }
-
-      .foot-grid h4 {
-        margin: 0 0 10px;
-        color: var(--text);
-        font-size: 13px;
-        font-weight: 620;
-      }
-
-      .foot-grid ul {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        display: grid;
-        gap: 7px;
-      }
-
-      .foot-grid a { color: var(--muted); text-decoration: none; }
-
-      .foot-grid a:hover { color: var(--accent); }
-
-      .colophon { max-width: 46ch; }
-
-      .colophon a { color: var(--muted); }
-    </style>
+    <meta name="theme-color" content="#f7f5f0" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f7f5f0'/><rect x='14' y='14' width='32' height='32' fill='%235c45d6'/><rect x='54' y='14' width='32' height='32' fill='%230f8f7c'/><rect x='14' y='54' width='32' height='32' fill='%23db9a29'/><rect x='54' y='54' width='32' height='32' fill='%23db456b'/></svg>" />
+    <link rel="preload" href="ink/fonts/inter-tight-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="ink/ink.css" />
+    <script>
+      // Decide before first paint, so the fallback never flashes.
+      (function () {
+        var d = document.documentElement;
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) d.classList.add("still");
+      })();
+    </script>
+    <script type="module" src="ink/page.js"></script>
   </head>
-
   <body>
-    <nav class="nav">
-      <div class="wrap nav-inner">
-        <a class="brand" href="#top">
-          <span class="mark" aria-hidden="true"><span></span></span>
+    <a class="skip" href="#main">Skip to content</a>
+    <canvas class="ink-canvas" id="ink" aria-hidden="true"></canvas>
+
+    <header class="masthead">
+      <div class="wrap grid">
+        <a class="wordmark" href="#top" aria-label="skills-hub, back to top">
+          <svg viewBox="0 0 22 22" aria-hidden="true">
+            <rect x="0" y="0" width="10" height="10" fill="var(--skill-ink)" />
+            <rect x="12" y="0" width="10" height="10" fill="var(--agent-ink)" />
+            <rect x="0" y="12" width="10" height="10" fill="var(--command-ink)" />
+            <rect x="12" y="12" width="10" height="10" fill="var(--rule-ink)" />
+          </svg>
           skills-hub
         </a>
-        <div class="nav-links">
-          <a href="#library">Library</a>
-          <a href="#menubar">Menubar</a>
-          <a href="#install">Install</a>
-          <a href="#cost">Cost</a>
-          <a href="#tools">Tools</a>
-          <a href="#appearance">Themes</a>
-          <a href="#build">Build</a>
-        </div>
-        <a class="nav-cta" href="https://github.com/nimble-123/skills-hub">GitHub</a>
+        <nav aria-label="Sections">
+          <ul>
+            <li><a href="#files">Real files</a></li>
+            <li><a href="#discover">Discover</a></li>
+            <li><a href="#cost">Cost</a></li>
+            <li><a href="#tools">Tools</a></li>
+            <li><a href="#palettes">Palettes</a></li>
+            <li><a href="#install">Install</a></li>
+          </ul>
+        </nav>
+        <a class="gh" href="https://github.com/nimble-123/skills-hub">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+          GitHub
+        </a>
       </div>
-    </nav>
+    </header>
 
-    <div class="wrap" id="top">
-      <div class="hero">
-        <span class="badge"><i aria-hidden="true"></i> v0.3.1 · macOS · Windows · Linux · MIT</span>
-        <h1>Every tool's skills, in one library</h1>
-        <p class="lede">
-          Your skills, agents, commands and rules are scattered across a dozen folders, one
-          convention per tool. This puts them in one place — and works on the real folders, so
-          everything it does is a real change.
-        </p>
-        <div class="actions">
-          <a class="button primary" href="#build">Build it</a>
-          <a class="button" href="https://github.com/nimble-123/skills-hub">View source</a>
-        </div>
-        <p class="small">No account, no telemetry, nothing to sign in to.</p>
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="ink-still" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div class="wrap grid">
+          <p class="hero-meta">
+            <span>A desktop application</span>
+            <span>macOS · Windows · Linux</span>
+            <span>MIT · No account · No telemetry</span>
+          </p>
 
-        <figure class="hero-shot">
-          <div class="window lift">
-            <div class="titlebar" aria-hidden="true">
-              <i></i><i></i><i></i><span>skills-hub</span>
+          <h1 id="hero-title">
+            <span class="w w-skill">Skills,<sup>Skill</sup></span>
+            <span class="w w-agent">agents,<sup>Agent</sup></span>
+            <span class="w w-command">commands,<sup>Command</sup></span>
+            <span class="w w-rule">rules.<sup>Rule</sup></span>
+          </h1>
+
+          <div class="hero-side">
+            <p class="lede">
+              <strong>One library</strong> over the folders sixteen AI coding tools actually read.
+              Switching an item off moves the file. Linking makes a symlink. Nothing is a copy.
+            </p>
+            <div class="cmd">
+              <code>brew install --cask nimble-123/tap/skills-hub</code>
+              <button class="copy" type="button" data-copy="brew install --cask nimble-123/tap/skills-hub" aria-label="Copy the Homebrew command">
+                <svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+                <svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+              </button>
             </div>
-            <picture>
-              <source srcset="images/library-dark.png" media="(prefers-color-scheme: dark)" />
-              <img src="images/library.png" alt="The library: a sidebar of tools and types, a grid of cards, and a detail panel showing a skill's content" />
-            </picture>
+            <p class="hero-links">
+              <a href="#install">Windows, Linux, source</a>
+              <a href="https://github.com/nimble-123/skills-hub/releases/latest">Latest release</a>
+            </p>
           </div>
-        </figure>
+
+          <div class="draw" role="group" aria-labelledby="draw-label">
+            <span class="label" id="draw-label">Draw with</span>
+            <button class="chip" type="button" data-ink="mixed" aria-pressed="true"><span class="dot mixed" aria-hidden="true"></span>All four</button>
+            <button class="chip" type="button" data-ink="skill" aria-pressed="false"><span class="dot" style="background: var(--skill-ink)" aria-hidden="true"></span>Skill</button>
+            <button class="chip" type="button" data-ink="agent" aria-pressed="false"><span class="dot" style="background: var(--agent-ink)" aria-hidden="true"></span>Agent</button>
+            <button class="chip" type="button" data-ink="command" aria-pressed="false"><span class="dot" style="background: var(--command-ink)" aria-hidden="true"></span>Command</button>
+            <button class="chip" type="button" data-ink="rule" aria-pressed="false"><span class="dot" style="background: var(--rule-ink)" aria-hidden="true"></span>Rule</button>
+            <span class="hint" id="draw-hint">Move across the page — the four item types are the four inks.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 -->
+      <section class="sec" id="why" aria-labelledby="why-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">01</p>
+            <h2 id="why-title"><span class="sec-kicker">Why</span>Every tool keeps its own folders. Nothing shows you all of them.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>Some folders are global, some belong to a project, most tools use both. The same prompt ends up pasted into three of them and drifts apart.</p>
+              <p>And a checkbox in a manager that never touches the file the tool reads has not disabled anything. So: one library over the real folders, and every action a real one.</p>
+            </div>
+            <div class="aside">
+              <h3>Five of the places it reads</h3>
+              <ul class="pathlist">
+                <li><span class="tsq skill" aria-hidden="true"></span>~/.claude/skills</li>
+                <li><span class="tsq rule" aria-hidden="true"></span>~/.cursor/rules</li>
+                <li><span class="tsq command" aria-hidden="true"></span>~/.codex/prompts</li>
+                <li><span class="tsq agent" aria-hidden="true"></span>~/.config/opencode/agents</li>
+                <li><span class="tsq skill" aria-hidden="true"></span>~/.agents/skills</li>
+              </ul>
+            </div>
+          </div>
+          <div class="grid">
+            <figure class="plate span-full crop">
+              <img src="images/library.png" width="2880" height="1800" alt="The skills-hub library: a sidebar of types, tools and collections, a grid of item cards, and the detail panel for one skill." fetchpriority="high" />
+              <figcaption><span class="no">Plate I</span><span><em>The library.</em> Sidebar, card grid, and the detail panel for a skill. <span class="crop-note">Detail from the left half of the window.</span></span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 -->
+      <section class="sec" id="files" aria-labelledby="files-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">02</p>
+            <h2 id="files-title"><span class="sec-kicker">Real files</span>Off means moved. The tool genuinely stops seeing it.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>Disabling moves the item into a <code>.skillmanager-disabled</code> folder beside where it was, and enabling moves it back.</p>
+              <p>It is symlink-aware: a relative link is recomputed for its new depth rather than replaced with an absolute path, so a shared skills folder keeps working after the round trip.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="disk" id="disk-demo" data-on="true">
+              <div class="disk-top">
+                <span class="name">pdf</span>
+                <span class="tag skill">Skill</span>
+                <span class="state" id="disk-state" aria-live="polite">Enabled</span>
+                <button class="switch" type="button" role="switch" aria-checked="true" aria-labelledby="disk-label" id="disk-switch"><span class="knob" aria-hidden="true"></span></button>
+                <span class="sr-only" id="disk-label">Enable the pdf skill and the linked sap-abap skill</span>
+              </div>
+              <div class="fs">
+                <div class="fs-row">
+                  <span class="k">Folder</span>
+                  <span class="v">~/.claude/skills/<span class="seg">.skillmanager-disabled/</span>pdf/SKILL.md</span>
+                </div>
+                <div class="fs-row">
+                  <span class="k">Symlink</span>
+                  <span class="v">~/.claude/skills/<span class="seg">.skillmanager-disabled/</span>sap-abap <span class="arrow">→</span> <span class="up">../</span>../../.agents/skills/sap-abap</span>
+                </div>
+              </div>
+              <p class="disk-note">Try the switch. One more level deep, one more <code>../</code> — the link still resolves.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <figure class="plate span-r10 crop at-mid">
+              <img src="images/types.png" width="2880" height="1800" loading="lazy" alt="The whole library unfiltered: skill, agent, command and rule cards side by side, each type marked in a colour of its own." />
+              <figcaption><span class="no">Plate II</span><span><em>Everything, unfiltered.</em> Four types, four colours — the same four this page is inked with. A switched-off rule sits greyed in place.</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 -->
+      <section class="sec" id="tags" aria-labelledby="tags-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">03</p>
+            <h2 id="tags-title"><span class="sec-kicker">Notes</span>Your tags live in your vault.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>One small markdown file per item, with frontmatter, in a folder you choose. Put it in an Obsidian vault and it syncs with everything else you keep, queryable from Dataview.</p>
+              <p>A note is only rewritten when something in it actually changed. Your own tags, prose and unknown keys survive every rescan, and a note carrying your tags is never removed automatically. Your skills themselves are never moved into it or copied.</p>
+            </div>
+<pre class="note" aria-label="An example note"><span class="file">notes/pdf-….md</span><span class="fm">---</span>
+<b>entryId</b>: pdf-…
+<b>name</b>: pdf
+<b>type</b>: skill
+<b>tool</b>: claude-code
+<b>enabled</b>: true
+<b>tags</b>:
+  - <span class="mine">documents</span>
+<b>favorite</b>: false
+<span class="fm">---</span>
+
+<span class="mine">Use for forms, not scans.</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 -->
+      <section class="sec" id="discover" aria-labelledby="discover-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">04</p>
+            <h2 id="discover-title"><span class="sec-kicker">Discover</span>Find it, install it, and see the diff first.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>Search the <a href="https://skills.sh">skills.sh</a> registry by name, or point it at any repository git can reach. No account, no token.</p>
+              <p>Watching a repository clones it and lists everything installable in it. Anything installed records the commit it came from — so it can be checked for updates, shown as a diff before anything is overwritten, and put back the way it was.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <figure class="plate span-half-l crop">
+              <img src="images/discover.png" width="2880" height="1800" loading="lazy" alt="Discover: a registry search, a watched repository, and the skills found in it." />
+              <figcaption><span class="no">Plate III</span><span><em>Discover.</em> A registry search and a watched repository.</span></figcaption>
+            </figure>
+            <figure class="plate span-half-r crop at-right">
+              <img src="images/diff.png" width="2880" height="1800" loading="lazy" alt="An update to an installed skill, shown as a line-by-line diff before anything is overwritten." />
+              <figcaption><span class="no">Plate IV</span><span><em>The diff.</em> An update, shown before anything is overwritten.</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 -->
+      <section class="sec" id="cost" aria-labelledby="cost-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">05</p>
+            <h2 id="cost-title"><span class="sec-kicker">Cost</span>What it carries every turn, and what it costs once used.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>Every enabled item puts its name and description in front of the model each turn, so the model knows it exists. The body loads only when it is invoked. The cost page keeps those two apart.</p>
+              <p>Where a tool keeps a history, that history says which items were actually used — rather than a guess from how old a file is.</p>
+            </div>
+          </div>
+          <div class="grid figures">
+            <p class="fig"><span class="n">459<small>MB</small></span><span class="cap">of Claude Code and Codex session history, read to learn what was actually run —</span></p>
+            <p class="fig"><span class="n">284<small>ms</small></span><span class="cap">— in this long. Fast enough to be the default, not a report you wait for.</span></p>
+          </div>
+          <div class="grid">
+            <figure class="plate span-l10 crop at-right">
+              <img src="images/cost.png" width="2880" height="1800" loading="lazy" alt="The cost page: totals, source size by tool, items ranked by cost, and the most-run skills from Claude Code's history." />
+              <figcaption><span class="no">Plate V</span><span><em>Cost.</em> Totals, size by tool, items ranked, and what history says was run.</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 -->
+      <section class="sec" id="extensions" aria-labelledby="ext-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">06</p>
+            <h2 id="ext-title"><span class="sec-kicker">Read-only</span>Everything else it finds, it shows you.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>Every MCP server every tool is configured with, global and per project — listed, not edited.</p>
+              <p>Plugin bundles from Claude Code and Codex, with their items in the library and each bundle switchable as a whole.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <figure class="plate span-r9 crop">
+              <img src="images/mcp.png" width="2880" height="1800" loading="lazy" alt="The MCP servers page: each configured server with the tool and scope it comes from." />
+              <figcaption><span class="no">Plate VI</span><span><em>MCP servers.</em> Read from each tool's own configuration.</span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section class="sec" id="menubar" aria-labelledby="menu-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">07</p>
+            <h2 id="menu-title"><span class="sec-kicker">macOS</span>A menubar companion.</h2>
+          </header>
+          <div class="grid pop-row">
+            <figure class="plate">
+              <img src="images/popover.png" width="720" height="960" loading="lazy" alt="The menubar popover: a search field and matching items, each with its type, its tool and a switch." />
+              <figcaption><span class="no">Plate VII</span><span><em>The popover.</em> Search, type, tool, switch.</span></figcaption>
+            </figure>
+            <div class="text">
+              <p>Search the whole library from the menu bar, switch an item on or off, and go back to what you were doing. The panel takes the keyboard without activating the application, so typing in it does not pull you out of your editor.</p>
+              <p>Closing the window leaves it running. The popover and the window switch the same files and each tells the other what changed.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section class="sec" id="tools" aria-labelledby="tools-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">08</p>
+            <h2 id="tools-title"><span class="sec-kicker">Index</span>Sixteen tools, and where each one looks.</h2>
+          </header>
+          <div class="grid sec-body">
+            <div class="text">
+              <p>The global folders each tool reads by default. Most add project folders of their own, which are scanned per workspace.</p>
+              <p>Every path is editable, so a tool that moves its folders — or a setup that was never standard — does not have to wait for a release.</p>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="index">
+              <table>
+                <caption class="sr-only">Supported tools and their default global folders</caption>
+                <thead><tr><th scope="col">No.</th><th scope="col">Tool</th><th scope="col">Default folders</th></tr></thead>
+                <tbody id="tool-rows"></tbody>
+              </table>
+              <p class="index-legend">
+                <span><span class="tsq skill" aria-hidden="true"></span>Skills</span>
+                <span><span class="tsq agent" aria-hidden="true"></span>Agents</span>
+                <span><span class="tsq command" aria-hidden="true"></span>Commands</span>
+                <span><span class="tsq rule" aria-hidden="true"></span>Rules</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section class="sec" id="palettes" aria-labelledby="pal-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">09</p>
+            <h2 id="pal-title"><span class="sec-kicker">Appearance</span>Eighteen palettes. Nine bundled typefaces.</h2>
+          </header>
+          <div class="grid">
+            <ul class="swatches" id="swatches"></ul>
+          </div>
+          <div class="grid faces">
+            <div>
+              <h3>Interface</h3>
+              <ul><li>Inter</li><li>Geist</li><li>Figtree</li><li>IBM Plex Sans</li><li>Roboto</li></ul>
+            </div>
+            <div>
+              <h3>Monospace</h3>
+              <ul><li>JetBrains Mono</li><li>Fira Code</li><li>Geist Mono</li><li>IBM Plex Mono</li><li>— or the system’s own</li></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section class="sec" id="architecture" aria-labelledby="arch-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">10</p>
+            <h2 id="arch-title"><span class="sec-kicker">Architecture</span>Three layers. The boundary is enforced, not agreed.</h2>
+          </header>
+          <div class="grid">
+            <div class="layers">
+              <div class="layer"><span class="l">UI</span><code>src/</code><span class="k">The generated bindings, and nothing else.</span></div>
+              <div class="layer"><span class="l">Adapter</span><code>src-tauri/</code><span class="k">Tauri, and the domain.</span></div>
+              <div class="layer"><span class="l">Domain</span><code>crates/core/</code><span class="k">Neither — <code>cargo deny</code> bans <code>tauri</code> from it. A command-line harness links it alone, which is the proof it holds.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="sec" id="install" aria-labelledby="install-title">
+        <div class="wrap">
+          <header class="grid sec-head">
+            <p class="sec-no" aria-hidden="true">11</p>
+            <h2 id="install-title"><span class="sec-kicker">Install</span>Free, MIT, on every desktop.</h2>
+          </header>
+          <div class="grid">
+            <div class="install">
+              <div class="tabs" role="tablist" aria-label="Platform">
+                <button class="tab" type="button" role="tab" id="tab-mac" aria-controls="p-mac" aria-selected="true">macOS</button>
+                <button class="tab" type="button" role="tab" id="tab-win" aria-controls="p-win" aria-selected="false" tabindex="-1">Windows</button>
+                <button class="tab" type="button" role="tab" id="tab-linux" aria-controls="p-linux" aria-selected="false" tabindex="-1">Linux</button>
+                <button class="tab" type="button" role="tab" id="tab-src" aria-controls="p-src" aria-selected="false" tabindex="-1">Source</button>
+              </div>
+              <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="tab-mac">
+                <p>A universal build — Apple silicon and Intel in one.</p>
+                <div class="cmd"><code>brew install --cask nimble-123/tap/skills-hub</code><button class="copy" type="button" data-copy="brew install --cask nimble-123/tap/skills-hub" aria-label="Copy the Homebrew command"><svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+              </div>
+              <div class="panel" role="tabpanel" id="p-win" aria-labelledby="tab-win" hidden>
+                <div class="cmd ps"><code>winget install nimble-123.skills-hub</code><button class="copy" type="button" data-copy="winget install nimble-123.skills-hub" aria-label="Copy the winget command"><svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+                <p>The winget manifest is <a href="https://github.com/microsoft/winget-pkgs/pull/442854">in review</a>. Until it is merged, take the <code>-setup.exe</code> from <a href="https://github.com/nimble-123/skills-hub/releases/latest">the latest release</a>.</p>
+              </div>
+              <div class="panel" role="tabpanel" id="p-linux" aria-labelledby="tab-linux" hidden>
+                <p>The <code>.deb</code> or the <code>.AppImage</code> from <a href="https://github.com/nimble-123/skills-hub/releases/latest">the latest release</a> — which is also where every other installer comes from.</p>
+              </div>
+              <div class="panel" role="tabpanel" id="p-src" aria-labelledby="tab-src" hidden>
+                <div class="cmd"><code>pnpm install &amp;&amp; pnpm tauri build</code><button class="copy" type="button" data-copy="pnpm install && pnpm tauri build" aria-label="Copy the build commands"><svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+                <p>Clone <a href="https://github.com/nimble-123/skills-hub">the repository</a> first. On macOS the build produces the <code>.app</code> and a <code>.dmg</code>.</p>
+              </div>
+
+              <div class="caveat">
+                <p><strong>Not signed yet.</strong> macOS will refuse it the first time. Open the app, let it be refused, then allow it under System Settings → Privacy &amp; Security, where an Open Anyway button now sits. Or take the quarantine flag off yourself:</p>
+                <div class="cmd"><code>xattr -dr com.apple.quarantine /Applications/skills-hub.app</code><button class="copy" type="button" data-copy="xattr -dr com.apple.quarantine /Applications/skills-hub.app" aria-label="Copy the xattr command"><svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+                <p>On first launch it asks where to keep its notes. Your skills are never moved or copied there — only the notes live in it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <div class="wrap grid">
+        <p class="big" aria-hidden="true">skills-hub</p>
+        <div class="col">
+          <h3>Colophon</h3>
+          <p>Set in Inter Tight and JetBrains Mono. The ink is a fluid simulation in WebGL, dyed in the app’s four type colours.</p>
+        </div>
+        <div class="col">
+          <h3>Credit</h3>
+          <p>Derived from the Obsidian plugin <a href="https://github.com/notenerdofficial/ai-skills-manager">AI Skills Manager</a> by NoteNerd. Same disabled-folder name, same frontmatter keys — both can share one set of folders.</p>
+        </div>
+        <div class="col">
+          <h3>Privacy</h3>
+          <p>No account. No telemetry. It reads your folders and writes your notes, and that is all.</p>
+        </div>
+        <div class="col">
+          <h3>Elsewhere</h3>
+          <ul>
+            <li><a href="https://github.com/nimble-123/skills-hub">Source on GitHub</a></li>
+            <li><a href="https://github.com/nimble-123/skills-hub/releases/latest">Releases</a></li>
+            <li><a href="https://github.com/nimble-123/skills-hub/issues">Issues</a></li>
+            <li><a href="https://github.com/nimble-123/skills-hub/blob/main/LICENSE">MIT licence</a></li>
+          </ul>
+        </div>
       </div>
-    </div>
-
-    <div class="wrap">
-      <section id="library">
-        <p class="eyebrow">On disk</p>
-        <h2>It acts on the real files</h2>
-        <p class="section-lede">
-          A checkbox in a manager that never touches the file a tool reads has not disabled
-          anything. Everything here happens on disk.
-        </p>
-
-        <ul class="points">
-          <li class="point">
-            <h3>On and off, for real</h3>
-            <p>
-              Disabling moves the item out of where the tool looks, and back again. A relative
-              symlink is recomputed for its new depth rather than replaced, so a shared skills
-              folder survives the round trip unchanged.
-            </p>
-          </li>
-          <li class="point">
-            <h3>Nothing is copied</h3>
-            <p>
-              Linking a global skill into a project makes a symlink, never a duplicate. Two
-              copies drift apart the moment one is edited; a link cannot.
-            </p>
-          </li>
-          <li class="point">
-            <h3>Your tags are yours</h3>
-            <p>
-              One small markdown file per item, in a folder you choose. Inside an Obsidian vault
-              they sync with everything else and stay queryable from Dataview.
-            </p>
-          </li>
-          <li class="point">
-            <h3>It will not quietly delete</h3>
-            <p>
-              A scan that could not read a folder never prunes. A note whose item has gone is
-              kept for a fortnight — and indefinitely if you put anything in it.
-            </p>
-          </li>
-        </ul>
-      </section>
-
-      <section id="menubar">
-        <p class="eyebrow">Menubar</p>
-        <h2>Without opening the window at all</h2>
-        <p class="section-lede">
-          On macOS there is a status item with a popover behind it: search the whole library,
-          switch something on or off, and carry on. It is an <code>NSPanel</code>, so it takes the
-          keyboard without activating the application — typing in it does not pull you out of your
-          editor. Close the window and the application stays, in the menu bar.
-        </p>
-
-        <figure style="max-width: 380px; margin-inline: auto">
-          <div class="window">
-            <picture>
-              <source srcset="images/popover-dark.png" media="(prefers-color-scheme: dark)" />
-              <img
-                src="images/popover.png"
-                alt="The menubar popover: a search field, matching items with their type, tool and a switch each, and Open the window and Quit along the bottom"
-              />
-            </picture>
-          </div>
-        </figure>
-
-        <div class="note">
-          The popover and the window switch the same files, and each tells the other what changed,
-          so a card left open in the window does not go on showing the state it had before.
-        </div>
-      </section>
-
-      <section id="install">
-        <p class="eyebrow">Discover</p>
-        <h2>Install from anywhere, update with your eyes open</h2>
-        <p class="section-lede">
-          Search the skills.sh registry by name, or point it at any repository git can reach. No
-          account and no token either way — and nothing is overwritten before you have seen what
-          would change.
-        </p>
-
-        <div class="split">
-          <figure>
-            <div class="window">
-              <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Discover</span></div>
-              <picture>
-                <source srcset="images/discover-dark.png" media="(prefers-color-scheme: dark)" />
-                <img src="images/discover.png" alt="Discover: a registry search grouped by repository, and below it a watched repository with the skills found in it, each with an install button" />
-              </picture>
-            </div>
-            <figcaption>Search finds the repository; watching it finds the skills.</figcaption>
-          </figure>
-          <figure>
-            <div class="window">
-              <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Update</span></div>
-              <picture>
-                <source srcset="images/diff-dark.png" media="(prefers-color-scheme: dark)" />
-                <img src="images/diff.png" alt="An update shown as a line diff with the changed words picked out, and the other changed files listed" />
-              </picture>
-            </div>
-            <figcaption>The changed words picked out, and what else moves.</figcaption>
-          </figure>
-        </div>
-
-        <div class="note">
-          Anything installed this way records the commit it came from. That record is what makes
-          checking for updates possible — and putting it back exactly as it was.
-        </div>
-      </section>
-
-      <section id="cost">
-        <p class="eyebrow">Cost</p>
-        <h2>See what it all costs</h2>
-        <p class="section-lede">
-          What a tool carries every turn — a name and a description, so the model knows the item
-          exists — separated from what it loads once the item is actually used. Only the first is
-          a standing cost.
-        </p>
-
-        <figure>
-          <div class="window">
-            <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Cost</span></div>
-            <picture>
-              <source srcset="images/cost-dark.png" media="(prefers-color-scheme: dark)" />
-              <img src="images/cost.png" alt="The cost page: totals for enabled items, always-available and on-invocation tokens, items ranked by cost, and suggestions" />
-            </picture>
-          </div>
-        </figure>
-
-        <div class="note">
-          Where a tool keeps a session history — Claude Code and Codex do — that history says
-          which items have really been used, instead of guessing from how old a file is. It is
-          read on request, not on every scan: 459 MB of it here, in 284 ms.
-        </div>
-      </section>
-
-      <section id="tools">
-        <p class="eyebrow">Tools</p>
-        <h2>Sixteen tools, and room for yours</h2>
-        <p class="section-lede">
-          It writes where they already read. Every path below is a default, editable and checked
-          against your machine as you type — only the difference from the default is stored, so a
-          path you leave alone stays free to be corrected by an update.
-        </p>
-
-        <ul class="tool-grid">
-          <li><b>Claude Code</b><code>~/.claude/skills</code></li>
-          <li><b>Cursor</b><code>~/.cursor/skills</code></li>
-          <li><b>Codex</b><code>~/.codex/skills</code></li>
-          <li><b>OpenCode</b><code>~/.config/opencode/skills</code></li>
-          <li><b>Antigravity</b><code>~/.gemini/config/skills</code></li>
-          <li><b>Gemini CLI</b><code>~/.gemini/commands</code></li>
-          <li><b>GitHub Copilot</b><code>~/.copilot/skills</code></li>
-          <li><b>Cline</b><code>~/Documents/Cline/Rules</code></li>
-          <li><b>Trae</b><code>~/.trae/skills</code></li>
-          <li><b>Windsurf</b><code>~/.codeium/windsurf/skills</code></li>
-          <li><b>Goose</b><code>~/.config/goose/skills</code></li>
-          <li><b>Hermes</b><code>~/.hermes/skills</code></li>
-          <li><b>Pi</b><code>~/.pi/agent/skills</code></li>
-          <li><b>Roo Code</b><code>~/.roo/rules</code></li>
-          <li><b>Continue</b><code>.continue/prompts</code></li>
-          <li><b>Shared</b><code>~/.agents/skills</code></li>
-        </ul>
-
-        <figure>
-          <div class="window">
-            <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Tools</span></div>
-            <picture>
-              <source srcset="images/tools-dark.png" media="(prefers-color-scheme: dark)" />
-              <img src="images/tools.png" alt="The tools page with one tool expanded, each of its paths an editable field" />
-            </picture>
-          </div>
-        </figure>
-      </section>
-
-      <section id="appearance">
-        <p class="eyebrow">Appearance</p>
-        <h2>Eighteen palettes, and the type to go with them</h2>
-        <p class="section-lede">
-          The nine VS Code ships with, five you would otherwise install, both SAP Fiori Horizon
-          themes, and the two it started with. A palette is a set of colours and nothing else —
-          it never changes a size, a spacing or a typeface.
-        </p>
-
-        <ul class="gallery">
-          <li>
-            <figure>
-              <img src="images/themes/light.png" width="760" height="480" loading="lazy" alt="The library in the Light palette" />
-              <figcaption>Light<span class="from">Default</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/dark.png" width="760" height="480" loading="lazy" alt="The library in the Dark palette" />
-              <figcaption>Dark<span class="from">Default</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/quiet-light.png" width="760" height="480" loading="lazy" alt="The library in the Quiet Light palette" />
-              <figcaption>Quiet Light<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/solarized-light.png" width="760" height="480" loading="lazy" alt="The library in the Solarized Light palette" />
-              <figcaption>Solarized Light<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/solarized-dark.png" width="760" height="480" loading="lazy" alt="The library in the Solarized Dark palette" />
-              <figcaption>Solarized Dark<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/monokai.png" width="760" height="480" loading="lazy" alt="The library in the Monokai palette" />
-              <figcaption>Monokai<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/abyss.png" width="760" height="480" loading="lazy" alt="The library in the Abyss palette" />
-              <figcaption>Abyss<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/kimbie-dark.png" width="760" height="480" loading="lazy" alt="The library in the Kimbie Dark palette" />
-              <figcaption>Kimbie Dark<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/tomorrow-night-blue.png" width="760" height="480" loading="lazy" alt="The library in the Tomorrow Night Blue palette" />
-              <figcaption>Tomorrow Night Blue<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/red.png" width="760" height="480" loading="lazy" alt="The library in the Red palette" />
-              <figcaption>Red<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/high-contrast.png" width="760" height="480" loading="lazy" alt="The library in the High Contrast palette" />
-              <figcaption>High Contrast<span class="from">VS Code</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/tokyo-night.png" width="760" height="480" loading="lazy" alt="The library in the Tokyo Night palette" />
-              <figcaption>Tokyo Night<span class="from">Community</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/aura.png" width="760" height="480" loading="lazy" alt="The library in the Aura palette" />
-              <figcaption>Aura<span class="from">Community</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/synthwave-84.png" width="760" height="480" loading="lazy" alt="The library in the SynthWave '84 palette" />
-              <figcaption>SynthWave '84<span class="from">Community</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/panda.png" width="760" height="480" loading="lazy" alt="The library in the Panda palette" />
-              <figcaption>Panda<span class="from">Community</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/overnight.png" width="760" height="480" loading="lazy" alt="The library in the Overnight palette" />
-              <figcaption>Overnight<span class="from">Community</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/horizon-morning.png" width="760" height="480" loading="lazy" alt="The library in the Morning Horizon palette" />
-              <figcaption>Morning Horizon<span class="from">SAP Fiori Horizon</span></figcaption>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <img src="images/themes/horizon-evening.png" width="760" height="480" loading="lazy" alt="The library in the Evening Horizon palette" />
-              <figcaption>Evening Horizon<span class="from">SAP Fiori Horizon</span></figcaption>
-            </figure>
-          </li>
-        </ul>
-
-        <figure style="margin-top: 26px">
-          <div class="window">
-            <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Settings</span></div>
-            <picture>
-              <source srcset="images/settings-dark.png" media="(prefers-color-scheme: dark)" />
-              <img src="images/settings.png" alt="The settings page with three dropdowns: theme, interface font and code font" />
-            </picture>
-          </div>
-          <figcaption>Three dropdowns, and one of them follows the system until you say otherwise.</figcaption>
-        </figure>
-
-        <p class="section-lede" style="margin-top: 30px">
-          The typefaces are their own two settings, because they are their own two decisions: a
-          sans face for the interface, a monospaced one for code, paths and sizes. Nine families
-          ship with the application, so a choice looks the same on every machine and needs no
-          network.
-        </p>
-
-        <ul class="faces">
-          <li><b>Interface</b><code>System · Inter · Geist · Figtree · IBM Plex Sans · Roboto</code></li>
-          <li><b>Code</b><code>System · JetBrains Mono · Fira Code · Geist Mono · IBM Plex Mono</code></li>
-        </ul>
-
-        <div class="note">
-          All of it is tokens. A palette is a block of colours and a typeface is a stack — no
-          component in the interface knows the name of either, and there is not one hard-coded
-          colour outside the token files. That is why adding a palette is a block of CSS rather
-          than a patch, and why 547 KB covers nine fonts: only the Latin cuts are bundled, and a
-          glyph outside them falls back to the system face.
-        </div>
-      </section>
-
-      <section id="architecture">
-        <p class="eyebrow">Architecture</p>
-        <h2>Built to be checked</h2>
-        <p class="section-lede">
-          Three layers, dependencies pointing inwards only. The domain crate never imports the
-          UI framework — enforced by <code>cargo deny</code>, not by discipline — and
-          <code>$HOME</code> is injected rather than read, which is what makes the scanner
-          testable against temporary directories instead of only the machine it runs on.
-        </p>
-
-        <table class="layers">
-          <thead>
-            <tr><th>Layer</th><th>Where</th><th>Knows about</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>UI</td><td><code>src/</code></td><td>the generated bindings, and nothing else</td></tr>
-            <tr><td>Adapter</td><td><code>src-tauri/</code></td><td>Tauri and the domain</td></tr>
-            <tr><td>Domain</td><td><code>crates/core/</code></td><td>neither of the above</td></tr>
-          </tbody>
-        </table>
-
-        <div class="note">
-          There is also a command-line harness that drives the same domain code from a terminal.
-          That it can exist at all is the proof the domain really is decoupled.
-        </div>
-      </section>
-
-      <section id="build">
-        <p class="eyebrow">Get it</p>
-        <h2>One command, or two and a coffee</h2>
-        <p class="section-lede">
-          macOS installs from a Homebrew tap; Windows and Linux take their installer from the
-          releases page. Building it yourself needs Rust, Node and pnpm, and produces a
-          <code>.app</code> and a <code>.dmg</code> — or the equivalent for your platform.
-        </p>
-
-        <ul class="steps">
-          <li class="step">
-            <h3>Install it</h3>
-<pre>brew install --cask <span class="comment">\</span>
-  nimble-123/tap/skills-hub</pre>
-            <p>
-              On Windows, <code>winget install nimble-123.skills-hub</code> once the
-              <a href="https://github.com/microsoft/winget-pkgs/pull/442854">manifest</a> is
-              merged; until then, and on Linux, take the installer from the
-              <a href="https://github.com/nimble-123/skills-hub/releases/latest">latest release</a>.
-            </p>
-          </li>
-          <li class="step">
-            <h3>Or build it</h3>
-<pre>git clone https://github.com/<span class="comment">\</span>
-  nimble-123/skills-hub
-pnpm install
-pnpm tauri build</pre>
-          </li>
-          <li class="step">
-            <h3>Open it</h3>
-            <p>
-              On first launch it asks where to keep its notes. Your skills themselves are never
-              moved or copied — only those notes live there.
-            </p>
-          </li>
-        </ul>
-
-        <div class="note">
-          Builds are not signed yet, so macOS will object the first time. Open the app, let it be
-          refused, then allow it under System Settings &rarr; Privacy &amp; Security, where an
-          <strong>Open Anyway</strong> button now sits &mdash; or take the quarantine flag off
-          yourself with <code>xattr -dr com.apple.quarantine /Applications/skills-hub.app</code>.
-          Control-clicking the app and choosing Open no longer works; macOS&nbsp;15 removed that
-          bypass.
-        </div>
-      </section>
-    </div>
-
-    <div class="wrap">
-      <footer>
-        <div class="foot-grid">
-          <div class="colophon">
-            <h4>skills-hub</h4>
-            MIT licensed. The feature set, tool registry and on-disk conventions are derived from
-            <a href="https://github.com/notenerdofficial/ai-skills-manager">AI Skills Manager</a>,
-            an Obsidian plugin by NoteNerd; the implementation here is a fresh one in Rust.
-          </div>
-          <div>
-            <h4>Source</h4>
-            <ul>
-              <li><a href="https://github.com/nimble-123/skills-hub">Repository</a></li>
-              <li><a href="https://github.com/nimble-123/skills-hub/issues">Issues</a></li>
-              <li><a href="https://github.com/nimble-123/skills-hub/pulls">Pull requests</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4>Elsewhere</h4>
-            <ul>
-              <li><a href="https://github.com/notenerdofficial/ai-skills-manager">The plugin this came from</a></li>
-              <li><a href="https://skills.sh">skills.sh registry</a></li>
-            </ul>
-          </div>
-        </div>
-        The screenshots are of the real interface against sample data, taken headlessly — which
-        is why the window around them is drawn by this page rather than by macOS.
-      </footer>
-    </div>
+    </footer>
   </body>
 </html>
