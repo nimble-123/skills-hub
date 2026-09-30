@@ -10,6 +10,7 @@ import { useSettings } from "../../stores/settings";
 import { useUi } from "../../stores/ui";
 import { TOOL_META, TYPE_META } from "../../toolMeta";
 import { Icon, ToolIcon } from "../common/Icon";
+import { BuildStamp } from "./BuildStamp";
 import { NavRow } from "./NavRow";
 import { Section } from "./Section";
 import styles from "./Sidebar.module.css";
@@ -261,6 +262,7 @@ export function Sidebar({ facets }: SidebarProps) {
           active={route.kind === "settings"}
           onClick={() => go({ kind: "settings" })}
         />
+        <BuildStamp />
       </div>
     </nav>
   );

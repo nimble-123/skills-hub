@@ -24,6 +24,9 @@ pub struct Capabilities {
     /// Developer Mode, which disables linking a global skill into a project.
     pub symlinks_supported: bool,
     pub app_version: String,
+    /// The commit this build came from: a short SHA, with `-dirty` when the
+    /// tree had uncommitted changes, or `unknown` when git could not be asked.
+    pub commit: &'static str,
     pub platform: &'static str,
 }
 
@@ -44,6 +47,7 @@ pub fn probe_capabilities(app: tauri::AppHandle) -> Result<Capabilities, Command
         home,
         symlinks_supported: skills_core::platform::probe_symlink_support(&scratch),
         app_version: app.package_info().version.to_string(),
+        commit: env!("SKILLS_HUB_COMMIT"),
         platform: std::env::consts::OS,
     })
 }

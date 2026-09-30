@@ -267,6 +267,11 @@ export type Capabilities = {
 	 */
 	symlinksSupported: boolean,
 	appVersion: string,
+	/**
+	 *  The commit this build came from: a short SHA, with `-dirty` when the
+	 *  tree had uncommitted changes, or `unknown` when git could not be asked.
+	 */
+	commit: string,
 	platform: string,
 };
 

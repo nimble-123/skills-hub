@@ -1,18 +1,16 @@
 import { open } from "@tauri-apps/plugin-dialog";
-import { useEffect, useState } from "react";
-import {
-  type AppSettings,
-  type Capabilities,
-  commands,
-  type EnabledFilter,
-  type MonoFont,
-  type SortOrder,
-  type ThemePref,
-  type UiFont,
+import type {
+  AppSettings,
+  EnabledFilter,
+  MonoFont,
+  SortOrder,
+  ThemePref,
+  UiFont,
 } from "../../bindings";
+import { formatBuild } from "../../lib/build";
+import { useCapabilities } from "../../lib/capabilities";
 import { MONO_FONTS, UI_FONTS } from "../../lib/fonts";
 import { THEME_GROUPS } from "../../lib/theme";
-import { reportError } from "../../stores/errors";
 import { useLibrary } from "../../stores/library";
 import { useSettings } from "../../stores/settings";
 import styles from "./Pane.module.css";
@@ -185,7 +183,9 @@ export function SettingsPane() {
             <div className={styles.fieldText}>
               <div className={styles.fieldName}>Version</div>
             </div>
-            <span className={styles.fieldHint}>{capabilities?.appVersion ?? "…"}</span>
+            <span className={`${styles.fieldHint} ${styles.mono}`}>
+              {capabilities ? formatBuild(capabilities.appVersion, capabilities.commit) : "…"}
+            </span>
           </div>
           <div className={styles.field}>
             <div className={styles.fieldText}>
@@ -207,18 +207,4 @@ export function SettingsPane() {
       </div>
     </div>
   );
-}
-
-/** What this machine lets the application do. Probed once. */
-function useCapabilities(): Capabilities | null {
-  const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
-
-  useEffect(() => {
-    void commands.probeCapabilities().then((result) => {
-      if (result.status === "ok") setCapabilities(result.data);
-      else reportError(result.error);
-    });
-  }, []);
-
-  return capabilities;
 }

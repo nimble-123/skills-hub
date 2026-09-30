@@ -63,12 +63,15 @@ vi.mock("@tauri-apps/api/core", () => ({
   },
 }));
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
+const opener = vi.hoisted(() => ({ openUrl: vi.fn(() => Promise.resolve()) }));
+vi.mock("@tauri-apps/plugin-opener", () => opener);
 // The window listens for items the menubar popover changed.
 vi.mock("@tauri-apps/api/event", () => ({
   listen: vi.fn(() => Promise.resolve(() => {})),
 }));
 
 import { App } from "./App";
+import { forgetCapabilities } from "./lib/capabilities";
 import { useToasts } from "./stores/errors";
 import { useFilters } from "./stores/filters";
 import { useLibrary } from "./stores/library";
@@ -86,6 +89,7 @@ const LIBRARY = [
 
 beforeEach(() => {
   vi.clearAllMocks();
+  forgetCapabilities();
   commands.getSettings.mockResolvedValue(ok(aSettingsView()));
   commands.getSnapshot.mockResolvedValue(ok(aSnapshot(LIBRARY)));
   commands.listOrphanedMetadata.mockResolvedValue(ok([]));
@@ -106,6 +110,7 @@ beforeEach(() => {
       home: "/home/someone",
       symlinksSupported: true,
       appVersion: "0.1.0",
+      commit: "53580a7",
       platform: "macos",
     }),
   );
@@ -367,6 +372,50 @@ describe("the shell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Settings" })).toBeTruthy();
     // It shows what it found out about this machine, not just what was saved.
     await waitFor(() => expect(screen.getByText("/home/someone")).toBeTruthy());
+  });
+
+  it("shows the build at the foot of the sidebar, and opens its commit", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await waitFor(() => expect(within(sidebar).getByText("v0.1.0")).toBeTruthy());
+    const commit = within(sidebar).getByRole("button", { name: "Commit 53580a7, open on GitHub" });
+    expect(commit.textContent).toBe("53580a7");
+
+    await user.click(commit);
+    expect(opener.openUrl).toHaveBeenCalledWith(
+      "https://github.com/nimble-123/skills-hub/commit/53580a7",
+    );
+  });
+
+  it("names an unknown commit without pretending it can be opened", async () => {
+    commands.probeCapabilities.mockResolvedValue(
+      ok({
+        home: "/home/someone",
+        symlinksSupported: true,
+        appVersion: "0.1.0",
+        commit: "unknown",
+        platform: "macos",
+      }),
+    );
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await waitFor(() => expect(within(sidebar).getByText("unknown")).toBeTruthy());
+    expect(within(sidebar).queryByRole("button", { name: /Commit/ })).toBeNull();
+  });
+
+  it("shows the same build on the settings page", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await user.click(within(sidebar).getByRole("button", { name: "Settings" }));
+
+    await waitFor(() => expect(screen.getByText("v0.1.0 · 53580a7")).toBeTruthy());
+    // One probe answers both the sidebar and the settings page.
+    expect(commands.probeCapabilities).toHaveBeenCalledTimes(1);
   });
 
   it("opens the tools page and shows each path as an editable field", async () => {

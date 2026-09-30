@@ -29,7 +29,8 @@ export const commands: typeof real = {
     ok({
       home: "/Users/you",
       symlinksSupported: true,
-      appVersion: "0.1.0",
+      appVersion: "0.5.0",
+      commit: "53580a7",
       platform: "macos",
     }),
 
