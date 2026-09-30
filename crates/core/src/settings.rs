@@ -163,6 +163,8 @@ pub enum ThemePref {
     Overnight,
     HorizonMorning,
     HorizonEvening,
+    EnbwLight,
+    EnbwDark,
 }
 
 /// The typeface for the interface.

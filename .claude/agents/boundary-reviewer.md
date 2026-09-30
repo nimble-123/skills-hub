@@ -25,7 +25,7 @@ Read `ARCHITECTURE.md` for why each of these exists before you start.
    `MonoFont` variant and its entry in `src/lib/theme.ts` or `src/lib/fonts.ts`
    and its CSS block. A change to one side only compiles.
 4. **Colour outside `src/styles/`.** There is none in the repository. A literal
-   colour in a component defeats eighteen palettes at once.
+   colour in a component defeats twenty palettes at once.
 5. **The file-safety rules in `crates/core/src/toggle.rs`.** Create before
    destroying; a symlink is re-pointed and removed with `remove_file`, never
    followed or `remove_dir_all`-ed; nothing is overwritten. A diff that touches
