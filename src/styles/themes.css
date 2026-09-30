@@ -590,3 +590,76 @@
   --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.55);
 }
+
+/* --------------------------------------------------------------------- EnBW */
+
+/* EnBW Light [EnBW corporate design: Tiefenblau #000099, Horizontorange]
+   Deep blue carries the accent; the orange is too light to read as text on
+   white, so it only appears darkened, as the command chip. */
+:root[data-theme="enbw-light"] {
+  --bg-primary: #ffffff;
+  --bg-primary-alt: #f4f5f9;
+  --bg-secondary: #f2f3f8;
+  --bg-secondary-alt: #e4e6ef;
+  --bg-modifier-border: #d5d8e3;
+  --bg-modifier-hover: rgba(0, 0, 153, 0.05);
+  --bg-modifier-active: rgba(0, 0, 153, 0.09);
+
+  --text-normal: #0a0b3d;
+  --text-muted: #4a4e70;
+  --text-faint: #7b7f9b;
+  --text-on-accent: #ffffff;
+  --text-error: #c8102e;
+  --text-success: #1f7a3d;
+  --text-warning: #b35300;
+
+  --interactive-accent: #000099;
+  --interactive-accent-hover: #00007a;
+
+  --type-skill-bg: #e6e6f7;
+  --type-skill-text: #000099;
+  --type-agent-bg: #dcefed;
+  --type-agent-text: #0d6b66;
+  --type-command-bg: #ffecd8;
+  --type-command-text: #b35300;
+  --type-rule-bg: #fbe3ec;
+  --type-rule-text: #ad1457;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 60, 0.1);
+  --shadow-m: 0 4px 12px rgba(0, 0, 60, 0.15);
+}
+
+/* EnBW Dark [the same two colours, turned round: a Tiefenblau ground, and
+   Horizontorange as the accent] */
+:root[data-theme="enbw-dark"] {
+  --bg-primary: #0b0d33;
+  --bg-primary-alt: #12154a;
+  --bg-secondary: #070924;
+  --bg-secondary-alt: #181c55;
+  --bg-modifier-border: #272b66;
+  --bg-modifier-hover: rgba(255, 255, 255, 0.06);
+  --bg-modifier-active: rgba(255, 255, 255, 0.1);
+
+  --text-normal: #eceef8;
+  --text-muted: #a8abd0;
+  --text-faint: #7477a3;
+  --text-on-accent: #1a0e00;
+  --text-error: #ff7a85;
+  --text-success: #6fd98f;
+  --text-warning: #ffc15a;
+
+  --interactive-accent: #ff8f0f;
+  --interactive-accent-hover: #ffa53d;
+
+  --type-skill-bg: rgba(160, 162, 255, 0.18);
+  --type-skill-text: #a8aaff;
+  --type-agent-bg: rgba(95, 214, 198, 0.16);
+  --type-agent-text: #5fd6c6;
+  --type-command-bg: rgba(255, 143, 15, 0.18);
+  --type-command-text: #ffb45c;
+  --type-rule-bg: rgba(255, 143, 180, 0.16);
+  --type-rule-text: #ff8fb4;
+
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.6);
+}

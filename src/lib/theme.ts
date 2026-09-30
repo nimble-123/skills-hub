@@ -68,6 +68,13 @@ export const THEME_GROUPS: { label: string; themes: ThemeChoice[] }[] = [
       { id: "horizon-evening", label: "Evening Horizon", appearance: "dark" },
     ],
   },
+  {
+    label: "EnBW",
+    themes: [
+      { id: "enbw-light", label: "EnBW Light", appearance: "light" },
+      { id: "enbw-dark", label: "EnBW Dark", appearance: "dark" },
+    ],
+  },
 ];
 
 const BY_ID = new Map(THEME_GROUPS.flatMap((group) => group.themes).map((t) => [t.id, t]));

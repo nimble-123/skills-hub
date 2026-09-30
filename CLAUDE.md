@@ -87,7 +87,7 @@ pnpm screenshots                # docs/images/, incl. the palette gallery
 - **Several lists exist on both sides** — the tool registry, the palettes, the
   fonts, the icons. Adding to one side only still compiles, and a test is what
   notices. `.claude/skills/` holds the procedures.
-- **No colour outside `src/styles/`.** There is not one, and eighteen palettes
+- **No colour outside `src/styles/`.** There is not one, and twenty palettes
   depend on that staying true. `data-theme` names the palette; anything that
   only needs "is this dark" reads `data-appearance`.
 - **`unwrap`, `expect` and `panic` are `deny`** workspace-wide. Test files opt
