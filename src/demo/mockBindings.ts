@@ -6,6 +6,7 @@
  * never catches a loading state or an error toast.
  */
 
+import { version } from "../../package.json";
 import type { commands as real } from "../bindings";
 import {
   CATALOG,
@@ -29,7 +30,8 @@ export const commands: typeof real = {
     ok({
       home: "/Users/you",
       symlinksSupported: true,
-      appVersion: "0.5.0",
+      // The version being built, so What's new opens on it as "This version".
+      appVersion: version,
       commit: "53580a7",
       platform: "macos",
     }),

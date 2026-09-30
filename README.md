@@ -1,86 +1,124 @@
+<div align="center">
+
+<img src="app-icon.png" alt="" width="112" height="112">
+
 # skills-hub
 
-One library for the skills, agents, commands and rules scattered across every
-AI coding tool you use — Claude Code, Cursor, Codex, Gemini CLI and a dozen
-more. It works on the folders those tools actually read, so enabling,
-disabling and organising act on the real files rather than on a copy.
+**One library for the skills, agents, commands and rules<br>scattered across every AI coding tool you use.**
+
+[![Release](https://img.shields.io/github/v/release/nimble-123/skills-hub?style=flat-square&color=6e62e5)](https://github.com/nimble-123/skills-hub/releases/latest)
+[![CI](https://img.shields.io/github/actions/workflow/status/nimble-123/skills-hub/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/nimble-123/skills-hub/actions/workflows/ci.yml)
+[![Downloads](https://img.shields.io/github/downloads/nimble-123/skills-hub/total?style=flat-square&color=2ea44f)](https://github.com/nimble-123/skills-hub/releases)
+[![Licence](https://img.shields.io/github/license/nimble-123/skills-hub?style=flat-square)](LICENSE)
+<br>
+[![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](#install)
+[![Windows](https://img.shields.io/badge/Windows-0078D4?style=flat-square&logo=windows&logoColor=white)](#install)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](#install)
+[![Tauri 2](https://img.shields.io/badge/Tauri_2-24C8DB?style=flat-square&logo=tauri&logoColor=white)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
+
+[Install](#install) · [Features](#features) · [Supported tools](#supported-tools) · [Changelog](CHANGELOG.md) · [Architecture](ARCHITECTURE.md)
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/tour-dark.gif">
+  <img src="docs/images/tour.gif" alt="A tour of skills-hub: searching the library, opening a skill, searching the skills.sh registry, the cost page, and what changed in this version" width="900">
+</picture>
+
+</div>
+
+<br>
+
+Every AI coding tool keeps its skills, agents, commands and rules in a folder
+of its own — some global, some per project, most both. Nothing shows you all of
+it at once, the same prompt ends up pasted into three places and drifting
+apart, and a checkbox in a manager that never touches the file the tool reads
+has not disabled anything.
+
+**skills-hub works on the folders those tools actually read.** Enabling,
+disabling and organising act on the real files, never on a copy.
+
+## Features
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🗂️ One library, real files
+Every tool's items side by side, searchable and filterable by type, tool and
+workspace. **Disabling moves the file** into a `.skillmanager-disabled` folder
+beside it, and enabling moves it back — so the tool genuinely stops seeing it.
+Symlink-aware: a relative link is recomputed for its new depth.
+
+</td>
+<td width="50%" valign="top">
+
+### 🏷️ Tags that live in your vault
+One small markdown note per item, with frontmatter, in a folder you choose. Put
+it in an Obsidian vault and your tags sync with everything else and stay
+queryable from Dataview. A note carrying your own tags is never removed
+automatically.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🔎 Discover, install, diff first
+Search the [skills.sh](https://skills.sh) registry, or point it at any
+repository git can reach — no account, no token. Everything installed records
+the commit it came from, so updates arrive **as a diff before anything is
+overwritten**, and can be put back.
+
+</td>
+<td valign="top">
+
+### 📊 See what it all costs
+What a tool carries every turn — an item's name and description — separated
+from what it loads once invoked. Where a tool keeps a history, that history
+says which items are actually used.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🧩 MCP servers and plugins
+Every MCP server every tool is configured with, global and per project,
+read-only. Plugin bundles from Claude Code and Codex, with their items in the
+library and the bundle switchable as a whole.
+
+</td>
+<td valign="top">
+
+### ⌨️ A menubar companion
+On macOS, a status item with a popover: search the whole library, switch an
+item on or off, and carry on — the panel takes the keyboard without pulling
+you out of your editor.
+
+</td>
+</tr>
+</table>
+
+And the details: twenty colour palettes, a choice of interface and code fonts,
+and a What's new that reads this repository's changelog, filterable by scope.
+
+<details>
+<summary><b>Screenshots</b></summary>
+<br>
+
+| | |
+|---|---|
+| ![The library with a skill open in the detail panel](docs/images/library-dark.png) | ![Discover: a registry search and the skills in a watched repository](docs/images/discover-dark.png) |
+| ![An update shown as a diff before anything is overwritten](docs/images/diff-dark.png) | ![The cost page: totals, largest items, and what stands out](docs/images/cost-dark.png) |
+| ![The tools page, with one tool's paths editable](docs/images/tools-dark.png) | ![Every configured MCP server](docs/images/mcp-dark.png) |
 
 <p align="center">
-  <img src="docs/images/library.png" alt="The library: sidebar, card grid and the detail panel for a skill" width="900">
+  <img src="docs/images/popover-dark.png" alt="The menubar popover: a search field and matching items with a switch each" width="360">
 </p>
 
-A standalone desktop application, built with Tauri and Rust. Derived from the
-Obsidian plugin [AI Skills Manager](https://github.com/notenerdofficial/ai-skills-manager);
-see [NOTICE.md](NOTICE.md).
-
-## Why
-
-Every tool invents its own convention for where these things live — some
-global, some per project, most both. Nothing shows you all of it at once, the
-same prompt ends up pasted into three folders and drifting apart, and a
-checkbox in a manager that never touches the file the tool reads has not
-disabled anything.
-
-So: one library over the real folders, and every action a real one.
-
-<p align="center">
-  <img src="docs/images/types.png" alt="The whole library unfiltered: skills, agents, commands and rules side by side, each type a colour of its own" width="900">
-</p>
-
-## What it does
-
-**Enabling and disabling moves the file.** Into a `.skillmanager-disabled`
-folder beside where it was, and back. Symlink-aware — a relative link is
-recomputed for its new depth rather than replaced with an absolute path, so a
-shared skills folder keeps working after a round trip. The tool genuinely
-stops seeing the item.
-
-**Your tags live in your vault.** One small markdown file per item, with
-frontmatter, in a folder you choose. Put it in an Obsidian vault and they sync
-with everything else you have and stay queryable from Dataview. A note is only
-rewritten when something actually changed, and a note carrying your own tags
-is never removed automatically.
-
-**Find it, install it, and see the diff first.**
-
-<p align="center">
-  <img src="docs/images/discover.png" alt="Discover: a registry search, a watched repository, and the skills found in it" width="450">
-  <img src="docs/images/diff.png" alt="An update, shown as a diff before anything is overwritten" width="450">
-</p>
-
-Search the [skills.sh](https://skills.sh) registry by name, or point it at any
-repository git can reach — no account and no token either way. A search result
-names a repository, and watching one clones it, walks it, and lists everything
-installable in it, so the registry is a way to *find* repositories rather than
-a second install path that could go stale on its own. Anything installed
-records the commit it came from, so it can be checked for updates, shown as a
-diff before anything is overwritten, and put back the way it was.
-
-**See what it all costs.**
-
-<p align="center">
-  <img src="docs/images/cost.png" alt="The cost page: totals, largest items, and what stands out" width="900">
-</p>
-
-What a tool carries every turn — an item's name and description, so the model
-knows it exists — separated from what it loads once the item is invoked. Where
-a tool keeps a history, that history says which items have actually been used
-rather than guessing from how old a file is.
-
-**Everything else it reads, read-only.** Every MCP server every tool is
-configured with, global and per project. Plugin bundles from Claude Code and
-Codex, with their items in the library and the bundle switchable as a whole.
-
-**A menubar companion, on macOS.** A status item with a popover: search the
-whole library, switch an item on or off, and go back to what you were doing —
-the panel takes the keyboard without activating the application, so typing in
-it does not pull you out of your editor. Closing the window leaves it running;
-the popover and the window switch the same files and each tells the other what
-changed, so neither goes stale.
-
-<p align="center">
-  <img src="docs/images/popover.png" alt="The menubar popover: a search field, matching items with their type, tool and a switch each" width="360">
-</p>
+</details>
 
 ## Supported tools
 
@@ -91,42 +129,30 @@ Continue · and the shared `~/.agents/skills` convention.
 Every path is editable, so a tool that moves its folders — or a setup that was
 never standard — does not have to wait for a release.
 
-<p align="center">
-  <img src="docs/images/tools.png" alt="The tools page, with one tool expanded and its paths editable" width="900">
-</p>
+## Install
 
-## Installing
-
-**macOS** — a universal build, Apple silicon and Intel in one:
-
-```bash
-brew install --cask nimble-123/tap/skills-hub
-```
-
-**Windows**:
-
-```powershell
-winget install nimble-123.skills-hub
-```
+| Platform | Install |
+|---|---|
+| **macOS** — universal, Apple silicon and Intel | `brew install --cask nimble-123/tap/skills-hub` |
+| **Windows** | `winget install nimble-123.skills-hub` |
+| **Linux** | the `.deb` or `.AppImage` from the [latest release](https://github.com/nimble-123/skills-hub/releases/latest) |
 
 The winget manifest is [in review](https://github.com/microsoft/winget-pkgs/pull/442854);
-until it is merged, take the `-setup.exe` from the release instead.
+until it is merged, take the `-setup.exe` from the
+[latest release](https://github.com/nimble-123/skills-hub/releases/latest),
+where every installer above comes from.
 
-**Linux** — the `.deb` or the `.AppImage` from
-[the latest release](https://github.com/nimble-123/skills-hub/releases/latest),
-which is also where every installer above comes from.
+On first launch it asks where to keep its notes. Your skills are never moved
+or copied — only those notes live there.
 
-**From source**:
+<details>
+<summary><b>macOS says the app cannot be opened</b></summary>
+<br>
 
-```bash
-pnpm install
-pnpm tauri build     # → .app and .dmg
-```
-
-Builds are not signed yet, so macOS will object the first time — Homebrew
-quarantines what it downloads like any other browser would. Open the app, let
-it be refused, then allow it under System Settings → Privacy & Security, where
-an **Open Anyway** button now sits. Or take the quarantine flag off yourself:
+Builds are not signed yet, and Homebrew quarantines what it downloads like any
+browser would. Open the app, let it be refused, then allow it under
+**System Settings → Privacy & Security**, where an **Open Anyway** button now
+sits. Or take the quarantine flag off yourself:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/skills-hub.app
@@ -136,8 +162,18 @@ Control-clicking the app and choosing Open no longer works — macOS 15 removed
 that bypass. The flag is set when a file is *downloaded*, so a build carried
 over on a USB stick or with `scp` has none and simply opens.
 
-On first launch it asks where to keep its notes. Your skills are never moved
-or copied — only those notes live there.
+</details>
+
+<details>
+<summary><b>Build from source</b></summary>
+<br>
+
+```bash
+pnpm install
+pnpm tauri build     # → .app and .dmg, or the platform's equivalent
+```
+
+</details>
 
 ## Architecture
 
@@ -151,16 +187,21 @@ Three layers, dependencies pointing inwards only:
 
 `skills-core` never imports `tauri` — enforced by `cargo deny`, not by
 discipline. `$HOME` is injected rather than read, which is what makes the
-scanner testable against temporary directories. `crates/cli` is a developer
-harness that drives the same domain code from a terminal; that it can exist at
-all is the proof the domain really is decoupled.
+scanner testable against temporary directories, and `crates/cli` drives the
+same domain code from a terminal as proof that it really is decoupled.
 
-[ARCHITECTURE.md](ARCHITECTURE.md) has the long version: the domain model, the
-path a scan takes to become a card, where state is held, and which invariants
-must not be broken. [SPEC.md](SPEC.md) has what the application guarantees on
-disk, guarantee by guarantee, each cited to the test that holds it up.
+[ARCHITECTURE.md](ARCHITECTURE.md) has the long version, and
+[SPEC.md](SPEC.md) what the application guarantees on disk, each guarantee
+cited to the test that holds it up.
 
-## Development
+## Contributing
+
+Issues and pull requests are welcome — [CONTRIBUTING.md](CONTRIBUTING.md) has
+the branching model and how a change becomes a release.
+
+<details>
+<summary><b>Development commands</b></summary>
+<br>
 
 ```bash
 pnpm install
@@ -171,15 +212,16 @@ pnpm check              # Biome: format + lint
 pnpm typecheck
 pnpm test               # vitest, including a headless render of the window
 pnpm icons              # regenerate the icon registry
-pnpm screenshots        # regenerate the pictures above
+pnpm screenshots        # regenerate the screenshots
+pnpm tour               # regenerate the tour at the top of this page
 ```
 
-`src/bindings.ts` is generated by `tauri-specta` and committed. Regenerate it
-with `cargo test -p skills-hub`; CI fails if doing so produces a diff.
+`src/bindings.ts` is generated by `tauri-specta` and committed; CI fails if
+`cargo test -p skills-hub` produces a diff.
 
-The screenshots come from a demo build that swaps only the three modules
-talking to the host, so they are the real components and the real stylesheet
-against fixtures. What they cannot show is the native window frame.
+The screenshots and the tour come from a demo build that swaps only the
+modules talking to the host, so they are the real components and the real
+stylesheet against fixtures.
 
 ```bash
 cargo run -p skills-cli -- scan            # the real scanner, real folders
@@ -187,6 +229,10 @@ cargo run -p skills-cli -- usage codex     # what a tool's history says
 cargo run -p skills-cli -- mcp             # every configured MCP server
 ```
 
+</details>
+
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Derived from the Obsidian plugin
+[AI Skills Manager](https://github.com/notenerdofficial/ai-skills-manager);
+see [NOTICE.md](NOTICE.md).
