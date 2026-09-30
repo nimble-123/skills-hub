@@ -3,6 +3,7 @@ import changelogSource from "../../../CHANGELOG.md?raw";
 import {
   type Change,
   countChanges,
+  countUnscoped,
   formatDate,
   parseChangelog,
   type Release,
@@ -44,6 +45,8 @@ type WhatsNewProps = {
  * The scopes of the Conventional Commits behind each change are offered as a
  * filter: pick one and only its changes remain, in the releases that have
  * any, unfolded, since a filtered history is short enough to read at once.
+ * Changes committed without a scope are a filter of their own, beside "All"
+ * rather than at the end of a row that may scroll it out of sight.
  */
 export function WhatsNew({
   open,
@@ -87,6 +90,9 @@ export function WhatsNew({
   );
 }
 
+/** A scope to narrow to, or `null` for the changes committed without one. */
+type Filter = { scope: string | null };
+
 /** Only drawn while open, so a closed dialog holds no DOM and reopens fresh. */
 function Contents({
   onClose,
@@ -95,15 +101,18 @@ function Contents({
   releases,
 }: Omit<WhatsNewProps, "open" | "releases"> & { releases: Release[] }) {
   const [shown, setShown] = useState(PAGE);
-  const [scope, setScope] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter | null>(null);
   const scopes = useMemo(() => scopesOf(releases), [releases]);
+  const unscoped = useMemo(() => countUnscoped(releases), [releases]);
 
   const visible = useMemo(
     () =>
-      scope
-        ? releases.map((release) => withScope(release, scope)).filter((r) => countChanges(r) > 0)
+      filter
+        ? releases
+            .map((release) => withScope(release, filter.scope))
+            .filter((r) => countChanges(r) > 0)
         : releases,
-    [releases, scope],
+    [releases, filter],
   );
   // Only the newest release gets the full card. Filtered down to a scope it
   // has nothing in, the matches are all older and are listed as such.
@@ -113,10 +122,24 @@ function Contents({
   const hidden = older.length - shown;
   const matching = visible.reduce((n, release) => n + countChanges(release), 0);
 
-  const pick = (next: string | null) => {
-    setScope((current) => (current === next ? null : next));
+  // Picking the filter already in force lifts it, like "All" or "Clear".
+  const pick = (next: Filter | null) => {
+    setFilter((current) => (next && current?.scope === next.scope ? null : next));
     setShown(PAGE);
   };
+  const isPicked = (scope: string | null) => filter !== null && filter.scope === scope;
+  const scope = filter?.scope;
+  // Keys that change with the filter, so folded rows remount open or closed.
+  const keyed = filter ? `${filter.scope ?? "(none)"}:` : "";
+  const what = filter ? (
+    filter.scope === null ? (
+      "without a scope"
+    ) : (
+      <>
+        in <span className={styles.mono}>{filter.scope}</span>
+      </>
+    )
+  ) : null;
 
   return (
     <div className={styles.frame}>
@@ -142,19 +165,36 @@ function Contents({
             <button
               type="button"
               className={styles.chip}
-              aria-pressed={scope === null}
+              aria-pressed={filter === null}
               onClick={() => pick(null)}
             >
               All
             </button>
+            {unscoped > 0 && (
+              <>
+                <button
+                  type="button"
+                  className={`${styles.chip} ${styles.chipBare}`}
+                  aria-pressed={isPicked(null)}
+                  aria-label={`No scope, ${unscoped} ${unscoped === 1 ? "change" : "changes"}`}
+                  onClick={() => pick({ scope: null })}
+                >
+                  no scope
+                  <span className={styles.chipCount} aria-hidden="true">
+                    {unscoped}
+                  </span>
+                </button>
+                <span className={styles.chipRule} aria-hidden="true" />
+              </>
+            )}
             {scopes.map(({ scope: name, count }) => (
               <button
                 key={name}
                 type="button"
                 className={styles.chip}
-                aria-pressed={scope === name}
+                aria-pressed={isPicked(name)}
                 aria-label={`${name}, ${count} ${count === 1 ? "change" : "changes"}`}
-                onClick={() => pick(name)}
+                onClick={() => pick({ scope: name })}
               >
                 {name}
                 <span className={styles.chipCount} aria-hidden="true">
@@ -167,10 +207,9 @@ function Contents({
       </header>
 
       <div className={styles.body}>
-        {scope && (
+        {filter && (
           <p className={styles.filtered} aria-live="polite">
-            {matching} {matching === 1 ? "change" : "changes"} in{" "}
-            <span className={styles.mono}>{scope}</span> across {visible.length}{" "}
+            {matching} {matching === 1 ? "change" : "changes"} {what} across {visible.length}{" "}
             {visible.length === 1 ? "release" : "releases"}
             <button type="button" className={styles.clear} onClick={() => pick(null)}>
               Clear
@@ -180,16 +219,22 @@ function Contents({
 
         {latest ? (
           <LatestRelease
-            key={`${scope ?? ""}${latest.version}`}
+            key={`${keyed}${latest.version}`}
             release={latest}
             installed={latest.version === installedVersion}
-            unfold={scope !== null}
+            unfold={filter !== null}
             scope={scope}
           />
-        ) : newest && scope ? (
+        ) : newest && filter ? (
           <p className={styles.quiet}>
-            No <span className={styles.mono}>{scope}</span> changes in {newest.version}, the latest
-            release.
+            {filter.scope === null ? (
+              "No changes without a scope"
+            ) : (
+              <>
+                No <span className={styles.mono}>{filter.scope}</span> changes
+              </>
+            )}{" "}
+            in {newest.version}, the latest release.
           </p>
         ) : (
           <p className={styles.empty}>No releases are recorded in this build.</p>
@@ -202,11 +247,11 @@ function Contents({
             </h3>
             <ul className={styles.earlier}>
               {older.slice(0, shown).map((release) => (
-                <li key={`${scope ?? ""}${release.version}`}>
+                <li key={`${keyed}${release.version}`}>
                   <OlderRelease
                     release={release}
                     installed={release.version === installedVersion}
-                    unfold={scope !== null}
+                    unfold={filter !== null}
                     scope={scope}
                   />
                 </li>
@@ -242,7 +287,7 @@ type ReleaseProps = {
   /** Open what is otherwise folded: set while a scope filter narrows the list. */
   unfold: boolean;
   /** The scope being filtered to, which then goes without saying on each change. */
-  scope: string | null;
+  scope: string | null | undefined;
 };
 
 function LatestRelease({ release, installed, unfold, scope }: ReleaseProps) {
@@ -308,7 +353,7 @@ function ReleaseDate({ release }: { release: Release }) {
   );
 }
 
-function SectionList({ section, scope }: { section: Section; scope: string | null }) {
+function SectionList({ section, scope }: { section: Section; scope: string | null | undefined }) {
   return (
     <section className={styles.section} data-kind={section.kind}>
       <h4 className={styles.sectionTitle}>{section.title}</h4>

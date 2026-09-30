@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   countChanges,
+  countUnscoped,
   formatDate,
   parseChangelog,
   scopesOf,
@@ -112,6 +113,16 @@ describe("reading the changelog", () => {
     expect(countChanges(ui)).toBe(1);
     expect(countChanges(withScope(first, "ui"))).toBe(0);
     expect(countChanges(latest)).toBe(4);
+  });
+
+  it("counts and keeps the changes committed without a scope", () => {
+    expect(countUnscoped(releases)).toBe(3);
+    const bare = withScope(latest, null);
+    expect(bare.sections.map((s) => s.title)).toEqual(["Features", "Documentation"]);
+    expect(bare.sections.flatMap((s) => s.changes.map((c) => c.text))).toEqual([
+      "add a menubar companion",
+      "add CLAUDE.md",
+    ]);
   });
 
   it("formats a date the way the interface writes one", () => {

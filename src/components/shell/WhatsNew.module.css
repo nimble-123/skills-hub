@@ -134,6 +134,20 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Not a scope name, so not set like one. */
+.chipBare {
+  font-family: inherit;
+  font-size: var(--font-ui-smaller);
+}
+
+.chipRule {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  margin: 3px 2px;
+  background: var(--bg-modifier-border);
+}
+
 .chip[aria-pressed="true"] .chipCount {
   color: inherit;
   opacity: 0.75;

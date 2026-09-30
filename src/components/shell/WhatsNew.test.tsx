@@ -154,6 +154,7 @@ describe("what's new", () => {
 
     expect(chips.map((chip) => chip.getAttribute("aria-label") ?? chip.textContent)).toEqual([
       "All",
+      "No scope, 30 changes",
       "ui, 20 changes",
       "menubar, 10 changes",
     ]);
@@ -228,6 +229,42 @@ describe("what's new", () => {
     await user.click(within(dialog).getByRole("button", { name: "Clear" }));
     expect(within(dialog).queryByText(/changes in/)).toBeNull();
     expect(within(dialog).getByText("Feature number 20")).toBeTruthy();
+  });
+
+  it("narrows to the changes committed without a scope", async () => {
+    const user = userEvent.setup();
+    const dialog = open();
+    const bare = within(dialog).getByRole("button", { name: "No scope, 30 changes" });
+
+    await user.click(bare);
+
+    expect(bare.getAttribute("aria-pressed")).toBe("true");
+    expect(within(dialog).getByText(/30 changes/).textContent).toBe(
+      "30 changes without a scope across 20 releasesClear",
+    );
+    expect(within(dialog).queryByText("Feature number 20")).toBeNull();
+    expect(within(dialog).queryByText("Fix number 20")).toBeNull();
+    expect(within(dialog).getByText("Fix number 19")).toBeTruthy();
+    expect(within(dialog).getByText("Docs for 20")).toBeTruthy();
+
+    await user.click(bare);
+    expect(within(dialog).getByText("Feature number 20")).toBeTruthy();
+  });
+
+  it("says when the latest release has nothing without a scope", async () => {
+    const user = userEvent.setup();
+    const releases = history(2);
+    const newest = releases[0];
+    if (!newest) throw new Error("no history");
+    newest.sections = newest.sections.filter((section) => section.kind === "features");
+    const dialog = open(releases, "0.2.0");
+
+    await user.click(within(dialog).getByRole("button", { name: /^No scope,/ }));
+
+    expect(within(dialog).queryByRole("article")).toBeNull();
+    expect(within(dialog).getByText(/the latest release/).textContent).toBe(
+      "No changes without a scope in 0.2.0, the latest release.",
+    );
   });
 
   it("says so when the build carries no releases", () => {
