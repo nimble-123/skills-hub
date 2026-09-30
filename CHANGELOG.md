@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0](https://github.com/nimble-123/skills-hub/compare/v0.4.0...v0.5.0) (2026-09-30)
+
+
+### Features
+
+* add a menubar companion with a webview popover ([3d30ba7](https://github.com/nimble-123/skills-hub/commit/3d30ba7dcf43b3d678603ac073d234b85c4e6c79))
+* publish through Homebrew and winget ([2387093](https://github.com/nimble-123/skills-hub/commit/2387093b98f44dddcb0353728be5dff67f36f5ba))
+* **ui:** add EnBW Light and EnBW Dark palettes ([#28](https://github.com/nimble-123/skills-hub/issues/28)) ([cb378dc](https://github.com/nimble-123/skills-hub/commit/cb378dc5f8c34cf5b0aa4969e04185022a46af45))
+
+
+### Fixes
+
+* ask for the notes folder once, not once per core ([dc54b49](https://github.com/nimble-123/skills-hub/commit/dc54b49400a7c396524e64e10c84ffd80a26cbd3))
+* drag the window by its title bar ([584165e](https://github.com/nimble-123/skills-hub/commit/584165e10ee16db6e0e5e59131ec04cc6d010ac2))
+* keep interface text from being selected ([6b5d788](https://github.com/nimble-123/skills-hub/commit/6b5d788e1c58a2e0e3a2341f2f1086ed4dcdd2cc))
+* **menubar:** let the window's first scan run unopposed ([de2c2c6](https://github.com/nimble-123/skills-hub/commit/de2c2c6332e237ace7fe2f318858deb422f61304))
+
 ## [0.4.0](https://github.com/nimble-123/skills-hub/compare/v0.3.1...v0.4.0) (2026-09-28)
 
 
