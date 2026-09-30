@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://github.com/nimble-123/skills-hub/compare/v0.5.0...v0.6.0) (2026-09-30)
+
+
+### Features
+
+* **ui:** filter what's new by the scope of each change ([e370d2e](https://github.com/nimble-123/skills-hub/commit/e370d2e4da8de286721746bf55d5c95636bc8752))
+* **ui:** filter what's new to the changes without a scope ([502cc12](https://github.com/nimble-123/skills-hub/commit/502cc12caa55482ed86c17ab70eef5b506c685e2))
+* **ui:** open what's new from the version in the sidebar ([16b33f2](https://github.com/nimble-123/skills-hub/commit/16b33f23db6f638b93db2559da1fad3377ac4968))
+* **ui:** pin "All" and "no scope" while the scope chips scroll ([b1331b4](https://github.com/nimble-123/skills-hub/commit/b1331b481a2f3fc346650361e87c05c0dcda70c9))
+* **ui:** show the version and commit at the foot of the sidebar ([f0a8635](https://github.com/nimble-123/skills-hub/commit/f0a86352495c3486870cbc431aceaa043410402f))
+
+
+### Fixes
+
+* **menubar:** load the popover's library each time it opens ([#32](https://github.com/nimble-123/skills-hub/issues/32)) ([291e78e](https://github.com/nimble-123/skills-hub/commit/291e78ea00ee48f3139bc8945eaa66863f454543))
+
 ## [0.5.0](https://github.com/nimble-123/skills-hub/compare/v0.4.0...v0.5.0) (2026-09-30)
 
 
