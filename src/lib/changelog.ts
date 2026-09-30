@@ -115,8 +115,8 @@ function kindOf(title: string): SectionKind {
  * Every scope the history uses, most used first, then by name.
  *
  * Scopes are the `(scope)` of a Conventional Commit, which release-please
- * writes as `**scope:**`. Changes without one belong to no scope and are only
- * reached through "All".
+ * writes as `**scope:**`. Changes without one are not counted here; see
+ * `countUnscoped`.
  */
 export function scopesOf(releases: Release[]): { scope: string; count: number }[] {
   const counts = new Map<string, number>();
@@ -132,8 +132,24 @@ export function scopesOf(releases: Release[]): { scope: string; count: number }[
     .sort((a, b) => b.count - a.count || a.scope.localeCompare(b.scope));
 }
 
-/** The release with only the changes in `scope`; sections left empty go. */
-export function withScope(release: Release, scope: string): Release {
+/** How many changes, across the history, were committed without a scope. */
+export function countUnscoped(releases: Release[]): number {
+  return releases.reduce(
+    (n, release) =>
+      n +
+      release.sections.reduce(
+        (m, section) => m + section.changes.filter((change) => change.scope === null).length,
+        0,
+      ),
+    0,
+  );
+}
+
+/**
+ * The release with only the changes in `scope`, or with only those without
+ * one when `scope` is null; sections left empty go.
+ */
+export function withScope(release: Release, scope: string | null): Release {
   return {
     ...release,
     sections: release.sections
