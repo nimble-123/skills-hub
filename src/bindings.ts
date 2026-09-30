@@ -58,6 +58,10 @@ export const commands = {
 	 *  it shows the progress; the popover has nowhere to put it and would rather
 	 *  wait than open onto nothing. `None` means no notes folder has been chosen,
 	 *  which only the window can put right.
+	 * 
+	 *  Opened while the window's first scan is still running, it waits for that
+	 *  scan and answers with its result, rather than being refused the lock and
+	 *  opening onto an error.
 	 */
 	ensureSnapshot: () => typedError<{
 	items: ItemMetadata[],

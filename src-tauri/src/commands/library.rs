@@ -49,16 +49,36 @@ pub async fn rescan(
 /// it shows the progress; the popover has nowhere to put it and would rather
 /// wait than open onto nothing. `None` means no notes folder has been chosen,
 /// which only the window can put right.
+///
+/// Opened while the window's first scan is still running, it waits for that
+/// scan and answers with its result, rather than being refused the lock and
+/// opening onto an error.
 #[tauri::command]
 #[specta::specta]
 pub async fn ensure_snapshot(state: State<'_, AppState>) -> CommandResult<Option<LibrarySnapshot>> {
+    // At debug level, like the popover's opening and closing: what it asked
+    // for and what it got cannot be read off the screen.
     if let Some(snapshot) = lock(&state.snapshot)?.clone() {
+        tracing::debug!(items = snapshot.items.len(), "ensure_snapshot: cached");
         return Ok(Some(snapshot));
     }
     if lock(&state.store)?.is_none() {
+        tracing::debug!("ensure_snapshot: no notes folder");
         return Ok(None);
     }
-    scan(
+
+    tracing::debug!("ensure_snapshot: nothing cached, waiting for the scan lock");
+    let _scanning = lock(&state.scanning)?;
+    // Whoever held the lock may have been scanning: their result is this one.
+    if let Some(snapshot) = lock(&state.snapshot)?.clone() {
+        tracing::debug!(
+            items = snapshot.items.len(),
+            "ensure_snapshot: another scan's result"
+        );
+        return Ok(Some(snapshot));
+    }
+    tracing::debug!("ensure_snapshot: scanning");
+    scan_locked(
         &state,
         RescanOptions {
             skip_plugins: false,
@@ -80,7 +100,15 @@ fn scan(
         .scanning
         .try_lock()
         .map_err(|_| CommandError::new("busy", "A scan is already running."))?;
+    scan_locked(state, options, on_progress)
+}
 
+/// A scan, for a caller already holding `state.scanning`.
+fn scan_locked(
+    state: &AppState,
+    options: RescanOptions,
+    on_progress: &(dyn Fn(Progress) + Sync),
+) -> CommandResult<LibrarySnapshot> {
     let settings = lock(&state.settings)?.clone();
     let store_guard = lock(&state.store)?;
     let Some(store) = store_guard.as_ref() else {

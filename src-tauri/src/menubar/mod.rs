@@ -8,7 +8,9 @@
 
 use tauri::image::Image;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Manager as _, PhysicalPosition, Rect, WebviewUrl, WebviewWindow};
+use tauri::{
+    AppHandle, Emitter as _, Manager as _, PhysicalPosition, Rect, WebviewUrl, WebviewWindow,
+};
 use tauri_nspanel::{CollectionBehavior, ManagerExt as _, PanelLevel, StyleMask};
 
 mod panel;
@@ -18,6 +20,12 @@ mod panel;
 pub const POPOVER: &str = "popover";
 /// The main window's label, as `tauri.conf.json` declares it.
 pub const MAIN: &str = "main";
+/// Told to the popover each time it is shown, matching `OPENED` in
+/// `src/components/popover/Popover.tsx`.
+///
+/// The webview cannot find out for itself: the panel's delegate replaces the
+/// one Tauri installs, so the window's focus events never reach it.
+pub const OPENED: &str = "popover:opened";
 
 const WIDTH: f64 = 360.0;
 const HEIGHT: f64 = 480.0;
@@ -107,6 +115,11 @@ fn toggle(app: &AppHandle, rect: &Rect) {
     }
 
     panel.show_and_make_key();
+
+    match app.emit_to(POPOVER, OPENED, ()) {
+        Ok(()) => tracing::debug!("told the popover it opened"),
+        Err(err) => tracing::warn!(%err, "the popover opened without being told, and may be stale"),
+    }
 }
 
 /// Hides the popover, from wherever noticed it should close.
