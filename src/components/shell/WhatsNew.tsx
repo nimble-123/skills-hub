@@ -1,4 +1,4 @@
-import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type MouseEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import changelogSource from "../../../CHANGELOG.md?raw";
 import {
   type Change,
@@ -103,6 +103,8 @@ function Contents({
   const [shown, setShown] = useState(PAGE);
   const [filter, setFilter] = useState<Filter | null>(null);
   const scopes = useMemo(() => scopesOf(releases), [releases]);
+  const row = useRef<HTMLDivElement>(null);
+  const edges = useScrollEdges(row);
   const unscoped = useMemo(() => countUnscoped(releases), [releases]);
 
   const visible = useMemo(
@@ -162,16 +164,17 @@ function Contents({
         {scopes.length > 0 && (
           <fieldset className={styles.scopes}>
             <legend className={styles.srOnly}>Filter by scope</legend>
-            <button
-              type="button"
-              className={styles.chip}
-              aria-pressed={filter === null}
-              onClick={() => pick(null)}
-            >
-              All
-            </button>
-            {unscoped > 0 && (
-              <>
+            {/* "All" and "no scope" stay put; only the scopes scroll. */}
+            <div className={styles.pinned}>
+              <button
+                type="button"
+                className={styles.chip}
+                aria-pressed={filter === null}
+                onClick={() => pick(null)}
+              >
+                All
+              </button>
+              {unscoped > 0 && (
                 <button
                   type="button"
                   className={`${styles.chip} ${styles.chipBare}`}
@@ -184,24 +187,31 @@ function Contents({
                     {unscoped}
                   </span>
                 </button>
-                <span className={styles.chipRule} aria-hidden="true" />
-              </>
-            )}
-            {scopes.map(({ scope: name, count }) => (
-              <button
-                key={name}
-                type="button"
-                className={styles.chip}
-                aria-pressed={isPicked(name)}
-                aria-label={`${name}, ${count} ${count === 1 ? "change" : "changes"}`}
-                onClick={() => pick({ scope: name })}
-              >
-                {name}
-                <span className={styles.chipCount} aria-hidden="true">
-                  {count}
-                </span>
-              </button>
-            ))}
+              )}
+              <span className={styles.chipRule} aria-hidden="true" />
+            </div>
+            <div
+              ref={row}
+              className={styles.scroller}
+              data-more-before={edges.before || undefined}
+              data-more-after={edges.after || undefined}
+            >
+              {scopes.map(({ scope: name, count }) => (
+                <button
+                  key={name}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={isPicked(name)}
+                  aria-label={`${name}, ${count} ${count === 1 ? "change" : "changes"}`}
+                  onClick={() => pick({ scope: name })}
+                >
+                  {name}
+                  <span className={styles.chipCount} aria-hidden="true">
+                    {count}
+                  </span>
+                </button>
+              ))}
+            </div>
           </fieldset>
         )}
       </header>
@@ -400,6 +410,38 @@ function ChangeRow({ change, showScope }: { change: Change; showScope: boolean }
       )}
     </li>
   );
+}
+
+/**
+ * Whether a sideways-scrolling row has more to show before or after what is
+ * in view, so a fade can say so on that side only, and not once the row has
+ * been scrolled to its end or fits without scrolling at all.
+ */
+function useScrollEdges(ref: RefObject<HTMLElement | null>) {
+  const [edges, setEdges] = useState({ before: false, after: false });
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const measure = () => {
+      // A pixel of slack: fractional widths leave the end a hair short of flush.
+      const before = node.scrollLeft > 1;
+      const after = node.scrollLeft + node.clientWidth < node.scrollWidth - 1;
+      setEdges((current) =>
+        current.before === before && current.after === after ? current : { before, after },
+      );
+    };
+    measure();
+    node.addEventListener("scroll", measure, { passive: true });
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => {
+      node.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, [ref]);
+
+  return edges;
 }
 
 /** Commit subjects start lower-case; a list reads better when they do not. */

@@ -267,6 +267,36 @@ describe("what's new", () => {
     );
   });
 
+  it("keeps All and no scope in place, and scrolls only the scopes", () => {
+    const dialog = open();
+    const ui = within(dialog).getByRole("button", { name: /^ui,/ });
+    const all = within(dialog).getByRole("button", { name: "All" });
+    const bare = within(dialog).getByRole("button", { name: /^No scope,/ });
+    expect(ui.parentElement?.contains(all)).toBe(false);
+    expect(ui.parentElement?.contains(bare)).toBe(false);
+  });
+
+  it("fades the chip row only on a side with more to scroll to", () => {
+    const dialog = open();
+    const row = within(dialog).getByRole("button", { name: /^ui,/ }).parentElement;
+    if (!row) throw new Error("no chip row");
+    // jsdom lays nothing out, so the row is given a width and a scroll range.
+    Object.defineProperty(row, "clientWidth", { value: 300, configurable: true });
+    Object.defineProperty(row, "scrollWidth", { value: 500, configurable: true });
+    const scrollTo = (left: number) => {
+      row.scrollLeft = left;
+      fireEvent.scroll(row);
+      return [row.hasAttribute("data-more-before"), row.hasAttribute("data-more-after")];
+    };
+
+    expect(scrollTo(0)).toEqual([false, true]);
+    expect(scrollTo(100)).toEqual([true, true]);
+    expect(scrollTo(200)).toEqual([true, false]);
+
+    Object.defineProperty(row, "scrollWidth", { value: 300, configurable: true });
+    expect(scrollTo(0)).toEqual([false, false]);
+  });
+
   it("says so when the build carries no releases", () => {
     const dialog = open([]);
     expect(within(dialog).getByText("No releases are recorded in this build.")).toBeTruthy();
