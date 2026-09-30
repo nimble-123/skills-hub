@@ -74,6 +74,7 @@ cargo test -p skills-hub        # src/bindings.ts
 pnpm icons                      # src/components/common/icons.ts
 pnpm fonts                      # src/fonts/ and src/styles/fonts.css
 pnpm screenshots                # docs/images/, incl. the palette gallery
+pnpm tour                       # docs/images/tour.gif and tour-dark.gif, the README's tour
 ```
 
 `lefthook` runs fmt, clippy, biome and typecheck on commit; on push,
