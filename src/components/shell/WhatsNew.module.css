@@ -1,0 +1,428 @@
+/*
+ * What's new: the changelog as a dialog.
+ *
+ * Colours are the palette's own tokens, so the dialog follows all twenty.
+ * The frame is a column: a fixed header and footer, and a body that scrolls,
+ * so the close button is never scrolled away however long the history grows.
+ */
+
+.dialog {
+  width: min(620px, calc(100vw - 48px));
+  max-width: none;
+  max-height: min(720px, calc(100vh - 64px));
+  padding: 0;
+  border: 1px solid var(--bg-modifier-border);
+  border-radius: var(--radius-l);
+  background: var(--bg-primary);
+  color: var(--text-normal);
+  box-shadow: var(--shadow-m);
+  overflow: hidden;
+}
+
+.dialog[open] {
+  display: flex;
+  animation: rise 160ms ease-out;
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+  animation: fade 160ms ease-out;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open],
+  .dialog::backdrop {
+    animation: none;
+  }
+}
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--bg-modifier-border);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-ui-large);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.subtitle strong {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -4px -6px 0 0;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.close:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* ------------------------------------------------------------------ body */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  user-select: text;
+}
+
+.empty,
+.quiet {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+/* The newest release, laid out in full. */
+.latest {
+  padding: 16px 16px 6px;
+  border-radius: var(--radius-l);
+  background: var(--bg-primary-alt);
+  box-shadow: inset 0 0 0 1px var(--bg-modifier-border);
+}
+
+.latestHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.latestVersion {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge {
+  align-self: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--type-skill-bg);
+  color: var(--type-skill-text);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.date {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- sections */
+
+.section {
+  --kind: var(--text-faint);
+  margin-bottom: 14px;
+}
+
+.section[data-kind="features"] {
+  --kind: var(--interactive-accent);
+}
+
+.section[data-kind="fixes"] {
+  --kind: var(--text-success);
+}
+
+.section[data-kind="performance"] {
+  --kind: var(--text-warning);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sectionTitle::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kind);
+}
+
+.changes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 5px 0 5px 13px;
+  font-size: var(--font-ui-small);
+  line-height: 1.45;
+}
+
+.change + .change {
+  border-top: 1px solid var(--bg-modifier-border);
+}
+
+.changeText {
+  flex: 1;
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+.scope {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  background: var(--bg-secondary-alt);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 18px;
+  vertical-align: 1px;
+}
+
+.ref {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color 120ms ease-out;
+}
+
+.ref:hover {
+  color: var(--interactive-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ------------------------------------------------ folds and older releases */
+
+.chevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--text-faint);
+  transform: rotate(-90deg);
+  transition: transform 150ms ease-out;
+}
+
+details[open] > summary .chevron {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold {
+  margin: 2px 0 10px;
+}
+
+.foldSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  transition: background-color 120ms ease-out;
+}
+
+.foldSummary:hover {
+  background: var(--bg-modifier-hover);
+}
+
+.fold[open] > .foldSummary {
+  margin-bottom: 10px;
+}
+
+.earlierTitle {
+  margin: 22px 0 6px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.earlier {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.earlier > li + li {
+  border-top: 1px solid var(--bg-modifier-border);
+}
+
+.rowSummary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 6px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-small);
+  transition: background-color 120ms ease-out;
+}
+
+.rowSummary:hover {
+  background: var(--bg-modifier-hover);
+}
+
+.rowVersion {
+  min-width: 44px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowCounts {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowBody {
+  padding: 6px 6px 4px 28px;
+}
+
+.more {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px dashed var(--bg-modifier-border);
+  border-radius: var(--radius-m);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-ui-small);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.more:hover {
+  background: var(--bg-modifier-hover);
+  color: var(--text-normal);
+}
+
+.moreCount {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+/* ---------------------------------------------------------------- footer */
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 20px;
+  border-top: 1px solid var(--bg-modifier-border);
+  background: var(--bg-secondary);
+}
+
+.link {
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+  transition: color 120ms ease-out;
+}
+
+.link:hover {
+  color: var(--interactive-accent);
+}
