@@ -389,6 +389,20 @@ describe("the shell", () => {
     );
   });
 
+  it("opens what's new from the version, and closes it again", async () => {
+    const user = userEvent.setup();
+    await renderApp();
+
+    const sidebar = screen.getByRole("navigation", { name: "Library" });
+    await waitFor(() => expect(within(sidebar).getByText("v0.1.0")).toBeTruthy());
+    await user.click(within(sidebar).getByRole("button", { name: "v0.1.0" }));
+
+    const dialog = screen.getByRole("dialog", { name: "What’s new" });
+    expect(within(dialog).getByText(/You’re on/).textContent).toContain("0.1.0 · 53580a7");
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog", { name: "What’s new" })).toBeNull();
+  });
+
   it("names an unknown commit without pretending it can be opened", async () => {
     commands.probeCapabilities.mockResolvedValue(
       ok({

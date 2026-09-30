@@ -55,3 +55,16 @@ globalThis.matchMedia ??= ((query: string) => ({
   removeListener: () => {},
   dispatchEvent: () => false,
 })) as unknown as typeof globalThis.matchMedia;
+
+/**
+ * jsdom has `<dialog>` but not its modal methods. These do what the tests can
+ * observe: the `open` attribute, and the `close` event a real one fires.
+ */
+HTMLDialogElement.prototype.showModal ??= function showModal(this: HTMLDialogElement) {
+  this.setAttribute("open", "");
+};
+HTMLDialogElement.prototype.close ??= function close(this: HTMLDialogElement) {
+  if (!this.hasAttribute("open")) return;
+  this.removeAttribute("open");
+  this.dispatchEvent(new Event("close"));
+};
