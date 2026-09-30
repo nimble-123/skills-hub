@@ -56,18 +56,28 @@ pub async fn rescan(
 #[tauri::command]
 #[specta::specta]
 pub async fn ensure_snapshot(state: State<'_, AppState>) -> CommandResult<Option<LibrarySnapshot>> {
+    // At debug level, like the popover's opening and closing: what it asked
+    // for and what it got cannot be read off the screen.
     if let Some(snapshot) = lock(&state.snapshot)?.clone() {
+        tracing::debug!(items = snapshot.items.len(), "ensure_snapshot: cached");
         return Ok(Some(snapshot));
     }
     if lock(&state.store)?.is_none() {
+        tracing::debug!("ensure_snapshot: no notes folder");
         return Ok(None);
     }
 
+    tracing::debug!("ensure_snapshot: nothing cached, waiting for the scan lock");
     let _scanning = lock(&state.scanning)?;
     // Whoever held the lock may have been scanning: their result is this one.
     if let Some(snapshot) = lock(&state.snapshot)?.clone() {
+        tracing::debug!(
+            items = snapshot.items.len(),
+            "ensure_snapshot: another scan's result"
+        );
         return Ok(Some(snapshot));
     }
+    tracing::debug!("ensure_snapshot: scanning");
     scan_locked(
         &state,
         RescanOptions {

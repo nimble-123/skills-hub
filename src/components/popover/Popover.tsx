@@ -35,6 +35,9 @@ export function Popover() {
 
   const load = useCallback(async () => {
     const result = await commands.ensureSnapshot();
+    // Visible in the popover's Web Inspector, which is the only way to see
+    // what a native panel's webview was told.
+    console.debug("popover: ensureSnapshot", result.status);
     if (result.status === "error") {
       setMessage(result.error.message);
       setPhase("failed");
@@ -70,10 +73,13 @@ export function Popover() {
   // delegate replaces Tauri's, so `onFocusChanged` never fires here.
   useEffect(() => {
     const unlisten = getCurrentWindow().listen(OPENED, () => {
+      console.debug("popover: opened");
       setQuery("");
       search.current?.focus();
       void load();
     });
+    // A capability that does not allow listening fails here, and only here.
+    unlisten.catch((err: unknown) => console.error("popover: cannot listen for opening", err));
     return () => void unlisten.then((off) => off());
   }, [load]);
 

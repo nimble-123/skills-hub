@@ -116,8 +116,9 @@ fn toggle(app: &AppHandle, rect: &Rect) {
 
     panel.show_and_make_key();
 
-    if let Err(err) = app.emit_to(POPOVER, OPENED, ()) {
-        tracing::warn!(%err, "the popover opened without being told, and may be stale");
+    match app.emit_to(POPOVER, OPENED, ()) {
+        Ok(()) => tracing::debug!("told the popover it opened"),
+        Err(err) => tracing::warn!(%err, "the popover opened without being told, and may be stale"),
     }
 }
 
