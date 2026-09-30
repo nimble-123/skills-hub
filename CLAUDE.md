@@ -75,6 +75,7 @@ pnpm icons                      # src/components/common/icons.ts
 pnpm fonts                      # src/fonts/ and src/styles/fonts.css
 pnpm screenshots                # docs/images/, incl. the palette gallery
 pnpm tour                       # docs/images/tour.gif and tour-dark.gif, the README's tour
+pnpm architecture               # docs/images/architecture.svg and -dark.svg
 ```
 
 `lefthook` runs fmt, clippy, biome and typecheck on commit; on push,
