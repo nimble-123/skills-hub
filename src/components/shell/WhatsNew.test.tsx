@@ -39,7 +39,8 @@ function history(count: number): Release[] {
           kind: "fixes",
           changes: [
             {
-              scope: null,
+              // Every other release's fix is the menubar's.
+              scope: minor % 2 === 0 ? "menubar" : null,
               text: `fix number ${minor}`,
               pr: null,
               commit: { sha: "1234567", url: "https://github.com/o/r/commit/1234567" },
@@ -144,6 +145,89 @@ describe("what's new", () => {
 
     await user.click(within(dialog).getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it("offers each scope as a filter, most used first", () => {
+    const dialog = open();
+    const filter = within(dialog).getByRole("group", { name: "Filter by scope" });
+    const chips = within(filter).getAllByRole("button");
+
+    expect(chips.map((chip) => chip.getAttribute("aria-label") ?? chip.textContent)).toEqual([
+      "All",
+      "ui, 20 changes",
+      "menubar, 10 changes",
+    ]);
+    expect(chips[0]?.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("narrows to a scope's changes, in the releases that have any, unfolded", async () => {
+    const user = userEvent.setup();
+    const dialog = open();
+
+    await user.click(within(dialog).getByRole("button", { name: "menubar, 10 changes" }));
+
+    expect(within(dialog).getByText(/10 changes in/).textContent).toBe(
+      "10 changes in menubar across 10 releasesClear",
+    );
+    expect(within(dialog).queryByText("Feature number 20")).toBeNull();
+    expect(within(dialog).getByText("Fix number 20")).toBeTruthy();
+    expect(within(dialog).queryByText("Fix number 19")).toBeNull();
+
+    // The older matches are open to read, not folded behind a click each.
+    const rows = within(dialog)
+      .getAllByRole("listitem")
+      .map((li) => li.querySelector("details"))
+      .filter((d): d is HTMLDetailsElement => d !== null);
+    expect(rows).toHaveLength(8);
+    expect(rows.every((row) => row.open)).toBe(true);
+    expect(within(dialog).getByText("Fix number 18")).toBeTruthy();
+  });
+
+  it("keeps the full card for the newest release, and says when a scope skips it", async () => {
+    const user = userEvent.setup();
+    const releases = history(4);
+    const newest = releases[0];
+    if (!newest) throw new Error("no history");
+    // The newest release has no menubar change; two of the older ones do.
+    newest.sections = newest.sections.filter((section) => section.kind !== "fixes");
+    const dialog = open(releases, "0.4.0");
+
+    await user.click(within(dialog).getByRole("button", { name: /^menubar,/ }));
+
+    expect(within(dialog).queryByRole("article")).toBeNull();
+    expect(within(dialog).getByText(/changes in 0\.4\.0, the latest release/).textContent).toBe(
+      "No menubar changes in 0.4.0, the latest release.",
+    );
+    expect(within(dialog).getByText("Fix number 2")).toBeTruthy();
+  });
+
+  it("drops the scope label from each change while filtering to it", async () => {
+    const user = userEvent.setup();
+    const dialog = open();
+    const latest = () => within(dialog).getByRole("article", { name: "Release 0.20.0" });
+    expect(within(latest()).getByText("ui")).toBeTruthy();
+
+    await user.click(within(dialog).getByRole("button", { name: /^ui,/ }));
+    expect(within(latest()).queryByText("ui")).toBeNull();
+  });
+
+  it("goes back to everything from Clear, or by picking the scope again", async () => {
+    const user = userEvent.setup();
+    const dialog = open();
+    const ui = within(dialog).getByRole("button", { name: "ui, 20 changes" });
+
+    await user.click(ui);
+    expect(ui.getAttribute("aria-pressed")).toBe("true");
+    expect(within(dialog).queryByText("Fix number 20")).toBeNull();
+
+    await user.click(ui);
+    expect(ui.getAttribute("aria-pressed")).toBe("false");
+    expect(within(dialog).getByText("Fix number 20")).toBeTruthy();
+
+    await user.click(within(dialog).getByRole("button", { name: "menubar, 10 changes" }));
+    await user.click(within(dialog).getByRole("button", { name: "Clear" }));
+    expect(within(dialog).queryByText(/changes in/)).toBeNull();
+    expect(within(dialog).getByText("Feature number 20")).toBeTruthy();
   });
 
   it("says so when the build carries no releases", () => {
