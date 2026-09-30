@@ -70,18 +70,67 @@
   gap: 16px;
 }
 
-/* The scope filter: one row of chips that scrolls sideways rather than wraps,
-   so however many scopes the history grows, the header keeps its height. */
+/* The scope filter: "All" and "no scope" pinned at the start, then one row
+   of scopes that scrolls sideways rather than wraps, so however many scopes
+   the history grows, the header keeps its height. The row runs out to the
+   dialog's edge so scopes scroll out under it, and fades on a side only
+   while there is more to scroll to on it. */
 .scopes {
   display: flex;
+  min-width: 0;
+  margin: 14px -20px -4px 0;
+  padding: 0;
+  border: 0;
+}
+
+.pinned {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  padding: 2px 0 4px;
+}
+
+.scroller {
+  --fade: 40px;
+  --before: 0px;
+  --after: 0px;
+  display: flex;
+  flex: 1;
   gap: 6px;
   min-width: 0;
-  border: 0;
-  margin: 14px -20px -4px;
-  padding: 0 20px 4px;
+  /* Room for a focus ring, which the scroll box would otherwise clip. */
+  padding: 2px 0 4px 6px;
   overflow-x: auto;
   scrollbar-width: none;
-  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--before),
+    #000 calc(100% - var(--after)),
+    transparent
+  );
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scopes slip out of sight under the divider more briefly than off the end. */
+.scroller[data-more-before] {
+  --before: 20px;
+}
+
+.scroller[data-more-after] {
+  --after: var(--fade);
+}
+
+/* The end of the row keeps the header's inset once scrolled all the way.
+   A flex item rather than padding, which WebKit leaves out of the
+   scrollable width. */
+.scroller::after {
+  content: "";
+  flex: none;
+  width: 14px;
 }
 
 .srOnly {
@@ -91,10 +140,6 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-.scopes::-webkit-scrollbar {
-  display: none;
 }
 
 .chip {
@@ -144,7 +189,7 @@
   flex: none;
   align-self: stretch;
   width: 1px;
-  margin: 3px 2px;
+  margin: 3px 0 3px 2px;
   background: var(--bg-modifier-border);
 }
 
