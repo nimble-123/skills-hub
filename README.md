@@ -17,7 +17,7 @@
 [![Tauri 2](https://img.shields.io/badge/Tauri_2-24C8DB?style=flat-square&logo=tauri&logoColor=white)](https://tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
 
-[Install](#install) · [Features](#features) · [Supported tools](#supported-tools) · [Changelog](CHANGELOG.md) · [Architecture](ARCHITECTURE.md)
+[Website](https://nimble-123.github.io/skills-hub/) · [Install](#install) · [Features](#features) · [Supported tools](#supported-tools) · [Changelog](CHANGELOG.md) · [Architecture](ARCHITECTURE.md)
 
 <br>
 
