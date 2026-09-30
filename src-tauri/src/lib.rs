@@ -5,6 +5,9 @@
 //! adapts the core's progress callback onto a Tauri channel.
 
 mod commands;
+// Compiled into `build.rs`; included here only so its tests run.
+#[cfg(test)]
+mod commit;
 mod error;
 #[cfg(target_os = "macos")]
 mod menubar;

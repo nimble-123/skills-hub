@@ -195,6 +195,40 @@
   padding: 6px 4px;
 }
 
+/* Which build this is: one faint line, aligned with the row icons above. */
+.build {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  min-width: 0;
+  padding: 4px 12px 2px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}
+
+.buildLink {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: color 120ms ease-out;
+}
+
+.buildLink:hover {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .progress {
   padding: 2px 12px 6px;
   color: var(--text-faint);

@@ -16,6 +16,9 @@ export async function open(): Promise<string | null> {
   return null;
 }
 
+/** A link the demo has nowhere to open. */
+export async function openUrl(): Promise<void> {}
+
 /** An event nothing ever emits. */
 export async function listen(): Promise<() => void> {
   return () => {};

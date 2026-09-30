@@ -15,6 +15,7 @@ function swapHostModules(): Plugin {
     [/^@tauri-apps\/plugin-dialog$/, "/src/demo/tauriStubs.ts"],
     [/^@tauri-apps\/api\/event$/, "/src/demo/tauriStubs.ts"],
     [/^@tauri-apps\/api\/window$/, "/src/demo/tauriStubs.ts"],
+    [/^@tauri-apps\/plugin-opener$/, "/src/demo/tauriStubs.ts"],
   ];
 
   return {
