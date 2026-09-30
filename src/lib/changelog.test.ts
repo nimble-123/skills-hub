@@ -1,6 +1,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { formatDate, parseChangelog, splitSections, summarise } from "./changelog";
+import {
+  countChanges,
+  formatDate,
+  parseChangelog,
+  scopesOf,
+  splitSections,
+  summarise,
+  withScope,
+} from "./changelog";
 
 const SAMPLE = `# Changelog
 
@@ -82,6 +90,28 @@ describe("reading the changelog", () => {
     expect(summarise({ version: "0", date: null, compareUrl: null, sections: [] })).toBe(
       "No listed changes",
     );
+  });
+
+  it("lists the scopes in use, most used first", () => {
+    const releases = parseChangelog(`${SAMPLE}
+## 0.0.1 (2026-09-01)
+
+### Fixes
+
+* **ui:** an older fix
+`);
+    expect(scopesOf(releases)).toEqual([
+      { scope: "ui", count: 2 },
+      { scope: "menubar", count: 1 },
+    ]);
+  });
+
+  it("keeps only a scope's changes, and drops the sections left empty", () => {
+    const ui = withScope(latest, "ui");
+    expect(ui.sections.map((s) => s.title)).toEqual(["Features"]);
+    expect(countChanges(ui)).toBe(1);
+    expect(countChanges(withScope(first, "ui"))).toBe(0);
+    expect(countChanges(latest)).toBe(4);
   });
 
   it("formats a date the way the interface writes one", () => {
