@@ -346,7 +346,7 @@ Four things about it are not obvious from the code:
   popover has no use for. A window missing from every capability builds and
   starts and then fails each API call at runtime.
 
-The popover is a second Vite entry point (`popover.html`, `src/popover.tsx`)
+The popover is a second Vite entry point (`src/popover.html`, `src/popover.tsx`)
 rather than a route inside the window, so it loads its own small bundle
 instead of the whole shell. It holds no state the window also holds: it calls
 `ensure_snapshot` when it opens — which scans only if this session has not

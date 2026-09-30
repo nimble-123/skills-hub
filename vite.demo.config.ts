@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 
@@ -9,13 +10,16 @@ import { defineConfig, type Plugin } from "vite";
  * a mock-up of it.
  */
 function swapHostModules(): Plugin {
+  // Absolute paths, so they resolve the same whatever the root is.
+  const mockBindings = fileURLToPath(new URL("./src/demo/mockBindings.ts", import.meta.url));
+  const tauriStubs = fileURLToPath(new URL("./src/demo/tauriStubs.ts", import.meta.url));
   const swaps: Array<[RegExp, string]> = [
-    [/\/src\/bindings\.ts$/, "/src/demo/mockBindings.ts"],
-    [/^@tauri-apps\/api\/core$/, "/src/demo/tauriStubs.ts"],
-    [/^@tauri-apps\/plugin-dialog$/, "/src/demo/tauriStubs.ts"],
-    [/^@tauri-apps\/api\/event$/, "/src/demo/tauriStubs.ts"],
-    [/^@tauri-apps\/api\/window$/, "/src/demo/tauriStubs.ts"],
-    [/^@tauri-apps\/plugin-opener$/, "/src/demo/tauriStubs.ts"],
+    [/\/src\/bindings\.ts$/, mockBindings],
+    [/^@tauri-apps\/api\/core$/, tauriStubs],
+    [/^@tauri-apps\/plugin-dialog$/, tauriStubs],
+    [/^@tauri-apps\/api\/event$/, tauriStubs],
+    [/^@tauri-apps\/api\/window$/, tauriStubs],
+    [/^@tauri-apps\/plugin-opener$/, tauriStubs],
   ];
 
   return {
@@ -41,11 +45,14 @@ function swapHostModules(): Plugin {
 }
 
 export default defineConfig({
+  // Like the application's own config: the pages live in src/.
+  root: "src",
   plugins: [swapHostModules(), react()],
   server: { port: 1421, strictPort: true },
   build: {
-    rollupOptions: { input: "demo.html" },
-    outDir: "dist-demo",
+    rollupOptions: { input: fileURLToPath(new URL("./src/demo.html", import.meta.url)) },
+    outDir: "../dist-demo",
+    emptyOutDir: true,
     sourcemap: false,
   },
 });
