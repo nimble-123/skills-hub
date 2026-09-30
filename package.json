@@ -17,6 +17,7 @@
     "fonts": "node scripts/sync-fonts.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "tour": "node scripts/tour.mjs",
+    "architecture": "node scripts/architecture.mjs",
     "site": "node -e \"console.log('open file://' + require('path').resolve('docs/index.html'))\""
   },
   "dependencies": {

@@ -1,0 +1,336 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 1330" width="1760" height="1330" role="img" aria-label="The architecture of skills-hub: four layers — the real folders on disk, the domain crate, the Tauri adapter and the React interface — with dependencies pointing inwards, crossed by three paths: a scan from folder to card, a toggle that moves the file and tells both webviews, and the seams (a banned tauri dependency, generated bindings) that keep the layers apart.">
+<title>skills-hub architecture</title>
+<desc>The architecture of skills-hub: four layers — the real folders on disk, the domain crate, the Tauri adapter and the React interface — with dependencies pointing inwards, crossed by three paths: a scan from folder to card, a toggle that moves the file and tells both webviews, and the seams (a banned tauri dependency, generated bindings) that keep the layers apart.</desc>
+<style>
+  .flow { stroke-dasharray: 1 31; animation: march 1.6s linear infinite; }
+  .flow.toggle { animation-duration: 1.2s; }
+  .halo { animation: breathe 3.6s ease-in-out infinite; }
+  @keyframes march { to { stroke-dashoffset: -32; } }
+  @keyframes breathe { 50% { opacity: 0.022; } }
+  @media (prefers-reduced-motion: reduce) {
+    .flow, .halo { animation: none; }
+    .flow, .spark { display: none; }
+  }
+</style>
+<defs>
+  <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.2" fill="#d9dbe1"/></pattern>
+  <radialGradient id="bloom" cx="0.42" cy="0.36" r="0.62"><stop offset="0" stop-color="#5b6ef5" stop-opacity="0.063"/><stop offset="1" stop-color="#5b6ef5" stop-opacity="0"/></radialGradient>
+  <marker id="m-5b6ef5" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 L9 5 L1 8.5 z" fill="#5b6ef5"/></marker>
+<marker id="m-1f8b4c" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 L9 5 L1 8.5 z" fill="#1f8b4c"/></marker>
+<marker id="m-c0392b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 L9 5 L1 8.5 z" fill="#c0392b"/></marker>
+<marker id="m-8a8f98" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 L9 5 L1 8.5 z" fill="#8a8f98"/></marker>
+<marker id="m-5c6068" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 L9 5 L1 8.5 z" fill="#5c6068"/></marker>
+</defs>
+<rect width="1760" height="1330" rx="24" fill="#f7f7f9"/>
+<rect width="1760" height="1330" rx="24" fill="url(#dots)"/>
+<rect width="1760" height="1330" rx="24" fill="url(#bloom)"/>
+
+<text x="40" y="76" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="42" font-weight="750" fill="#1f2124" letter-spacing="-0.8">skills-hub, end to end</text>
+<text x="40" y="112" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" font-weight="400" fill="#5c6068">Four layers, dependencies pointing inwards, and the three paths that cross them. Every name is a real module.</text>
+<line x1="1160" y1="84" x2="1194" y2="84" stroke="#5b6ef5" stroke-width="2.2" />
+<text x="1204" y="90" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#5c6068">scan</text>
+<line x1="1305" y1="84" x2="1339" y2="84" stroke="#1f8b4c" stroke-width="2.2" />
+<text x="1349" y="90" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#5c6068">toggle</text>
+<line x1="1450" y1="84" x2="1484" y2="84" stroke="#5c6068" stroke-width="2.2" stroke-dasharray="5 5"/>
+<text x="1494" y="90" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#5c6068">generated</text>
+<line x1="1595" y1="84" x2="1629" y2="84" stroke="#c0392b" stroke-width="2.2" stroke-dasharray="5 5"/>
+<text x="1639" y="90" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#5c6068">banned</text>
+
+<rect x="188" y="160" width="329" height="1140" rx="18" fill="#8a5c0a" fill-opacity="0.045" stroke="#8a5c0a" stroke-opacity="0.18"/>
+<rect x="200" y="176" width="46" height="4" rx="2" fill="#8a5c0a"/>
+<text x="200" y="204" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#8a5c0a" letter-spacing="1.8">ON DISK</text>
+<text x="200" y="229" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="650" fill="#1f2124">~, projects, your vault</text>
+<text x="200" y="251" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#8a8f98">the real files, never a copy</text>
+<rect x="593" y="160" width="329" height="1140" rx="18" fill="#5546b8" fill-opacity="0.045" stroke="#5546b8" stroke-opacity="0.18"/>
+<rect x="605" y="176" width="46" height="4" rx="2" fill="#5546b8"/>
+<text x="605" y="204" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#5546b8" letter-spacing="1.8">DOMAIN</text>
+<text x="605" y="229" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="650" fill="#1f2124">crates/core</text>
+<text x="605" y="251" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#8a8f98">no Tauri, no window, no IPC</text>
+<rect x="998" y="160" width="329" height="1140" rx="18" fill="#146054" fill-opacity="0.045" stroke="#146054" stroke-opacity="0.18"/>
+<rect x="1010" y="176" width="46" height="4" rx="2" fill="#146054"/>
+<text x="1010" y="204" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#146054" letter-spacing="1.8">ADAPTER</text>
+<text x="1010" y="229" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="650" fill="#1f2124">src-tauri</text>
+<text x="1010" y="251" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#8a8f98">Tauri and the domain</text>
+<rect x="1403" y="160" width="329" height="1140" rx="18" fill="#a23048" fill-opacity="0.045" stroke="#a23048" stroke-opacity="0.18"/>
+<rect x="1415" y="176" width="46" height="4" rx="2" fill="#a23048"/>
+<text x="1415" y="204" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="700" fill="#a23048" letter-spacing="1.8">INTERFACE</text>
+<text x="1415" y="229" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="650" fill="#1f2124">src/</text>
+<text x="1415" y="251" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#8a8f98">the generated bindings only</text>
+<path d="M1006 214 L918 214" fill="none" stroke="#8a8f98" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-8a8f98)"/>
+<text x="960" y="204" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8a8f98" text-anchor="middle">uses</text>
+<path d="M1411 214 L1323 214" fill="none" stroke="#8a8f98" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-8a8f98)"/>
+<text x="1365" y="204" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8a8f98" text-anchor="middle">uses</text>
+
+<line x1="40" y1="768" x2="1720" y2="768" stroke="#dcdee3" stroke-dasharray="2 6"/>
+<line x1="40" y1="1028" x2="1720" y2="1028" stroke="#dcdee3" stroke-dasharray="2 6"/>
+
+<circle cx="58" cy="298" r="15" fill="none" stroke="#5c6068" stroke-opacity="0.6"/>
+<text x="58" y="303.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" fill="#1f2124" text-anchor="middle">1</text>
+<text x="40" y="344" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1f2124">Scan</text>
+<text x="40" y="370" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5c6068">a folder becomes</text>
+<text x="40" y="390" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5c6068">a card</text>
+<circle cx="58" cy="808" r="15" fill="none" stroke="#5c6068" stroke-opacity="0.6"/>
+<text x="58" y="813.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" fill="#1f2124" text-anchor="middle">2</text>
+<text x="40" y="854" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1f2124">Toggle</text>
+<text x="40" y="880" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5c6068">one item, the real</text>
+<text x="40" y="900" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5c6068">file, both webviews</text>
+<circle cx="58" cy="1068" r="15" fill="none" stroke="#5c6068" stroke-opacity="0.6"/>
+<text x="58" y="1073.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" fill="#1f2124" text-anchor="middle">3</text>
+<text x="40" y="1114" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1f2124">Seams</text>
+<text x="40" y="1140" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5c6068">what keeps the</text>
+<text x="40" y="1160" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#5c6068">layers honest</text>
+
+<rect x="200" y="290" width="305" height="232" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<text x="216" y="317" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">Tool folders</text>
+<text x="489" y="316" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#8a8f98" text-anchor="end">16 tools</text>
+<text x="216" y="346" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#1f2124">~/.claude/skills/</text>
+<text x="232" y="368" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#5c6068">tdd/SKILL.md</text>
+<text x="232" y="390" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#5c6068">engineering/review/SKILL.md</text>
+<text x="232" y="412" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#1f8b4c">.skillmanager-disabled/</text>
+<text x="248" y="434" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#8a8f98">old-idea/SKILL.md</text>
+<text x="216" y="456" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#1f2124">~/.cursor/rules/house-style.md</text>
+<text x="216" y="478" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#1f2124">&lt;project&gt;/.codex/prompts/</text>
+<text x="216" y="508" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#8a8f98">global and per project</text>
+<rect x="200" y="540" width="305" height="148" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<text x="216" y="567" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">Notes folder</text>
+<text x="489" y="566" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#8a8f98" text-anchor="end">your vault</text>
+<text x="216" y="594" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#5c6068">&lt;entry_id&gt;.md, one per item</text>
+<text x="216" y="622" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">your tags live here</text>
+<text x="216" y="644" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">rewritten only when changed</text>
+<text x="216" y="666" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">never pruned while it holds tags</text>
+<rect x="605" y="290" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="300" width="3" height="42" rx="1.5" fill="#5546b8"/>
+<text x="621" y="317" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">scan::Walk</text>
+<text x="621" y="340" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">pairs enabled and disabled halves</text>
+<rect x="605" y="368" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="378" width="3" height="42" rx="1.5" fill="#5546b8"/>
+<text x="621" y="395" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">rescan::perform_rescan</text>
+<text x="621" y="418" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">a rayon task per tool and project</text>
+<rect x="605" y="446" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="456" width="3" height="42" rx="1.5" fill="#5546b8"/>
+<text x="621" y="473" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">MetaStore::ensure</text>
+<text x="621" y="496" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">a note per item, in parallel</text>
+<rect x="605" y="524" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="534" width="3" height="42" rx="1.5" fill="#c0392b"/>
+<text x="621" y="551" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">store::prune</text>
+<text x="621" y="574" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">refused on a partial or noisy scan</text>
+<rect x="605" y="602" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="612" width="3" height="42" rx="1.5" fill="#5546b8"/>
+<text x="621" y="629" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">LibrarySnapshot</text>
+<text x="621" y="652" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">items · plugins · broken links</text>
+<rect x="1010" y="290" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1010" y="300" width="3" height="42" rx="1.5" fill="#146054"/>
+<text x="1026" y="317" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">commands::rescan</text>
+<text x="1026" y="340" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">#[tauri::command], async</text>
+<rect x="1010" y="374" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1010" y="384" width="3" height="42" rx="1.5" fill="#146054"/>
+<text x="1026" y="401" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">Channel&lt;Progress&gt;</text>
+<text x="1026" y="424" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">streams while it walks</text>
+<rect x="1010" y="458" width="305" height="138" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1010" y="468" width="3" height="118" rx="1.5" fill="#146054"/>
+<text x="1026" y="485" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">AppState</text>
+<text x="1026" y="508" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">one Mutex per field</text>
+<text x="1026" y="528" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">snapshot: a cache, not the truth</text>
+<text x="1026" y="548" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">scanning: try_lock — a second</text>
+<text x="1026" y="568" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">scan is refused, never queued</text>
+<rect x="1415" y="290" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="300" width="3" height="42" rx="1.5" fill="#a23048"/>
+<text x="1431" y="317" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">commands.rescan()</text>
+<text x="1431" y="340" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">the Rescan button</text>
+<rect x="1415" y="374" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="384" width="3" height="42" rx="1.5" fill="#a23048"/>
+<text x="1431" y="401" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">Progress bar</text>
+<text x="1431" y="424" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">tool by tool, as it walks</text>
+<rect x="1415" y="458" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="468" width="3" height="42" rx="1.5" fill="#a23048"/>
+<text x="1431" y="485" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">useLibrary</text>
+<text x="1431" y="508" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">replaces the snapshot whole</text>
+<rect x="1415" y="542" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="552" width="3" height="42" rx="1.5" fill="#a23048"/>
+<text x="1431" y="569" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">deriveLibrary()</text>
+<text x="1431" y="592" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">grid and counts in one pass</text>
+<rect x="1415" y="626" width="305" height="118" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<text x="1431" y="653" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">ItemGrid → Card</text>
+<rect x="1431" y="666" width="85" height="30" rx="6" fill="#f7f7f9" stroke="#dcdee3"/>
+<rect x="1439" y="675" width="32" height="4" rx="2" fill="#5c6068" opacity="0.7"/>
+<rect x="1439" y="684" width="20" height="4" rx="2" fill="#8a8f98" opacity="0.5"/>
+<rect x="1479" y="676" width="24" height="10" rx="5" fill="#5546b8" opacity="0.85"/>
+<rect x="1524" y="666" width="85" height="30" rx="6" fill="#f7f7f9" stroke="#dcdee3"/>
+<rect x="1532" y="675" width="32" height="4" rx="2" fill="#5c6068" opacity="0.7"/>
+<rect x="1532" y="684" width="20" height="4" rx="2" fill="#8a8f98" opacity="0.5"/>
+<rect x="1572" y="676" width="24" height="10" rx="5" fill="#146054" opacity="0.85"/>
+<rect x="1617" y="666" width="85" height="30" rx="6" fill="#f7f7f9" stroke="#dcdee3"/>
+<rect x="1625" y="675" width="32" height="4" rx="2" fill="#5c6068" opacity="0.7"/>
+<rect x="1625" y="684" width="20" height="4" rx="2" fill="#8a8f98" opacity="0.5"/>
+<rect x="1665" y="676" width="24" height="10" rx="5" fill="#8a5c0a" opacity="0.85"/>
+<rect x="1431" y="702" width="85" height="30" rx="6" fill="#f7f7f9" stroke="#dcdee3"/>
+<rect x="1439" y="711" width="32" height="4" rx="2" fill="#5c6068" opacity="0.7"/>
+<rect x="1439" y="720" width="20" height="4" rx="2" fill="#8a8f98" opacity="0.5"/>
+<rect x="1479" y="712" width="24" height="10" rx="5" fill="#a23048" opacity="0.85"/>
+<rect x="1524" y="702" width="85" height="30" rx="6" fill="#f7f7f9" stroke="#dcdee3"/>
+<rect x="1532" y="711" width="32" height="4" rx="2" fill="#5c6068" opacity="0.7"/>
+<rect x="1532" y="720" width="20" height="4" rx="2" fill="#8a8f98" opacity="0.5"/>
+<rect x="1572" y="712" width="24" height="10" rx="5" fill="#5546b8" opacity="0.85"/>
+<rect x="1617" y="702" width="85" height="30" rx="6" fill="#f7f7f9" stroke="#dcdee3"/>
+<rect x="1625" y="711" width="32" height="4" rx="2" fill="#5c6068" opacity="0.7"/>
+<rect x="1625" y="720" width="20" height="4" rx="2" fill="#8a8f98" opacity="0.5"/>
+<rect x="1665" y="712" width="24" height="10" rx="5" fill="#146054" opacity="0.85"/>
+<path d="M1560 521 L1560 539" fill="none" stroke="#5b6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M1560 605 L1560 623" fill="none" stroke="#5b6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M750 353 L750 365" fill="none" stroke="#5b6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M750 431 L750 443" fill="none" stroke="#5b6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M750 509 L750 521" fill="none" stroke="#5b6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M750 587 L750 599" fill="none" stroke="#5b6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M1413 321 L1319 321" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1413 321 L1319 321" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M1413 321 L1319 321" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" path="M1413 321 L1319 321" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" path="M1413 321 L1319 321"/></circle>
+<rect x="1332.7" y="307" width="64.6" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="1365" y="323.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">invoke</text>
+<path d="M1008 321 L960 321 L960 399 L914 399" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1008 321 L960 321 L960 399 L914 399" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M1008 321 L960 321 L960 399 L914 399" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="0.37s" repeatCount="indefinite" path="M1008 321 L960 321 L960 399 L914 399" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="0.37s" repeatCount="indefinite" path="M1008 321 L960 321 L960 399 L914 399"/></circle>
+<rect x="931.75" y="348" width="56.5" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="960" y="364.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">calls</text>
+<path d="M507 321 L601 321" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M507 321 L601 321" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M507 321 L601 321" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="0.74s" repeatCount="indefinite" path="M507 321 L601 321" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="0.74s" repeatCount="indefinite" path="M507 321 L601 321"/></circle>
+<rect x="526.75" y="307" width="56.5" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="555" y="323.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">reads</text>
+<path d="M603 477 L555 477 L555 597 L509 597" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M603 477 L555 477 L555 597 L509 597" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M603 477 L555 477 L555 597 L509 597" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="1.1099999999999999s" repeatCount="indefinite" path="M603 477 L555 477 L555 597 L509 597" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="1.1099999999999999s" repeatCount="indefinite" path="M603 477 L555 477 L555 597 L509 597"/></circle>
+<rect x="522.7" y="526" width="64.6" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="555" y="542.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">writes</text>
+<path d="M912 633 L960 633 L960 527 L1006 527" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M912 633 L960 633 L960 527 L1006 527" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M912 633 L960 633 L960 527 L1006 527" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="1.48s" repeatCount="indefinite" path="M912 633 L960 633 L960 527 L1006 527" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="1.48s" repeatCount="indefinite" path="M912 633 L960 633 L960 527 L1006 527"/></circle>
+<rect x="927.7" y="568" width="64.6" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="960" y="584.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">caches</text>
+<path d="M1317 405 L1411 405" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1317 405 L1411 405" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M1317 405 L1411 405" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" path="M1317 405 L1411 405" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" path="M1317 405 L1411 405"/></circle>
+<rect x="1328.65" y="391" width="72.69999999999999" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="1365" y="407.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">streams</text>
+<path d="M1317 527 L1365 527 L1365 489 L1411 489" fill="none" stroke="#5b6ef5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1317 527 L1365 527 L1365 489 L1411 489" fill="none" stroke="#5b6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-5b6ef5)"/>
+<path d="M1317 527 L1365 527 L1365 489 L1411 489" fill="none" stroke="#5b6ef5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow scan"/>
+<circle r="4" fill="#5b6ef5" class="spark"><animateMotion dur="2.4s" begin="0.37s" repeatCount="indefinite" path="M1317 527 L1365 527 L1365 489 L1411 489" rotate="auto"/></circle>
+<circle r="10" fill="#5b6ef5" opacity="0.18" class="spark"><animateMotion dur="2.4s" begin="0.37s" repeatCount="indefinite" path="M1317 527 L1365 527 L1365 489 L1411 489"/></circle>
+<rect x="1344.85" y="528" width="40.3" height="23" rx="11.5" fill="#f7f7f9" stroke="#5b6ef5" stroke-opacity="0.45"/>
+<text x="1365" y="544.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5b6ef5" text-anchor="middle">IPC</text>
+
+<rect x="200" y="800" width="305" height="190" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<text x="216" y="827" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">The unit moves</text>
+<text x="216" y="858" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#1f2124">skills/tdd/</text>
+<path d="M230 868 C 230 900, 236 904, 256 906" fill="none" stroke="#1f8b4c" stroke-width="1.8" marker-end="url(#m-1f8b4c)"/>
+<text x="262" y="911" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#1f8b4c">.skillmanager-disabled/</text>
+<text x="278" y="931" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" font-weight="400" fill="#5c6068">tdd/</text>
+<text x="216" y="958" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">moved, not copied: the tool</text>
+<text x="216" y="979" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">genuinely stops seeing it</text>
+<rect x="605" y="800" width="305" height="104" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="810" width="3" height="84" rx="1.5" fill="#1f8b4c"/>
+<text x="621" y="827" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">toggle::set_item_enabled</text>
+<text x="621" y="850" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">new place created and verified</text>
+<text x="621" y="870" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">before the old one goes;</text>
+<text x="621" y="890" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">relative symlinks re-pointed</text>
+<rect x="605" y="926" width="305" height="64" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="936" width="3" height="44" rx="1.5" fill="#1f8b4c"/>
+<text x="621" y="953" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">MetaStore::ensure</text>
+<text x="621" y="976" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">the note follows the new path</text>
+<path d="M750 905 L750 923" fill="none" stroke="#1f8b4c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-1f8b4c)"/>
+<rect x="1010" y="800" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1010" y="810" width="3" height="42" rx="1.5" fill="#1f8b4c"/>
+<text x="1026" y="827" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">set_item_enabled</text>
+<text x="1026" y="850" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">one item, no rescan</text>
+<rect x="1010" y="928" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1010" y="938" width="3" height="42" rx="1.5" fill="#1f8b4c"/>
+<text x="1026" y="955" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">emit item:changed</text>
+<text x="1026" y="978" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">after replace_in_snapshot</text>
+<path d="M1155 863 L1155 925" fill="none" stroke="#1f8b4c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-1f8b4c)"/>
+<rect x="1415" y="800" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="810" width="3" height="42" rx="1.5" fill="#1f8b4c"/>
+<text x="1431" y="827" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">Card switch</text>
+<text x="1431" y="850" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">in the window; patchItem() on ok</text>
+<rect x="1415" y="928" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="938" width="3" height="42" rx="1.5" fill="#1f8b4c"/>
+<text x="1431" y="955" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">Menubar popover</text>
+<text x="1431" y="978" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">a second webview, macOS NSPanel</text>
+<path d="M1413 831 L1319 831" fill="none" stroke="#1f8b4c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1413 831 L1319 831" fill="none" stroke="#1f8b4c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-1f8b4c)"/>
+<path d="M1413 831 L1319 831" fill="none" stroke="#1f8b4c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow toggle"/>
+<circle r="4" fill="#1f8b4c" class="spark"><animateMotion dur="1.8s" begin="0.74s" repeatCount="indefinite" path="M1413 831 L1319 831" rotate="auto"/></circle>
+<circle r="10" fill="#1f8b4c" opacity="0.18" class="spark"><animateMotion dur="1.8s" begin="0.74s" repeatCount="indefinite" path="M1413 831 L1319 831"/></circle>
+<rect x="1332.7" y="817" width="64.6" height="23" rx="11.5" fill="#f7f7f9" stroke="#1f8b4c" stroke-opacity="0.45"/>
+<text x="1365" y="833.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#1f8b4c" text-anchor="middle">invoke</text>
+<path d="M1008 831 L914 831" fill="none" stroke="#1f8b4c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1008 831 L914 831" fill="none" stroke="#1f8b4c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-1f8b4c)"/>
+<path d="M1008 831 L914 831" fill="none" stroke="#1f8b4c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow toggle"/>
+<circle r="4" fill="#1f8b4c" class="spark"><animateMotion dur="1.8s" begin="1.1099999999999999s" repeatCount="indefinite" path="M1008 831 L914 831" rotate="auto"/></circle>
+<circle r="10" fill="#1f8b4c" opacity="0.18" class="spark"><animateMotion dur="1.8s" begin="1.1099999999999999s" repeatCount="indefinite" path="M1008 831 L914 831"/></circle>
+<rect x="931.75" y="817" width="56.5" height="23" rx="11.5" fill="#f7f7f9" stroke="#1f8b4c" stroke-opacity="0.45"/>
+<text x="960" y="833.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#1f8b4c" text-anchor="middle">calls</text>
+<path d="M603 852 L509 852" fill="none" stroke="#1f8b4c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M603 852 L509 852" fill="none" stroke="#1f8b4c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-1f8b4c)"/>
+<path d="M603 852 L509 852" fill="none" stroke="#1f8b4c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow toggle"/>
+<circle r="4" fill="#1f8b4c" class="spark"><animateMotion dur="1.8s" begin="1.48s" repeatCount="indefinite" path="M603 852 L509 852" rotate="auto"/></circle>
+<circle r="10" fill="#1f8b4c" opacity="0.18" class="spark"><animateMotion dur="1.8s" begin="1.48s" repeatCount="indefinite" path="M603 852 L509 852"/></circle>
+<rect x="518.65" y="838" width="72.69999999999999" height="23" rx="11.5" fill="#f7f7f9" stroke="#1f8b4c" stroke-opacity="0.45"/>
+<text x="555" y="854.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#1f8b4c" text-anchor="middle">renames</text>
+<path d="M1317 959 L1411 959" fill="none" stroke="#1f8b4c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.072" class="halo"/>
+<path d="M1317 959 L1411 959" fill="none" stroke="#1f8b4c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  marker-end="url(#m-1f8b4c)"/>
+<path d="M1317 959 L1411 959" fill="none" stroke="#1f8b4c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="flow toggle"/>
+<circle r="4" fill="#1f8b4c" class="spark"><animateMotion dur="1.8s" begin="0s" repeatCount="indefinite" path="M1317 959 L1411 959" rotate="auto"/></circle>
+<circle r="10" fill="#1f8b4c" opacity="0.18" class="spark"><animateMotion dur="1.8s" begin="0s" repeatCount="indefinite" path="M1317 959 L1411 959"/></circle>
+<rect x="1336.75" y="945" width="56.5" height="23" rx="11.5" fill="#f7f7f9" stroke="#1f8b4c" stroke-opacity="0.45"/>
+<text x="1365" y="961.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#1f8b4c" text-anchor="middle">tells</text>
+
+<rect x="200" y="1060" width="305" height="146" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="200" y="1070" width="3" height="126" rx="1.5" fill="#8a5c0a"/>
+<text x="216" y="1087" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="17.5" font-weight="600" fill="#1f2124">Install · update</text>
+<text x="216" y="1110" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">git clone --depth 1, .git stripped</text>
+<text x="216" y="1130" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">the commit it came from recorded</text>
+<text x="216" y="1150" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">an update arrives as a diff,</text>
+<text x="216" y="1170" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">applied only when you say so</text>
+<rect x="605" y="1060" width="305" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="605" y="1070" width="3" height="42" rx="1.5" fill="#c0392b"/>
+<text x="621" y="1087" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">deny.toml</text>
+<text x="621" y="1110" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">[[bans.deny]] name = "tauri"</text>
+<rect x="775" y="1146" width="120" height="40" rx="8" fill="none" stroke="#c0392b" stroke-dasharray="4 5"/>
+<text x="835" y="1171" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="400" fill="#c0392b" text-anchor="middle">tauri</text>
+<line x1="789" y1="1156" x2="881" y2="1176" stroke="#c0392b" stroke-width="1.6"/>
+<path d="M645 1123 L645 1166 L771 1166" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 6" marker-end="url(#m-c0392b)"/>
+<text x="659" y="1158" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#c0392b">cargo deny</text>
+<rect x="605" y="1206" width="145" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<text x="621" y="1233" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600" fill="#1f2124">crates/cli</text>
+<text x="621" y="1256" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">links core only</text>
+<rect x="765" y="1206" width="145" height="62" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<text x="781" y="1233" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600" fill="#1f2124">$HOME</text>
+<text x="781" y="1256" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">passed in</text>
+<rect x="1010" y="1060" width="305" height="104" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1010" y="1070" width="3" height="84" rx="1.5" fill="#146054"/>
+<text x="1026" y="1087" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">specta_builder()</text>
+<text x="1026" y="1110" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">every command in one list;</text>
+<text x="1026" y="1130" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">errors cross as a stable code,</text>
+<text x="1026" y="1150" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">never a raw Rust string</text>
+<rect x="1415" y="1060" width="305" height="104" rx="10" fill="#ffffff" stroke="#dcdee3"/>
+<rect x="1415" y="1070" width="3" height="84" rx="1.5" fill="#a23048"/>
+<text x="1431" y="1087" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17.5" font-weight="600" fill="#1f2124">src/bindings.ts</text>
+<text x="1431" y="1110" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">generated, never hand-edited;</text>
+<text x="1431" y="1130" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">CI fails on drift, and the demo</text>
+<text x="1431" y="1150" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="400" fill="#5c6068">build swaps it for fixtures</text>
+<path d="M1317 1100 L1411 1100" fill="none" stroke="#5c6068" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 6" marker-end="url(#m-5c6068)"/>
+<rect x="1320.55" y="1086" width="88.89999999999999" height="23" rx="11.5" fill="#f7f7f9" stroke="#5c6068" stroke-opacity="0.45"/>
+<text x="1365" y="1102.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="400" fill="#5c6068" text-anchor="middle">generates</text>
+</svg>
