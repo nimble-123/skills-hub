@@ -16,7 +16,6 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { createServer } from "vite";
 
-const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const OUT = new URL("../docs/images/", import.meta.url);
 
 /** Retina, and wide enough for the sidebar, the grid and the rail together. */
@@ -95,7 +94,6 @@ const PANEL = { width: 360, height: 480 };
 const server = await createServer({
   // fileURLToPath, not `.pathname`: this checkout's path has a space in it.
   configFile: fileURLToPath(new URL("../vite.demo.config.ts", import.meta.url)),
-  root: ROOT,
   logLevel: "warn",
 });
 await server.listen();
@@ -103,7 +101,7 @@ const base = server.resolvedUrls?.local?.[0] ?? "http://localhost:1421/";
 
 // The application's own list, loaded through the dev server rather than
 // copied: a palette it offers and the gallery does not would be a lie.
-const { THEME_GROUPS } = await server.ssrLoadModule("/src/lib/theme.ts");
+const { THEME_GROUPS } = await server.ssrLoadModule("/lib/theme.ts");
 const THEMES = THEME_GROUPS.flatMap((group) => group.themes);
 
 await mkdir(OUT, { recursive: true });
