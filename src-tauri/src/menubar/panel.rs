@@ -29,7 +29,10 @@ tauri_panel! {
 
 /// Turns the popover window into a panel that closes when it loses focus.
 ///
-/// The panel retains the delegate, so the caller keeps no handle to it.
+/// The panel retains the delegate, so the caller keeps no handle to it. The
+/// delegate *replaces* the one Tauri installed rather than wrapping it, so
+/// Tauri's focus and resize events stop for this window: anything the webview
+/// needs to hear about has to be emitted by hand.
 pub fn adopt(
     window: &WebviewWindow,
     on_resign_key: impl Fn() + 'static,

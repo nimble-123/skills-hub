@@ -9,6 +9,9 @@ import styles from "./Popover.module.css";
 /** Event name, matching `ITEM_CHANGED` in `src-tauri/src/commands/items.rs`. */
 const ITEM_CHANGED = "item:changed";
 
+/** Event name, matching `OPENED` in `src-tauri/src/menubar/mod.rs`. */
+const OPENED = "popover:opened";
+
 /** Beyond this the list stops being something you scan with your eyes. */
 const LIMIT = 40;
 
@@ -62,9 +65,11 @@ export function Popover() {
   // The panel is shown and hidden natively, so the webview is never torn down.
   // Opening it again should feel like opening a menu: caret in the field, last
   // search forgotten, and whatever changed meanwhile picked up.
+  //
+  // The host says when it opens. Focus events cannot: the native panel's
+  // delegate replaces Tauri's, so `onFocusChanged` never fires here.
   useEffect(() => {
-    const unlisten = getCurrentWindow().onFocusChanged(({ payload: focused }) => {
-      if (!focused) return;
+    const unlisten = getCurrentWindow().listen(OPENED, () => {
       setQuery("");
       search.current?.focus();
       void load();
