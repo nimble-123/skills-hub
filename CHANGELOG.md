@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.1](https://github.com/nimble-123/skills-hub/compare/v0.6.0...v0.6.1) (2026-10-01)
+
+
+### Documentation
+
+* **readme:** draw the architecture, sharpen the tour, sign it off ([3d77742](https://github.com/nimble-123/skills-hub/commit/3d77742cb609fbe58c770e61e7a17fafb16f3167))
+* **readme:** lead with a recorded tour, badges and a feature grid ([58a6dbf](https://github.com/nimble-123/skills-hub/commit/58a6dbfc8bbc01259e274dd6130702f4381ea81e))
+* **readme:** link the project site ([cc5e28d](https://github.com/nimble-123/skills-hub/commit/cc5e28db7f8fb578ca8f464ac8b84a6700fbfe39))
+* **site:** explore the architecture in 3D ([a1e2406](https://github.com/nimble-123/skills-hub/commit/a1e24064355f6981455943c60eefeda0367082d2))
+
 ## [0.6.0](https://github.com/nimble-123/skills-hub/compare/v0.5.0...v0.6.0) (2026-09-30)
 
 
