@@ -1,0 +1,24 @@
+Vendored for docs/architecture/, pinned. No CDN, no build step for the page.
+
+Fetched with `npm pack <pkg>@<version>` and copied file for file. three and
+gsap were minified one file at a time with esbuild 0.28.2
+(`--minify --legal-comments=inline --format=esm`, no bundling), so every
+module keeps its own name, imports and licence comment; lenis and motion are
+copied unchanged.
+
+three 0.186.1        MIT (three/LICENSE)
+  three/three.core.js       <- build/three.core.js
+  three/three.module.js     <- build/three.module.js
+  three/OrbitControls.js    <- examples/jsm/controls/OrbitControls.js
+
+gsap 3.15.0          GreenSock standard licence, https://gsap.com/standard-license
+                     (licence header kept in each file)
+  gsap/index.js, gsap-core.js, CSSPlugin.js, ScrollTrigger.js, Observer.js,
+  SplitText.js      <- the package's root ES modules
+
+lenis 1.3.26         MIT (lenis/LICENSE)
+  lenis/lenis.mjs           <- dist/lenis.mjs
+
+motion 13.4.6        MIT (motion/LICENSE.md)
+  motion/motion.js          <- dist/motion.js (the single-file browser build)
+  motion/index.js           a two-line ES module shim over it (ours)
