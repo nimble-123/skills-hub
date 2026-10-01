@@ -177,10 +177,14 @@ pnpm tauri build     # → .app and .dmg, or the platform's equivalent
 
 ## Architecture
 
+<a href="https://nimble-123.github.io/skills-hub/architecture/">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.svg">
   <img src="docs/images/architecture.svg" alt="The architecture of skills-hub: four layers — the real folders on disk, the domain crate, the Tauri adapter and the React interface — with dependencies pointing inwards, crossed by a scan from folder to card, a toggle that moves the file and tells both webviews, and the seams that keep the layers apart" width="100%">
 </picture>
+</a>
+
+<p align="center"><b><a href="https://nimble-123.github.io/skills-hub/architecture/">Explore it in 3D →</a></b><br><sub>Follow a scan up through the layers and a toggle down to the file, then turn the model and open any module.</sub></p>
 
 Four layers, dependencies pointing inwards only. `skills-core` never imports
 `tauri` — enforced by `cargo deny`, not by discipline. `$HOME` is injected
