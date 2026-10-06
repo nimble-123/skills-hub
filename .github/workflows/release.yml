@@ -195,10 +195,14 @@ jobs:
         env:
           TAG: ${{ needs.prepare.outputs.tag_name }}
 
+  # Switched off for now: the action refuses to run until microsoft/winget-pkgs
+  # carries at least one version of nimble-123.skills-hub, and the first manifest
+  # pull request is not merged yet. Once it is, restore the condition below
+  # (`if: needs.prepare.outputs.release_created == 'true'`) in place of `false`.
   winget:
     name: winget manifest
     needs: [prepare, bundle]
-    if: needs.prepare.outputs.release_created == 'true'
+    if: false && needs.prepare.outputs.release_created == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Is the winget token there?
